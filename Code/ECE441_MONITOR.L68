@@ -1,0 +1,2116 @@
+00001068 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 11/27/2018 5:33:53 AM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Monitor Program
+00000000                             3  * Written by : Clive Gomes
+00000000                             4  * Date       : November, 2018
+00000000                             5  * Description: ECE 441 Final Project
+00000000                             6  *----------------------------------------------------------
+00000000                             7  
+00000000                             8  
+00000000                             9  *-----------------------------------------------------------------------------------------------------------
+00000000                            10  *------------------------------------  START OF MONITOR PROGRAM  -------------------------------------------
+00000000                            11  *-----------------------------------------------------------------------------------------------------------
+00001000                            12      ORG $1000
+00001000                            13  ***************************
+00001000                            14  ***   MONITOR  PROGRAM  ***
+00001000                            15  ***************************
+00001000                            16  *-----------------------------------------------------------------------------------------------------------
+00001000                            17  *-------------------------------------------- DATA SPACE ---------------------------------------------------
+00001000                            18  
+00001000                            19  * Stack Location
+00001000  =00003000                 20  STACK EQU $3000
+00001000                            21  
+00001000                            22  * Terminal Prompt 
+00001000= 54 55 54 4F 52 20 ...     23  TML DC.B 'TUTOR 0>'
+00001008= 00                        24  TE  DC.B 0
+00001009                            25  
+00001009                            26  * Input Buffer
+00001009                            27  INPUT DS.B 30 ; 30 characters max
+00001027= 00                        28        DC.B 0
+00001028                            29        
+00001028                            30  * General Purpose Memory Registers (Also Serves As Extra Space In Case Input Is Too Long)
+00001028= 00000000                  31  REG_X DC.L 0
+0000102C= 00000000                  32  REG_Y DC.L 0
+00001030                            33  
+00001030                            34  * Welcome Message
+00001030= 57 65 6C 63 6F 6D ...     35  WELC DC.B 'Welcome To TUTOR, Version 0!'
+0000104C= 00                        36  WE   DC.B  0  
+0000104D                            37  
+0000104D                            38  * Thank you Message
+0000104D= 54 68 61 6E 6B 20 ...     39  THANK DC.B 'Thank You For Using TUTOR!'
+00001067= 00                        40  TKE   DC.B  0 
+00001068                            41  
+00001068                            42  *-----------------------------------------------------------------------------------------------------------
+00001068                            43  *-------------------------------------------- PROGRAM SPACE ------------------------------------------------
+00001068                            44  START:                  ; first instruction of program  
+00001068                            45  
+00001068                            46  *** STARTS AT $1030
+00001068                            47  
+00001068                            48  * Initialize Exception Vectors
+00001068  21FC 00003000 0000        49      MOVE.L #STACK,$0
+00001070  21FC 00002362 0008        50      MOVE.L #BUS_ERR,$8
+00001078  21FC 0000236A 000C        51      MOVE.L #ADRS_ERR,$C
+00001080  21FC 000023D4 0010        52      MOVE.L #ILL_INST,$10
+00001088  21FC 000023DC 0014        53      MOVE.L #DIV_ZERO,$14
+00001090  21FC 000023E4 0018        54      MOVE.L #CHK_INST,$18
+00001098  21FC 000023EC 0020        55      MOVE.L #PRIV_VIOL,$20
+000010A0  21FC 000023F4 0028        56      MOVE.L #LINE_A,$28
+000010A8  21FC 000023FC 002C        57      MOVE.L #LINE_F,$2C
+000010B0                            58    
+000010B0                            59  * Set Stack Pointer to Top of Stack
+000010B0  4FF8 3000                 60      LEA STACK,A7
+000010B4                            61      
+000010B4  4EB9 000010F6             62      JSR NEWLINE ; Print Blank Line
+000010BA                            63      
+000010BA  4EB9 00001132             64      JSR WELCOME ; Displays Welcome Message
+000010C0                            65          
+000010C0  6000 0002                 66      BRA RUN_MONITOR ; Start Monitor Program  
+000010C4                            67  *-----------------------------------------------------------------------------------------------------------  
+000010C4                            68  RUN_MONITOR
+000010C4                            69  * Monitor Program Main Loop
+000010C4                            70  *
+000010C4  4EB9 000010D2             71      JSR TERMINAL ; Display Terminal Prompt & Get Input
+000010CA  4EB9 000011EC             72      JSR CHK_CMD ; Check Entered Command & Branch to Appropriate Subroutine
+000010D0                            73      
+000010D0  60F2                      74      BRA RUN_MONITOR ; Loop till EXIT Command is Executed
+000010D2                            75  *-----------------------------------------------------------------------------------------------------------
+000010D2                            76  TERMINAL
+000010D2                            77  * Displays Terminal Prompt and Gets User Input    
+000010D2                            78  *
+000010D2  48E7 C040                 79      MOVEM.L D0-D1/A1,-(A7) ; Save Registers to Stack 
+000010D6                            80      
+000010D6  4EB9 000010F6             81      JSR NEWLINE ; Print Blank Line
+000010DC                            82      
+000010DC                            83  * Print TUTOR Prompt
+000010DC  43F8 1000                 84      LEA TML,A1
+000010E0  103C 000E                 85      MOVE.B #14,D0
+000010E4  4E4F                      86      TRAP #15  
+000010E6                            87      
+000010E6                            88  * Get Input String
+000010E6  43F8 1009                 89      LEA INPUT,A1 ; Input (50 characters max)
+000010EA  103C 0002                 90      MOVE.B #2,D0
+000010EE  4E4F                      91      TRAP #15
+000010F0                            92       
+000010F0  4CDF 0203                 93      MOVEM.L (A7)+,D0-D1/A1 ; Restore Registers from Stack  
+000010F4  4E75                      94      RTS ; Return from Subroutine
+000010F6                            95  *-----------------------------------------------------------------------------------------------------------   
+000010F6                            96  NEWLINE
+000010F6                            97  * Moves Print Cursor to the Next Line
+000010F6                            98  *
+000010F6  48E7 8040                 99      MOVEM.L D0/A1,-(A7) ; Store Registers on Stack
+000010FA                           100      
+000010FA  43F8 1008                101      LEA TE,A1 ; Address Starts with null character (To not Print Anything)
+000010FE  103C 000D                102      MOVE.B #13,D0 ; Set TRAP Function to Output Null Terminated String Starting at A1
+00001102  4E4F                     103      TRAP #15  
+00001104                           104      
+00001104  4CDF 0201                105      MOVEM.L (A7)+,D0/A1 ; Restore Registers from Stack
+00001108  4E75                     106      RTS ; Return from Subroutine
+0000110A                           107  *-----------------------------------------------------------------------------------------------------------
+0000110A                           108  SPACE
+0000110A                           109  * Displays a Blank Space
+0000110A                           110  *
+0000110A  48E7 C000                111      MOVEM.L D0-D1,-(A7) ; Store Registers on Stack
+0000110E                           112      
+0000110E  123C 0020                113      MOVE.B #$20,D1 ; D1.B = ' ' 
+00001112  103C 0006                114      MOVE.B #6,D0 ; Set TRAP Function to Output character in D1.B
+00001116  4E4F                     115      TRAP #15
+00001118                           116      
+00001118  4CDF 0003                117      MOVEM.L (A7)+,D0-D1 ; Restore Registers from Stack
+0000111C  4E75                     118      RTS ; Return from Subroutine
+0000111E                           119  *-----------------------------------------------------------------------------------------------------------
+0000111E                           120  QUOTE
+0000111E                           121  * Displays a Double Quote (")
+0000111E                           122  *
+0000111E  48E7 C000                123      MOVEM.L D0-D1,-(A7) ; Store Registers on Stack
+00001122                           124      
+00001122  123C 0022                125      MOVE.B #$22,D1 ; D1.B = Double Quote
+00001126  103C 0006                126      MOVE.B #6,D0 ; Set TRAP Function to Output character in D1.B
+0000112A  4E4F                     127      TRAP #15
+0000112C                           128      
+0000112C  4CDF 0003                129      MOVEM.L (A7)+,D0-D1 ; Restore Registers from Stack
+00001130  4E75                     130      RTS ; Return from Subroutine
+00001132                           131  *-----------------------------------------------------------------------------------------------------------
+00001132                           132  WELCOME
+00001132                           133  * Displays Welcome Message
+00001132                           134  *
+00001132  48E7 8040                135      MOVEM.L D0/A1,-(A7) ; Store Registers on Stack
+00001136                           136      
+00001136                           137  * Print Welcome Message
+00001136  43F8 1030                138      LEA WELC,A1
+0000113A  103C 000D                139      MOVE.B #13,D0
+0000113E  4E4F                     140      TRAP #15  
+00001140                           141      
+00001140  4CDF 0201                142      MOVEM.L (A7)+,D0/A1 ; Restore Registers from Stack
+00001144  4E75                     143      RTS ; Return from Subroutine
+00001146                           144  *-----------------------------------------------------------------------------------------------------------
+00001146                           145  THANKYOU
+00001146                           146  * Displays ThankYou Message
+00001146                           147  *
+00001146  48E7 8040                148      MOVEM.L D0/A1,-(A7) ; Store Registers on Stack
+0000114A                           149      
+0000114A                           150  * PrintD ThankYou Message
+0000114A  43F8 104D                151      LEA THANK,A1
+0000114E  103C 000E                152      MOVE.B #14,D0
+00001152  4E4F                     153      TRAP #15  
+00001154                           154      
+00001154  4CDF 0201                155      MOVEM.L (A7)+,D0/A1 ; Restore Registers from Stack
+00001158  4E75                     156      RTS ; Return from Subroutine
+0000115A                           157  *----------------------------------------------------------------------------------------------------------- 
+0000115A                           158  *-----------------------------------------------------------------------------------------------------------
+0000115A                           159  
+0000115A                           160  
+0000115A                           161  
+0000115A                           162  ***************************
+0000115A                           163  *** COMMAND INTERPRETER ***
+0000115A                           164  ***************************
+0000115A                           165  *-----------------------------------------------------------------------------------------------------------
+0000115A                           166  *-------------------------------------------- DATA SPACE ---------------------------------------------------
+0000115A                           167  
+0000115A                           168  *Input Pointer to Read Input String Saved in Memory
+0000115A= 00000000                 169  INP_PTR DC.L 0 
+0000115E                           170  
+0000115E                           171  * Memory Spaces to Store Parsed Data from Input String
+0000115E= 00000000                 172  DATA1 DC.L 0
+00001162= 00000000                 173  DATA2 DC.L 0
+00001166= 00000000                 174  DATA3 DC.L 0 
+0000116A                           175  
+0000116A                           176  * Error Message for Invalid Input
+0000116A= 49 4E 56 41 4C 49 ...    177  ERRC DC.B 'INVALID COMMAND!'
+0000117A= 00                       178  CE   DC.B 0
+0000117B                           179  
+0000117B                           180  * Table of Command Names
+0000117B= 48 45 4C 50 20 20        181  CMD_N DC.B 'HELP  '
+00001181= 4D 44 53 50 20 20        182        DC.B 'MDSP  '
+00001187= 53 4F 52 54 57 20        183        DC.B 'SORTW '
+0000118D= 4D 4D 20 20 20 20        184        DC.B 'MM    '
+00001193= 4D 53 20 20 20 20        185        DC.B 'MS    '
+00001199= 42 46 20 20 20 20        186        DC.B 'BF    '
+0000119F= 42 4D 4F 56 20 20        187        DC.B 'BMOV  '
+000011A5= 42 54 53 54 20 20        188        DC.B 'BTST  '
+000011AB= 42 53 43 48 20 20        189        DC.B 'BSCH  '
+000011B1= 47 4F 20 20 20 20        190        DC.B 'GO    '
+000011B7= 44 46 20 20 20 20        191        DC.B 'DF    '
+000011BD= 45 58 49 54 20 20        192        DC.B 'EXIT  '
+000011C3= 55 50 50 45 52 20        193        DC.B 'UPPER '
+000011C9= 42 52 45 56 20 20        194        DC.B 'BREV  '
+000011CF                           195        
+000011CF                           196  * Table of Command Addresses
+000011D0= 18FE                     197  CMD_A DC.W HELP
+000011D2= 194E                     198        DC.W MDSP
+000011D4= 19D2                     199        DC.W SORTW
+000011D6= 1A9A                     200        DC.W MM
+000011D8= 1BF8                     201        DC.W MS
+000011DA= 1D24                     202        DC.W BF
+000011DC= 1D9E                     203        DC.W BMOV
+000011DE= 1DFA                     204        DC.W BTST
+000011E0= 1EB8                     205        DC.W BSCH
+000011E2= 1FAE                     206        DC.W GO
+000011E4= 1FE8                     207        DC.W DF
+000011E6= 213A                     208        DC.W EXIT
+000011E8= 21B6                     209        DC.W UPPER
+000011EA= 2164                     210        DC.W BREV
+000011EC                           211        
+000011EC                           212  *-----------------------------------------------------------------------------------------------------------
+000011EC                           213  *-------------------------------------------- PROGRAM SPACE ------------------------------------------------
+000011EC                           214  CHK_CMD   
+000011EC                           215  * Looks for Entered Command in CMD_N and Calls the Command Subroutine if found
+000011EC                           216  * If Command is not found, Error Message is Displayed  
+000011EC                           217    
+000011EC  48E7 C070                218      MOVEM.L D0-D1/A1-A3,-(A7) ; Save Registers to Stack
+000011F0  21C8 102A                219      MOVE.L A0,$102A  ; Save A0 in memory
+000011F4                           220      
+000011F4  41F8 117B                221      LEA CMD_N,A0 ; Start Address of Command Names
+000011F8  43F8 11D0                222      LEA CMD_A,A1 ; Start Address of Command Subroutines
+000011FC  45F8 1009                223      LEA INPUT,A2 ; Start Address of Input
+00001200  47F8 115A                224      LEA INP_PTR,A3 ; Address of Input Pointer
+00001204                           225      
+00001204                           226  * Check for starting space character  
+00001204  121A                     227      MOVE.B (A2)+,D1
+00001206  B23C 0020                228      CMP.B #$20,D1
+0000120A  6600 005A                229      BNE CHK_INV ; If no, then Command is Invalid
+0000120E                           230      
+0000120E  268A                     231      MOVE.L A2,(A3) ; Save Start Address of Input Command in INP_PTR
+00001210                           232      
+00001210                           233  * Find Match for First Character
+00001210  2453                     234  MATCH1 MOVE.L (A3),A2 ; Get Start Address of Input Command in A2
+00001212  2008                     235      MOVE.L A0,D0 ; Save Start Address of Matched First Character in D0
+00001214                           236      
+00001214  B3C8                     237      CMP.L A0,A1 ; A1 - A0
+00001216  6700 004E                238      BEQ CHK_INV ; If reached end of CMD_T, Command Not Found
+0000121A                           239      
+0000121A  1218                     240      MOVE.B (A0)+,D1 ; Get a character from CMD_T to D1 
+0000121C  B21A                     241      CMP.B (A2)+,D1 ; D1 - (A2)
+0000121E  66F0                     242      BNE MATCH1 ; If character doesn't match Input Command character, keep searching
+00001220                           243      
+00001220                           244  * Current State: First character of Command Input Matched
+00001220                           245      
+00001220  1218                     246  MATCH2 MOVE.B (A0)+,D1 ; Get a character from CMD_T to D1
+00001222                           247  
+00001222  B23C 0020                248      CMP.B #$20,D1 ; Check if character = ' '
+00001226  6700 000E                249      BEQ AT_END ; If true, then reached end of Command Name
+0000122A                           250      
+0000122A  B21A                     251      CMP.B (A2)+,D1 ; D1 - (A2)
+0000122C  66E2                     252      BNE MATCH1 ; If character doesn't match Input Command character, search for first character again
+0000122E                           253      
+0000122E  B3C8                     254      CMP.L A0,A1 ; A1 - A0
+00001230  6EEE                     255      BGT MATCH2 ; If not reached end of CMD_T, Command Name matches so far
+00001232  6000 0032                256      BRA CHK_INV ; If reached end of CMD_T, Command Not Found
+00001236                           257      
+00001236                           258  AT_END
+00001236  0C12 0000                259      CMP.B #0,(A2) ; Check if next character in Input Command is null
+0000123A  6700 0008                260      BEQ FOUND ; If yes, Command Found
+0000123E  0C12 0020                261      CMP.B #$20,(A2) ; Check if next character in Input Command = ' '
+00001242  66CC                     262      BNE MATCH1 ; If no, search for first character again
+00001244                           263      
+00001244                           264  FOUND
+00001244  268A                     265      MOVE.L A2,(A3) ; Save Current Location of Pointer in INP_PTR
+00001246                           266      
+00001246                           267  * Get Address of Command Subroutine    
+00001246  41F8 117B                268      LEA CMD_N,A0 ; Start Address of Command Names
+0000124A  9088                     269      SUB.L A0,D0 ; Find Offset From Start of Command Names Table
+0000124C                           270  * Offset of Command Address from Start of Command Address Table = (Offset from Start of Command Names Table) / 6 * 2
+0000124C  80FC 0006                271      DIVU #6,D0 ; Offset/6
+00001250  C0FC 0002                272      MULU #2,D0 ; Offset*2
+00001254  D089                     273      ADD.L A1,D0 ; Get Address in Command Address Table  
+00001256  2240                     274      MOVE.L D0,A1 ; Set Pointer to that Address
+00001258  3051                     275      MOVE.W (A1),A0 ; Get Command Subroutine Start Address in A0
+0000125A                           276      
+0000125A  4CDF 0E03                277      MOVEM.L (A7)+,D0-D1/A1-A3 ; Restore Registers from Stack
+0000125E  588F                     278      ADD.L #4,A7 ; Throw a Long Word off of Stack
+00001260                           279      
+00001260  4E90                     280      JSR (A0) ; Jump to Command Subroutine
+00001262  6000 FE60                281      BRA RUN_MONITOR ; Return from Subroutine
+00001266                           282      
+00001266  4EB9 0000135C            283  CHK_INV JSR INVALID ; Display Error Message    
+0000126C                           284      
+0000126C  4CDF 0E03                285      MOVEM.L (A7)+,D0-D1/A1-A3 ; Restore Registers from Stack
+00001270  2078 102A                286      MOVE.L $102A,A0 ; Restore A0 from Memory
+00001274                           287      
+00001274  4E75                     288      RTS ; Return from Subroutine
+00001276                           289  *-----------------------------------------------------------------------------------------------------------
+00001276                           290  GET_DATA 
+00001276                           291  * Parses Data from Input String and Stores it in memory
+00001276                           292  * Input: Start Address to store result in A0
+00001276                           293  * D6 = 1 for invalid input
+00001276                           294  
+00001276  48E7 E0E0                295      MOVEM.L D0-D2/A0-A2,-(A7) ; Save Registers to Stack
+0000127A                           296      
+0000127A  4281                     297      CLR.L D1 ; Clear Register to Calculate Hex Data
+0000127C  4282                     298      CLR.L D2 ; Clear Flag (for Hex Operation)
+0000127E                           299      
+0000127E  43F8 115A                300      LEA INP_PTR,A1 ; Get Address of Stored Pointer Location
+00001282  2451                     301      MOVE.L (A1),A2 ; Get Current Input Pointer Address in A2
+00001284                           302      
+00001284                           303  * Check for starting space character  
+00001284  101A                     304      MOVE.B (A2)+,D0
+00001286  B03C 0020                305      CMP.B #$20,D0
+0000128A  6600 0088                306      BNE GD_INV ; If no, then Data is Invalid
+0000128E                           307      
+0000128E  0C12 0024                308      CMP.B #$24,(A2) ; Check if first character = '$' 
+00001292  6600 0006                309      BNE NOTHEX ; If not, proceed assuming the data is decimal
+00001296                           310      
+00001296  7401                     311      MOVE.L #1,D2 ; If yes, Set Flag (for Hex Operation)
+00001298  528A                     312      ADD.L #1,A2 ; Move pointer to the character after '$'
+0000129A                           313     
+0000129A                           314  * Check if first character is ';'
+0000129A  0C12 003B                315  NOTHEX CMP.B #$3B,(A2) ; Check if next character is ';' 
+0000129E  6700 0074                316      BEQ GD_INV ; If yes, then Command is Invalid
+000012A2                           317      
+000012A2                           318  * Check if character is a number    
+000012A2  0C12 003B                319  ISNUM CMP.B #$3B,(A2) ; Check if next character is ';' 
+000012A6  6700 0054                320      BEQ EOD ; If yes, then reached end of data
+000012AA  4280                     321      CLR.L D0 ; Clear D0
+000012AC  101A                     322      MOVE.B (A2)+,D0 ; Get a character in D0
+000012AE  80FC 0010                323      DIVU #$10,D0 ; D0/10
+000012B2  B07C 0003                324      CMP.W #3,D0 ; Check if 30 <= ASCII character value <= 39
+000012B6  6700 002C                325      BEQ HEX ; If character is a number, proceed to conversion
+000012BA                           326  
+000012BA  B4BC 00000001            327      CMP.L #1,D2 ; Check if number is supposed to be Hex
+000012C0  6600 0052                328      BNE GD_INV ; If not, then Number is Invalid
+000012C4                           329      
+000012C4                           330  * Check if character is a Hex digit
+000012C4  B07C 0004                331      CMP.W #4,D0 ; Check if character could be between A-F
+000012C8  6600 004A                332      BNE GD_INV ; If no, then number is Invalid
+000012CC  4840                     333      SWAP D0 ; Get remainder in lower word
+000012CE  B07C 0000                334      CMP.W #0,D0 ; Check if character could be '@'
+000012D2  6700 0040                335      BEQ GD_INV ; If yes, then number is Invalid
+000012D6  B07C 0006                336      CMP.W #6,D0 ; Check if D0 - 6 > 0
+000012DA  6E00 0038                337      BGT GD_INV ; If yes, then number is Invalid
+000012DE                           338      
+000012DE                           339  * Number is a valid Hex digit: Remainder is between 1 to 6
+000012DE  0640 0009                340      ADD.W #9,D0 ; Remainder becomes 10 to 15 (i.e A to F)
+000012E2  4840                     341      SWAP D0 ; Put remainder in the upper word   
+000012E4                           342  
+000012E4                           343  * Convert the ASCII Data to Hex (Assuming Input Data is Hex)    
+000012E4  E989                     344  HEX LSL.L #4,D1 ; D1*16
+000012E6  4840                     345      SWAP D0 ; Get remainder in lower word
+000012E8  D240                     346      ADD.W D0,D1 ; Add remainder to D1
+000012EA                           347      
+000012EA  0C12 0000                348      CMP.B #0,(A2) ; Check if next character is ' ' 
+000012EE  6700 000C                349      BEQ EOD ; If yes, then reached end of data
+000012F2  0C12 0020                350      CMP.B #$20,(A2) ; Check if next character is null
+000012F6  6700 0004                351      BEQ EOD ; If yes, then reached end of data
+000012FA  60A6                     352      BRA ISNUM ; If no, continue conversion
+000012FC                           353      
+000012FC                           354  EOD    
+000012FC  B43C 0001                355      CMP.B #1,D2 ; Check if Flag is Set
+00001300  6700 0008                356      BEQ COMPLETE ; If yes, then operation complete
+00001304  4EB9 00001370            357      JSR HEX_DEC ; If yes, then get the Decimal Equivalent for the Hex number
+0000130A                           358      
+0000130A  2081                     359  COMPLETE MOVE.L D1,(A0) ; Store Data in (A0)
+0000130C  228A                     360      MOVE.L A2,(A1) ; Store Current Input Pointer Location
+0000130E                           361      
+0000130E  4CDF 0707                362      MOVEM.L (A7)+,D0-D2/A0-A2 ; Restore Registers from Stack
+00001312  4E75                     363      RTS ; Return from Subroutine
+00001314                           364      
+00001314  1C3C 0001                365  GD_INV MOVE.B #1,D6 ; Denote Error Message
+00001318  4CDF 0707                366      MOVEM.L (A7)+,D0-D2/A0-A2 ; Restore Registers from Stack
+0000131C  4E75                     367      RTS ; Return from Subroutine
+0000131E                           368  
+0000131E                           369  *-----------------------------------------------------------------------------------------------------------
+0000131E                           370  GET_MODE
+0000131E                           371  * Parses Mode from Input String and Stores it in Memory
+0000131E                           372  * Input: Start Address to store result in A0
+0000131E                           373  
+0000131E  48E7 80E0                374      MOVEM.L D0/A0-A2,-(A7) ; Save Registers to Stack
+00001322                           375      
+00001322  43F8 115A                376      LEA INP_PTR,A1 ; Get Address of Stored Pointer Location
+00001326  2451                     377      MOVE.L (A1),A2 ; Get Current Input Pointer Address in A2
+00001328                           378      
+00001328                           379  * Check for ';' Character
+00001328  0C1A 003B                380      CMP.B #$3B,(A2)+ ; Check if Character is ';'
+0000132C  6600 002E                381      BNE INVALID ; If no, then Command is Invalid
+00001330                           382      
+00001330  4280                     383      CLR.L D0 ; Clear Temporary Register D0
+00001332  101A                     384      MOVE.B (A2)+,D0 ; Get Mode ASCII Character in D0
+00001334  2080                     385      MOVE.L D0,(A0) ; Store Mode in (A0)
+00001336  228A                     386      MOVE.L A2,(A1) ; Store Current Input Pointer Address in INP_PTR
+00001338                           387      
+00001338  4CDF 0701                388      MOVEM.L (A7)+,D0/A0-A2 ; Restore Registers from Stack
+0000133C  4E75                     389      RTS ; Return from Subroutine
+0000133E                           390  *-----------------------------------------------------------------------------------------------------------
+0000133E                           391  CHK_END
+0000133E                           392  * Checks for <CR> at the End of Command
+0000133E                           393  * Output: D6 = 1 for Invalid Command / D6 = 0 for Valid Command
+0000133E                           394  
+0000133E  48E7 8018                395      MOVEM.L D0/A3-A4,-(A7) ; Store Registers on Stack
+00001342                           396      
+00001342  49F8 115A                397      LEA INP_PTR,A4 ; Get Address of Input Pointer Location in A4
+00001346  2654                     398      MOVE.L (A4),A3 ; Get Current Location of Input Pointer in A3
+00001348  1013                     399      MOVE.B (A3),D0 ; Get Character at Current Pointer Location in D0
+0000134A  6700 0008                400      BEQ CE_V ; If null, then Command is valid
+0000134E                           401      
+0000134E  7C01                     402      MOVE.L #1,D6 ; D6 = 1 for Invalid Command
+00001350  6000 0004                403      BRA CK_END ; Operation Complete
+00001354                           404      
+00001354  4286                     405  CE_V CLR.L D6 ; D6 = 0 for Invalid Command
+00001356                           406  
+00001356  4CDF 1801                407  CK_END MOVEM.L (A7)+,D0/A3-A4 ; Restore Registers from Stack
+0000135A  4E75                     408      RTS ; Return from Subroutine
+0000135C                           409  *-----------------------------------------------------------------------------------------------------------
+0000135C                           410  INVALID 
+0000135C                           411  * Displays Invalid Message
+0000135C                           412  *
+0000135C  48E7 8040                413      MOVEM.L D0/A1,-(A7) ; Save Registers to Stack
+00001360                           414      
+00001360                           415  * Print "INVALID COMMAND!"
+00001360  43F8 116A                416      LEA ERRC,A1
+00001364  103C 000D                417      MOVE.B #13,D0
+00001368  4E4F                     418      TRAP #15
+0000136A                           419      
+0000136A  4CDF 0201                420      MOVEM.L (A7)+,D0/A1 ; Restore Registers from Stack
+0000136E  4E75                     421      RTS ; Return from Subroutine
+00001370                           422  *-----------------------------------------------------------------------------------------------------------  
+00001370                           423  HEX_DEC
+00001370                           424  * Convert Hex Number in D1 to Decimal 
+00001370                           425  * Used in GET_DATA Subroutine
+00001370  48E7 3E00                426      MOVEM.L D2-D6,-(A7) ; Save Registers to Stack
+00001374                           427      
+00001374  4285                     428      CLR.L D5 ; Clear Register to Store Result
+00001376  7401                     429      MOVE.L #1,D2 ; Set Starting Multiplier to 1
+00001378                           430      
+00001378  4284                     431  CONV CLR.L D4 ; Clear Temporary Register
+0000137A  2C01                     432      MOVE.L D1,D6 ; Make a Copy of D1 in D6
+0000137C  0286 0000000F            433      ANDI.L #$F,D6 ; D6 = D1%16 (Remainder)
+00001382  D882                     434      ADD.L D2,D4 ; Add Multiplier to Temporary Register
+00001384  C8C6                     435      MULU D6,D4 ; Multiply Temporary Register by Remainder
+00001386  DA84                     436      ADD.L D4,D5 ; Add Product to Result Register
+00001388  C4FC 000A                437      MULU #10,D2 ; Multiplier = (Multiplier)*16
+0000138C  E889                     438      LSR.L #4,D1 ; D1 = D1/16 (Quotient)
+0000138E  66E8                     439      BNE CONV ; If Input != 0, continue conversion
+00001390  2205                     440      MOVE.L D5,D1 ; If Input = 0, Store Result in D1
+00001392                           441       
+00001392  4CDF 007C                442      MOVEM.L (A7)+,D2-D6 ; Restore Registers from Stack
+00001396  4E75                     443      RTS ; Return from Subroutine
+00001398                           444  *-----------------------------------------------------------------------------------------------------------
+00001398                           445  *-----------------------------------------------------------------------------------------------------------
+00001398                           446  
+00001398                           447  
+00001398                           448   
+00001398                           449  ***************************
+00001398                           450  ***    COMMAND SPACE    ***
+00001398                           451  ***************************
+00001398                           452  *-----------------------------------------------------------------------------------------------------------
+00001398                           453  *-------------------------------------------- DATA SPACE ---------------------------------------------------
+00001398                           454  
+00001398                           455  * Special Memory Spaces (For Use in Subroutines) 
+00001398=                          456  MM_INPUT DC.B ''
+00001398=                          457  SORTW_INPUT DC.B ''
+00001398                           458  
+00001398                           459  * Messages for BTST (Block Test) Command
+00001398= 42 4C 4F 43 4B 20 ...    460  BPASS DC.B 'BLOCK TEST PASSED!'
+000013AA= 00                       461        DC.B 0
+000013AB= 42 4C 4F 43 4B 20 ...    462  BFAIL DC.B 'BLOCK TEST FAILED!'
+000013BD= 00                       463        DC.B 0 
+000013BE                           464        
+000013BE                           465  * Messages for BSCH (Block Search) Command      
+000013BE= 53 54 52 49 4E 47 ...    466  SFOUND DC.B 'STRING LOCATED!'
+000013CD= 00                       467        DC.B 0
+000013CE= 53 54 52 49 4E 47 ...    468  SLOST DC.B 'STRING WAS NOT FOUND!'
+000013E3= 00                       469        DC.B 0 
+000013E4                           470  
+000013E4                           471  * Lookup Table for HELP Command
+000013E4= 48 45 4C 50 3A 20 ...    472  INFO DC.B 'HELP: Displays This Message'
+000013FF= 00                       473       DC.B  0
+00001400= 00                       474       DC.B  0
+00001401= 4D 44 53 50 3A 20 ...    475       DC.B 'MDSP: Displays Addresses And Memory Contents'
+0000142D= 00                       476       DC.B  0
+0000142E= 4D 44 53 50 20 3C ...    477       DC.B 'MDSP <address1> <address2> eg: MDSP $200 $300<CR>'
+0000145F= 00                       478       DC.B  0
+00001460= 4D 44 53 50 20 3C ...    479       DC.B 'MDSP <address1> eg: MDSP $200<CR> (Displays 16 bytes)'
+00001495= 00                       480       DC.B  0
+00001496= 00                       481       DC.B  0
+00001497= 4D 4D 3A 20 4D 6F ...    482       DC.B 'MM: Modifies Data In Memory'
+000014B2= 00                       483       DC.B  0
+000014B3= 44 65 66 61 75 6C ...    484       DC.B 'Default: Displays One Word'
+000014CD= 00                       485       DC.B  0
+000014CE= 3B 42 3A 20 44 69 ...    486       DC.B ';B: Displays One Byte'
+000014E3= 00                       487       DC.B  0
+000014E4= 3B 57 3A 20 44 69 ...    488       DC.B ';W: Displays One Word'
+000014F9= 00                       489       DC.B  0
+000014FA= 3B 4C 3A 20 44 69 ...    490       DC.B ';L: Displays One Long Word'
+00001514= 00                       491       DC.B  0
+00001515= 4D 4D 20 3C 61 64 ...    492       DC.B 'MM <address1>[;size] eg: MM $8;W<CR>'
+00001539= 00                       493       DC.B  0
+0000153A= 00                       494       DC.B  0
+0000153B= 53 4F 52 54 57 3A ...    495       DC.B 'SORTW: Sorts A Block Of Word Size Memory'
+00001563= 00                       496       DC.B  0
+00001564= 44 65 66 61 75 6C ...    497       DC.B 'Default: Ascending Order'
+0000157C= 00                       498       DC.B  0
+0000157D= 3B 41 3A 20 41 73 ...    499       DC.B ';A: Ascending Order'
+00001590= 00                       500       DC.B  0
+00001591= 3B 44 3A 20 44 65 ...    501       DC.B ';D: Descending Order'
+000015A5= 00                       502       DC.B  0
+000015A6= 53 4F 52 54 57 20 ...    503       DC.B 'SORTW <address1> <address2>[;size] eg: SORTW $50 $60;A<CR>'
+000015E0= 00                       504       DC.B  0
+000015E1= 00                       505       DC.B  0
+000015E2= 4D 53 3A 20 53 65 ...    506       DC.B 'MS: Sets Data Into Memory'
+000015FB= 00                       507       DC.B  0
+000015FC= 4D 53 20 3C 61 64 ...    508       DC.B 'MS <address> <data> eg: MS $66 "YAY!"<CR>'
+00001625= 00                       509       DC.B  0
+00001626= 00                       510       DC.B  0
+00001627= 55 50 50 45 52 3A ...    511       DC.B 'UPPER: Capitalizes Null Terminated String At Address'
+0000165B= 00                       512       DC.B  0
+0000165C= 55 50 50 45 52 20 ...    513       DC.B 'UPPER <address> eg: UPPER $30<CR>'
+0000167D= 00                       514       DC.B  0
+0000167E= 00                       515       DC.B  0
+0000167F= 42 46 3A 20 46 69 ...    516       DC.B 'BF: Fills A Block Of Memory'
+0000169A= 00                       517       DC.B  0
+0000169B= 42 46 20 3C 61 64 ...    518       DC.B 'BF <address1> <address2> <word> eg: BF $50 $60 $345<CR>'
+000016D2= 00                       519       DC.B  0
+000016D3= 00                       520       DC.B  0
+000016D4= 42 53 43 48 3A 20 ...    521       DC.B 'BSCH: Searches A Literal String In Memory'
+000016FD= 00                       522       DC.B  0
+000016FE= 42 53 43 48 20 3C ...    523       DC.B 'BSCH <address1> <address2> "string" eg: BSCH $50 $60 "Hey"<CR>'
+0000173C= 00                       524       DC.B  0
+0000173D= 00                       525       DC.B  0
+0000173E= 42 4D 4F 56 3A 20 ...    526       DC.B 'BMOV: Moves A Block Of Memory To Another Area'
+0000176B= 00                       527       DC.B  0
+0000176C= 42 4D 4F 56 20 3C ...    528       DC.B 'BMOV <address1> <address2> <address3> eg: BMOV $20 $30 $40<CR>'
+000017AA= 00                       529       DC.B  0
+000017AB= 00                       530       DC.B  0
+000017AC= 42 54 53 54 3A 20 ...    531       DC.B 'BTST: Tests Block Of Memory' 
+000017C7= 00                       532       DC.B  0
+000017C8= 42 54 53 54 20 3C ...    533       DC.B 'BTST <address1> <address2> eg: BTST $20 $30<CR>'
+000017F7= 00                       534       DC.B  0
+000017F8= 00                       535       DC.B  0
+000017F9= 42 52 45 56 3A 20 ...    536       DC.B 'BREV: Reverses Data In A Block Of Memory'
+00001821= 00                       537       DC.B  0
+00001822= 42 52 45 56 20 3C ...    538       DC.B 'BREV <address1> <address2> eg: BREV $45 $55<CR>'
+00001851= 00                       539       DC.B  0
+00001852= 00                       540       DC.B  0
+00001853= 44 46 3A 20 44 69 ...    541       DC.B 'DF: Displays Formatted Registers'
+00001873= 00                       542       DC.B  0
+00001874= 44 46 20 20 65 67 ...    543       DC.B 'DF  eg: DF<CR>'
+00001882= 00                       544       DC.B  0
+00001883= 00                       545       DC.B  0
+00001884= 47 4F 3A 20 53 74 ...    546       DC.B 'GO: Start Execution From Given Address'
+000018AA= 00                       547       DC.B  0
+000018AB= 47 4F 20 3C 61 64 ...    548       DC.B 'GO <address> eg: GO $50<CR>'
+000018C6= 00                       549       DC.B  0
+000018C7= 00                       550       DC.B  0
+000018C8= 45 58 49 54 3A 20 ...    551       DC.B 'EXIT: Terminates Monitor Program'
+000018E8= 00                       552       DC.B  0
+000018E9= 45 58 49 54 20 20 ...    553       DC.B 'EXIT  eg: EXIT<CR>'
+000018FB= 00                       554       DC.B  0
+000018FC= 00                       555       DC.B  0
+000018FD= 00                       556       DC.B  0
+000018FE                           557       
+000018FE                           558  *-----------------------------------------------------------------------------------------------------------
+000018FE                           559  *-------------------------------------------- PROGRAM SPACE ------------------------------------------------ 
+000018FE                           560  HELP
+000018FE                           561  * Displays HELP Lookup Table
+000018FE                           562  *
+000018FE  2078 102A                563      MOVE.L $102A,A0 ; Restore A0 from Memory
+00001902  48E7 E240                564      MOVEM.L D0-D2/D6/A1,-(A7) ; Store Registers on Stack
+00001906                           565      
+00001906  4EB8 133E                566      JSR CHK_END ; Check if reached end of input. If not, then Command Invalid
+0000190A  BC3C 0001                567      CMP.B #1,D6 ; Check if D6 = 0
+0000190E  6700 0034                568      BEQ H_INV ; If yes, then Command is Invalid
+00001912                           569      
+00001912  103C 0006                570      MOVE.B #6,D0 ; Set TRAP Function to Output Character
+00001916  4202                     571      CLR.B D2 ; Counter for Number of Null Characters
+00001918                           572      
+00001918  43F8 13E4                573      LEA INFO,A1 ; Load Start Address of HELP Lookup Table in A1
+0000191C                           574      
+0000191C  1219                     575  H_LOOP MOVE.B (A1)+,D1 ; Get Character in D1
+0000191E                           576      
+0000191E  B43C 0003                577      CMP.B #3,D2 ; Look for 3 consecutive null characters
+00001922  6700 001A                578      BEQ H_DONE ; If yes, then Done
+00001926                           579      
+00001926  B23C 0000                580  H_N1 CMP.B #0,D1 ; Check if character is null
+0000192A  6600 000C                581      BNE H_N2 ; If no, then don't increment counter
+0000192E                           582      
+0000192E  4EB8 10F6                583      JSR NEWLINE ; Move to Next Line
+00001932                           584      
+00001932  5202                     585      ADD.B #1,D2 ; Increment Null Counter
+00001934  6000 0004                586      BRA H_N3 ; Jump
+00001938                           587      
+00001938  4202                     588  H_N2 CLR.B D2 ; Reset Null Counter
+0000193A                           589  
+0000193A  4E4F                     590  H_N3 TRAP #15 ; Display Character to Terminal
+0000193C  60DE                     591      BRA H_LOOP ; Loop till 3 consecutive null characters are found
+0000193E                           592  
+0000193E  4CDF 0247                593  H_DONE MOVEM.L (A7)+,D0-D2/D6/A1 ; Restore Registers from Stack
+00001942  4E75                     594      RTS ; Return from Subroutine
+00001944                           595      
+00001944  4EB8 135C                596  H_INV JSR INVALID ; Display Error Message
+00001948  4CDF 0247                597      MOVEM.L (A7)+,D0-D2/D6/A1 ; Restore Registers from Stack
+0000194C  4E75                     598      RTS ; Return from Subroutine
+0000194E                           599  *-----------------------------------------------------------------------------------------------------------
+0000194E                           600  MDSP
+0000194E                           601  * If 2 Addresses Inputted : Displays Addresses and Contents of All Memory Locations Between Addresses
+0000194E                           602  * If 1 Address Inputted : Displays Addresses and Contents of 16 Consecutive Memory Locations Starting at Address
+0000194E                           603  
+0000194E  2078 102A                604      MOVE.L $102A,A0 ; Restore A0 from Memory
+00001952  48E7 F2F8                605      MOVEM.L D0-D3/D6/A0-A4,-(A7) ; Store Registers on Stack
+00001956                           606      
+00001956                           607  * Get START Address in A1
+00001956  41F8 115E                608      LEA DATA1,A0 ; Set Pointer to First Data Save Location
+0000195A  4EB8 1276                609      JSR GET_DATA ; Get Data from Input
+0000195E  BC3C 0001                610      CMP.B #1,D6 ; Check if D6 = 1
+00001962  6700 0064                611      BEQ MD_INV ; If yes, then Command is Invalid
+00001966  2258                     612      MOVE.L (A0)+,A1 ; Get First Address in A1, and then Set Pointer to Second Data Save Location
+00001968                           613  
+00001968                           614  * Check if Second Address Inputted
+00001968  49F8 115A                615      LEA INP_PTR,A4 ; Get Address of Input Pointer Location in A4
+0000196C  2654                     616      MOVE.L (A4),A3 ; Get Current Location of Input Pointer in A3
+0000196E  1013                     617      MOVE.B (A3),D0 ; Get Character at Current Pointer Location in D0
+00001970  6600 000E                618      BNE GET2ADR ; If character is not null, then Get Second Address
+00001974  2449                     619      MOVE.L A1,A2 ; Copy A1 to A2
+00001976  D5FC 00000010            620      ADD.L #16,A2 ; A2 = A1 + 16
+0000197C  6000 0010                621      BRA START_MDSP
+00001980                           622      
+00001980                           623  GET2ADR 
+00001980  4EB8 1276                624      JSR GET_DATA ; Get Data from Input
+00001984  BC3C 0001                625      CMP.B #1,D6 ; Check if D6 = 1
+00001988  6700 003E                626      BEQ MD_INV ; If yes, then Command is Invalid
+0000198C  2450                     627      MOVE.L (A0),A2 ; Get Second Address in A2
+0000198E                           628      
+0000198E                           629  START_MDSP  
+0000198E  4EB8 133E                630      JSR CHK_END ; Check if reached end of input. If not, then Command Invalid
+00001992  BC3C 0001                631      CMP.B #1,D6 ; Check if D6 = 1
+00001996  6700 0030                632      BEQ MD_INV ; Command is Invalid
+0000199A                           633      
+0000199A                           634      
+0000199A  B5C9                     635  MD_LOOP CMP.L A1,A2 ; Check if A2 <= A1
+0000199C  6F00 0024                636      BLE MD_DONE ; If yes, then MD_DONE
+000019A0                           637      
+000019A0  2409                     638      MOVE.L A1,D2 ; Get Address in D2
+000019A2  163C 0002                639      MOVE.B #2,D3 ; Set Number of Bytes to Display = 2
+000019A6  4EB9 0000220C            640      JSR DISPREG ; Output Address
+000019AC                           641  
+000019AC  4EB8 110A                642      JSR SPACE ; Output Space Character
+000019B0                           643      
+000019B0  1419                     644      MOVE.B (A1)+,D2 ; Get Byte Size Data in D2
+000019B2  163C 0001                645      MOVE.B #1,D3 ; Set Number of Bytes to Display = 1
+000019B6  4EB9 0000220C            646      JSR DISPREG ; Output a Byte in Hex
+000019BC                           647    
+000019BC  4EB8 10F6                648      JSR NEWLINE ; Output Newline Character
+000019C0                           649      
+000019C0  60D8                     650      BRA MD_LOOP ; Loop While Still in Address Range
+000019C2                           651      
+000019C2  4CDF 1F4F                652  MD_DONE MOVEM.L (A7)+,D0-D3/D6/A0-A4 ; Restore Registers from Stack
+000019C6  4E75                     653      RTS ; Return from Subroutine
+000019C8                           654      
+000019C8  4EB8 135C                655  MD_INV JSR INVALID ; Display Error Message
+000019CC  4CDF 1F4F                656      MOVEM.L (A7)+,D0-D3/D6/A0-A4 ; Restore Registers from Stack
+000019D0  4E75                     657      RTS ; Return from Subroutine    
+000019D2                           658  *-----------------------------------------------------------------------------------------------------------  
+000019D2                           659  SORTW
+000019D2                           660  * Sorts Word Size Data in Block of Memory
+000019D2                           661  * Ascending/Descending Depending on Mode
+000019D2                           662  
+000019D2  2078 102A                663      MOVE.L $102A,A0 ; Restore A0 from Memory
+000019D6  48E7 E2F8                664      MOVEM.L D0-D2/D6/A0-A4,-(A7) ; Save Registers to Stack
+000019DA                           665  
+000019DA                           666  * Get START Address in A1
+000019DA  41F8 115E                667      LEA DATA1,A0 ; Set Pointer to First Data Save Location
+000019DE  4EB8 1276                668      JSR GET_DATA ; Get Data from Input
+000019E2  BC3C 0001                669      CMP.B #1,D6 ; Check if D6 = 1
+000019E6  6700 00A8                670      BEQ SORT_INV ; If yes, then Command is Invalid
+000019EA  2258                     671      MOVE.L (A0)+,A1 ; Get First Address in A1, and then Set Pointer to Second Data Save Location
+000019EC                           672      
+000019EC                           673  * Check if START Address is Even
+000019EC  2009                     674      MOVE.L A1,D0 ; Get Address in D0
+000019EE  0800 0000                675      BTST #0,D0 ; Check if D0 is even
+000019F2  6600 009C                676      BNE SORT_INV ; If no, then Address is Invalid
+000019F6                           677  
+000019F6                           678  * Get END Address in A2
+000019F6  4EB8 1276                679      JSR GET_DATA ; Get Data from Input
+000019FA  BC3C 0001                680      CMP.B #1,D6 ; Check if D6 = 1
+000019FE  6700 0090                681      BEQ SORT_INV ; If yes, then Command is Invalid
+00001A02  2458                     682      MOVE.L (A0)+,A2 ; Get Second Address in A2, and then Set Pointer to Third Data Save Location
+00001A04                           683      
+00001A04                           684  * Check if START Address is Even
+00001A04  200A                     685      MOVE.L A2,D0 ; Get Address in D0
+00001A06  0800 0000                686      BTST #0,D0 ; Check if D0 is even
+00001A0A  6600 0084                687      BNE SORT_INV ; If no, then Address is Invalid
+00001A0E                           688      
+00001A0E                           689  * Check for Order
+00001A0E  49F8 115A                690      LEA INP_PTR,A4 ; Get Address of Input Pointer Location in A4
+00001A12  2654                     691      MOVE.L (A4),A3 ; Get Current Location of Input Pointer in A3
+00001A14                           692      
+00001A14  0C13 0000                693      CMP.B #0,(A3) ; Check if Input String has Ended
+00001A18  6700 0024                694      BEQ DEFAULT ; If yes, then Perform Default Operation of Ascending Order
+00001A1C                           695      
+00001A1C  288B                     696      MOVE.L A3,(A4) ; Save Current Input Pointer Location in INP_PTR
+00001A1E                           697    
+00001A1E  4EB8 131E                698      JSR GET_MODE ; Get Mode from Input
+00001A22  2010                     699      MOVE.L (A0),D0 ; Get Third Data in D0
+00001A24                           700      
+00001A24  B0BC 00000041            701      CMP.L #$41,D0 ; Check if Data = 'A'
+00001A2A  6700 0012                702      BEQ DEFAULT If yes, then Perform Default Operation of Ascending Order
+00001A2E                           703      
+00001A2E  B0BC 00000044            704      CMP.L #$44,D0 ; Check if Data = 'D'
+00001A34  6600 005A                705      BNE SORT_INV ; If no, then Command is Invalid
+00001A38                           706      
+00001A38  7401                     707      MOVE.L #1,D2 ; Set Flag for Descending Order
+00001A3A  6000 0010                708      BRA SORT_START ; Start Sorting Function
+00001A3E                           709    
+00001A3E                           710  DEFAULT
+00001A3E  4282                     711      CLR.L D2 ; Reset Flag for Ascending Operation
+00001A40                           712  
+00001A40  4EB8 133E                713      JSR CHK_END ; Check if reached end of input. If not, then Command Invalid
+00001A44  BC3C 0001                714      CMP.B #1,D6  ; Check if D6 = 1
+00001A48  6700 0046                715      BEQ SORT_INV ; If yes, then Command is Invalid
+00001A4C                           716  
+00001A4C                           717  SORT_START    
+00001A4C  2049                     718      MOVE.L A1,A0 ; Make a Copy of START Address in A0
+00001A4E  4280                     719      CLR.L D0 ; Clear Temporary Register 1
+00001A50  4281                     720      CLR.L D1 ; Clear Temporary Register 2
+00001A52                           721  
+00001A52  2649                     722  OLOOP MOVE.L A1,A3 ; Assuming the First Word is Largest, Set A3 as Pointer
+00001A54  3019                     723      MOVE.W (A1)+,D0 ; Get Word in D0
+00001A56  B5C9                     724      CMP.L A1,A2 ; Check if A2 <= A1
+00001A58  6F00 0020                725      BLE SORT_END ; If yes, then Sorting Complete
+00001A5C                           726      
+00001A5C  3219                     727  ILOOP MOVE.W (A1)+,D1 ; Get Next Word
+00001A5E  B081                     728      CMP.L D1, D0 ; Compare Previous Word with Next Word
+00001A60  6C00 0006                729      BGE INEXT ; Check if Previous Word >= Next Word
+00001A64  3021                     730      MOVE.W -(A1),D0 ; Get Larger Word in D0
+00001A66  2649                     731      MOVE.L A1,A3 ; Set A3 as Pointer to Larger Word
+00001A68                           732  
+00001A68  B5C9                     733  INEXT CMP.L A1,A2 ; Check if A2 <= A1
+00001A6A  6F00 0004                734      BLE ONEXT ; If yes, then Proceed to Next Round of Sorting
+00001A6E  60EC                     735      BRA ILOOP ; If no, then Continue Sorting
+00001A70                           736      
+00001A70                           737  * Swap the Last Number of the Address Range with the Largest Number in the Current Round, then Shorten the Range by a Word
+00001A70  3513                     738  ONEXT MOVE.W (A3),-(A2)
+00001A72  3681                     739      MOVE.W D1,(A3)
+00001A74                           740      
+00001A74  2248                     741      MOVE.L A0,A1 ; Reload START Address in A1
+00001A76                           742      
+00001A76  B5C9                     743      CMP.L A1,A2 ; Check if A2 > A1
+00001A78  6ED8                     744      BGT OLOOP ; If yes, then done    
+00001A7A                           745      
+00001A7A  B4BC 00000001            746  SORT_END CMP.L #1,D2 ; Check if Flag is Set
+00001A80  6600 0008                747      BNE SORT_DONE ; If yes, then Sorting Complete
+00001A84  4EB9 00002254            748      JSR REVERSE ; If no, then change to Decending Order by Reversing Order
+00001A8A                           749  
+00001A8A  4CDF 1F47                750  SORT_DONE MOVEM.L (A7)+,D0-D2/D6/A0-A4 ; Restore Registers from Stack
+00001A8E  4E75                     751      RTS ; Return from Subroutine
+00001A90                           752  
+00001A90  4EB8 135C                753  SORT_INV JSR INVALID ; Display Error Message
+00001A94  4CDF 1F47                754      MOVEM.L (A7)+,D0-D2/D6/A0-A4 ; Restore Registers from Stack
+00001A98  4E75                     755      RTS ; Return from Subroutine
+00001A9A                           756  *-----------------------------------------------------------------------------------------------------------
+00001A9A                           757  MM
+00001A9A                           758  * Displays Address and Contents of Memory Locations Starting at Inputted Address
+00001A9A                           759  * Enter Number at the Terminal to Modify the Memory Contents
+00001A9A                           760  * Enter Carriage Return at the Terminal to Go to Next Address Without Modifying the Memory Contents
+00001A9A                           761  * Enter Period to Exit MM command loop
+00001A9A                           762  
+00001A9A  2078 102A                763      MOVE.L $102A,A0 ; Restore A0 from Memory
+00001A9E  48E7 FAF8                764      MOVEM.L D0-D4/D6/A0-A4,-(A7) ; Save Registers to Stack
+00001AA2                           765      
+00001AA2                           766  * Get START Address in A1
+00001AA2  41F8 115E                767      LEA DATA1,A0 ; Set Pointer to First Data Save Location
+00001AA6  4EB8 1276                768      JSR GET_DATA ; Get Data from Input
+00001AAA  BC3C 0001                769      CMP.B #1,D6 ; Check if D6 = 1
+00001AAE  6700 013E                770      BEQ MM_INV ; If yes, then Command is Invalid
+00001AB2  2458                     771      MOVE.L (A0)+,A2 ; Get First Address in A2, and then Set Pointer to Second Data Save Location
+00001AB4                           772      
+00001AB4                           773  * Check if Command String has Ended
+00001AB4  47F8 115A                774      LEA INP_PTR,A3 ; Get Address of Stored Pointer Location
+00001AB8  2853                     775      MOVE.L (A3),A4 ; Get Current Input Pointer Address in A4
+00001ABA                           776      
+00001ABA  0C14 0000                777      CMP.B #0,(A4) ; Check if Character is null
+00001ABE  6700 0030                778      BEQ MODEW ; If yes, Perform Default Operation, i.e Word Mode
+00001AC2                           779      
+00001AC2                           780  * Check for ';' Character
+00001AC2  0C14 003B                781      CMP.B #$3B,(A4) ; Check if Character is ';'
+00001AC6  6600 0126                782      BNE MM_INV ; If no, then Command is Invalid
+00001ACA                           783      
+00001ACA  268C                     784      MOVE.L A4,(A3) ; Save Current Input Pointer Location in INP_PTR
+00001ACC                           785      
+00001ACC                           786  * Check Mode of Operation
+00001ACC  4EB8 131E                787      JSR GET_MODE ; Get Mode from Input
+00001AD0  2018                     788      MOVE.L (A0)+,D0 ; Get Mode in D0, and then Set Pointer to Third Data Save Location
+00001AD2                           789      
+00001AD2  B0BC 00000042            790      CMP.L #$42,D0 ;Check if Mode = 'B'
+00001AD8  6700 001C                791      BEQ MODEB ; If yes, then Perform Operation in Byte Mode
+00001ADC                           792      
+00001ADC  B0BC 0000004C            793      CMP.L #$4C,D0 ;Check if Mode = 'L'
+00001AE2  6700 0018                794      BEQ MODEL ; If yes, then Perform Operation in Long Word Mode
+00001AE6                           795      
+00001AE6  B0BC 00000057            796      CMP.L #$57,D0 ;Check if Mode = 'W'
+00001AEC  6600 0100                797      BNE MM_INV ; If no, then Command is Invalid
+00001AF0                           798      
+00001AF0  7801                     799  MODEW MOVE.L #1,D4 ; D4 = 1 for Word Operation
+00001AF2  6000 000A                800      BRA MM_START ; Start Memory Modify Operation
+00001AF6  4284                     801  MODEB CLR.L D4 ; D4 = 0 for Byte Operation
+00001AF8  6000 0004                802      BRA MM_START ; Start Memory Modify Operation
+00001AFC  7802                     803  MODEL MOVE.L #2,D4 ; D4 = 2 for Long Word Operation
+00001AFE                           804  
+00001AFE                           805  MM_START
+00001AFE  4EB8 133E                806      JSR CHK_END ; Check if Command String is at End
+00001B02  BC3C 0001                807      CMP.B #1,D6 ; Check if D6 = 0
+00001B06  6700 00E6                808      BEQ MM_INV ; If yes, then Command is Invalid
+00001B0A                           809  
+00001B0A  4283                     810      CLR.L D3 ; Clear Data Input Register
+00001B0C  143C 0010                811      MOVE.B #16,D2 ; Set Base to 16 for TRAP Function #15
+00001B10                           812      
+00001B10                           813  MM_LOOP 
+00001B10                           814  * Byte Read Operation 
+00001B10  B8BC 00000000            815      CMP.L #0,D4 ; Check if D4 = 0 (for Byte Operation)
+00001B16  6600 000C                816      BNE MM_N1 ; If no, then Next
+00001B1A                           817      
+00001B1A  1412                     818      MOVE.B (A2),D2 ; Output a Byte
+00001B1C  163C 0001                819      MOVE.B #1,D3 ; Size of Output = 1 Byte
+00001B20  6000 001C                820      BRA MM_READ ; Perform Read Operation
+00001B24                           821  
+00001B24                           822  * Word Read Operation 
+00001B24  B8BC 00000001            823  MM_N1 CMP.L #1,D4 ; Check if D4 = 1 (for Word Operation)
+00001B2A  6600 000C                824      BNE MM_N2 ; If no, then Next
+00001B2E                           825      
+00001B2E  3412                     826      MOVE.W (A2),D2 ; Output a Word
+00001B30  163C 0002                827      MOVE.B #2,D3 ; Size of Output = 2 Bytes
+00001B34  6000 0008                828      BRA MM_READ ; Perform Read Operation
+00001B38                           829      
+00001B38                           830  * Long Word Read Operation   
+00001B38  2412                     831  MM_N2 MOVE.L (A2),D2 ; Output a Long
+00001B3A  163C 0004                832      MOVE.B #4,D3 ; Size of Output = 4 Bytes
+00001B3E                           833  
+00001B3E  240A                     834  MM_READ MOVE.L A2,D2 ; Get Address in D2
+00001B40  163C 0002                835      MOVE.B #2,D3 ; Size of Output = 2 Bytes
+00001B44  4EB9 0000220C            836      JSR DISPREG ; Output Address
+00001B4A                           837  
+00001B4A  4EB8 110A                838      JSR SPACE ; Output Space Character
+00001B4E                           839      
+00001B4E  4281                     840      CLR.L D1 ; Clear Output Register 
+00001B50                           841  
+00001B50  4EB9 0000220C            842      JSR DISPREG ; Output Data 
+00001B56                           843  
+00001B56  123C 003E                844      MOVE.B #$3E,D1 ; Set Character '>' for Output
+00001B5A  103C 0006                845      MOVE.B #6,D0 ; Set TRAP Function to Output Character in D1.B
+00001B5E  4E4F                     846      TRAP #15
+00001B60                           847  
+00001B60                           848  * Get Input Data
+00001B60  43F8 1398                849      LEA MM_INPUT,A1 ; Input
+00001B64  103C 0002                850      MOVE.B #2,D0
+00001B68  4E4F                     851      TRAP #15  
+00001B6A                           852      
+00001B6A                           853  * Check for '.'
+00001B6A  0C11 002E                854      CMP.B #$2E,(A1) ; Check if Character = '.'
+00001B6E  6700 0078                855      BEQ MM_DONE ; If yes, then Memory Modify Complete
+00001B72                           856      
+00001B72                           857  * Check for null
+00001B72  0C11 0000                858      CMP.B #0,(A1) ; Check if Character = null
+00001B76  6600 0026                859      BNE MM_WRITE ; If yes, then Modify Current Location
+00001B7A                           860      
+00001B7A                           861  * Byte Skip Operation 
+00001B7A  B8BC 00000000            862      CMP.L #0,D4 ; Check if D4 = 0 (for Byte Operation)
+00001B80  6600 0006                863      BNE MM_N3 ; If no, then Next
+00001B84                           864      
+00001B84  528A                     865      ADD.L #1,A2 Move to Next Byte
+00001B86  6088                     866      BRA MM_LOOP ; Loop Till '.' is Entered
+00001B88                           867  
+00001B88                           868  * Word Skip Operation 
+00001B88  B8BC 00000001            869  MM_N3 CMP.L #1,D4 ; Check if D4 = 1 (for Word Operation)
+00001B8E  6600 0008                870      BNE MM_N4 ; If no, then Next
+00001B92                           871      
+00001B92  548A                     872      ADD.L #2,A2 Move to Next Word
+00001B94  6000 FF7A                873      BRA MM_LOOP ; Loop Till '.' is Entered
+00001B98                           874      
+00001B98                           875  * Long Word Skip Operation   
+00001B98  588A                     876  MM_N4 ADD.L #4,A2 Move to Next Long Word
+00001B9A  6000 FF74                877      BRA MM_LOOP ; Loop Till '.' is Entered
+00001B9E                           878      
+00001B9E                           879  * Get Input Data in D0
+00001B9E                           880  
+00001B9E  2689                     881  MM_WRITE MOVE.L A1,(A3) ; Save Current Input Pointer Location in INP_PTR 
+00001BA0                           882  
+00001BA0  4EB8 1276                883      JSR GET_DATA ; Get Data from Input
+00001BA4  BC3C 0001                884      CMP.B #1,D6 ; Check if D6 = 1
+00001BA8  6700 0044                885      BEQ MM_INV ; If yes, then Command is Invalid
+00001BAC  2010                     886      MOVE.L (A0),D0 ; Get Data in D0
+00001BAE                           887      
+00001BAE                           888  * Byte Write Operation 
+00001BAE  B8BC 00000000            889      CMP.L #0,D4 ; Check if D4 = 0 (for Byte Operation)
+00001BB4  6600 0012                890      BNE MM_N5 ; If no, then Next
+00001BB8                           891      
+00001BB8  B0BC 000000FF            892      CMP.L #$FF,D0 ; Check if D0 > $FF
+00001BBE  6E00 002E                893      BGT MM_INV ; If yes, then Data Invalid
+00001BC2                           894      
+00001BC2  14C0                     895      MOVE.B D0,(A2)+ ; Store Entered Byte in Memory
+00001BC4  6000 001E                896      BRA MM_WDONE ; Write Operation Done
+00001BC8                           897  
+00001BC8                           898  * Word Write Operation 
+00001BC8  B8BC 00000001            899  MM_N5 CMP.L #1,D4 ; Check if D4 = 1 (for Word Operation)
+00001BCE  6600 0012                900      BNE MM_N6 ; If no, then Next
+00001BD2                           901      
+00001BD2  B0BC 0000FFFF            902      CMP.L #$FFFF,D0 ; Check if D0 > $FFFF
+00001BD8  6E00 0014                903      BGT MM_INV ; If yes, then Data Invalid
+00001BDC                           904      
+00001BDC  34C0                     905      MOVE.W D0,(A2)+ ; Store Entered Word in Memory
+00001BDE  6000 0004                906      BRA MM_WDONE ; Write Operation Done
+00001BE2                           907      
+00001BE2                           908  * Long Word Write Operation   
+00001BE2  24C0                     909  MM_N6 MOVE.L D0,(A2)+ ; Store Entered Long Word in Memory
+00001BE4                           910  
+00001BE4  6000 FF2A                911  MM_WDONE BRA MM_LOOP ; Loop Till '.' is Entered
+00001BE8                           912      
+00001BE8  4CDF 1F5F                913  MM_DONE MOVEM.L (A7)+,D0-D4/D6/A0-A4 ; Restore Registers from Stack
+00001BEC  4E75                     914      RTS ; Return from Subroutine
+00001BEE                           915      
+00001BEE  4EB8 135C                916  MM_INV JSR INVALID ; Display Error Message
+00001BF2  4CDF 1F5F                917      MOVEM.L (A7)+,D0-D4/D6/A0-A4 ; Restore Registers from Stack
+00001BF6  4E75                     918      RTS ; Return from Subroutine
+00001BF8                           919  *-----------------------------------------------------------------------------------------------------------
+00001BF8                           920  MS
+00001BF8                           921  * Stores Hexadecimal/Decimal/ASCII String Input Starting at Inputted Memory Address
+00001BF8                           922  *
+00001BF8  2078 102A                923      MOVE.L $102A,A0 ; Restore A0 from Memory
+00001BFC  48E7 F2F8                924      MOVEM.L D0-D3/D6/A0-A4,-(A7) ; Save Registers to Stack
+00001C00                           925      
+00001C00                           926  * Get START Address in A1
+00001C00  41F8 115E                927      LEA DATA1,A0 ; Set Pointer to First Data Save Location
+00001C04  4EB8 1276                928      JSR GET_DATA ; Get Data from Input
+00001C08  BC3C 0001                929      CMP.B #1,D6 ; Check if D6 = 1
+00001C0C  6700 010C                930      BEQ MS_INV ; If yes, then Command is Invalid
+00001C10  2250                     931      MOVE.L (A0),A1 ; Get First Address in A1
+00001C12                           932  
+00001C12                           933  * Look for Space Character followed by a Double Quote
+00001C12  49F8 115A                934      LEA INP_PTR,A4 ; Get Address of Input Pointer Location in A4
+00001C16  2654                     935      MOVE.L (A4),A3 ; Get Current Location of Input Pointer in A3
+00001C18                           936      
+00001C18  0C1B 0020                937      CMP.B #$20,(A3)+ ; Check if Next Character is a Space
+00001C1C  6600 00FC                938      BNE MS_INV ; If no, then Command is Invalid
+00001C20                           939      
+00001C20  0C1B 0022                940      CMP.B #$22,(A3)+ ; Check if Next Character is a Double Quote
+00001C24  6600 0062                941      BNE MS_NUMBER ; If no, then Data is not an ASCII String
+00001C28                           942      
+00001C28  244B                     943      MOVE.L A3,A2 ; Store Starting Address of String Input in A2
+00001C2A                           944      
+00001C2A                           945  * Check if String Ends with Double Quote
+00001C2A  0C1B 0022                946  STR_LOOP CMP.B #$22,(A3)+ ; Check if Next Character is a Double Quote
+00001C2E  6700 000E                947      BEQ STR_END ; If yes, then Reached End of String
+00001C32                           948      
+00001C32  0C23 0000                949      CMP.B #0,-(A3) ; Check if Character is null
+00001C36  6700 00E2                950      BEQ MS_INV ; If yes, then Command is Invalid
+00001C3A  528B                     951      ADD.L #1,A3 ; Go to Next Character
+00001C3C  60EC                     952      BRA STR_LOOP ; If no, then Keep Looping 
+00001C3E                           953      
+00001C3E  288B                     954  STR_END MOVE.L A3,(A4) ; Store Current Location of Input Pointer in INP_PTR
+00001C40                           955  
+00001C40  4EB8 133E                956      JSR CHK_END ; Check if reached end of input. If not, then Command Invalid
+00001C44  BC3C 0001                957      CMP.B #1,D6 ; Check if D6 = 1
+00001C48  6700 00D0                958      BEQ MS_INV ; If yes, then Command is Invalid
+00001C4C                           959      
+00001C4C  2849                     960      MOVE.L A1,A4 ; Save Start Address in A4
+00001C4E                           961      
+00001C4E                           962  * Memory Set Operation with ASCII String Data
+00001C4E  0C12 0022                963  MS_LOOP CMP.B #$22,(A2) ; Check if Next Character is a Double Quote
+00001C52  6700 0006                964      BEQ MS_END ; If yes, then Memory Set Complete
+00001C56                           965      
+00001C56  12DA                     966      MOVE.B (A2)+,(A1)+ ; Set Memory
+00001C58  60F4                     967      BRA MS_LOOP ; Loop till End of String 
+00001C5A                           968      
+00001C5A  12FC 0000                969  MS_END MOVE.B #0,(A1)+ ; Terminate String With Null Character
+00001C5E                           970  
+00001C5E                           971  * Confirm that Memory Set was Successful
+00001C5E                           972  
+00001C5E                           973  * Display Address
+00001C5E  240C                     974      MOVE.L A4,D2 ; Get START Address in D2
+00001C60  163C 0002                975      MOVE.B #2,D3 ; Set Number of Bytes to Display = 2
+00001C64  4EB9 0000220C            976      JSR DISPREG ; Display Address
+00001C6A                           977      
+00001C6A  4EB8 110A                978      JSR SPACE ; Leave a Blank Space
+00001C6E                           979     
+00001C6E                           980  * Display String
+00001C6E  4EB8 111E                981      JSR QUOTE ; Display Double Quote
+00001C72                           982      
+00001C72  224C                     983      MOVE.L A4,A1 ; Get Start Address of Stored String in A1
+00001C74  103C 000E                984      MOVE.B #14,D0 ; Set TRAP Function to Output Null Terminated String Starting at A1
+00001C78  4E4F                     985      TRAP #15
+00001C7A                           986      
+00001C7A  4EB8 111E                987      JSR QUOTE ; Display Double Quote
+00001C7E                           988      
+00001C7E  4EB8 10F6                989      JSR NEWLINE ; Leave Blank Line
+00001C82                           990      
+00001C82  4CDF 1F4F                991      MOVEM.L (A7)+,D0-D3/D6/A0-A4 ; Restore Registers from Stack
+00001C86  4E75                     992      RTS ; Return from Subroutine
+00001C88                           993  
+00001C88                           994  * Memory Set Operation with ASCII String Data
+00001C88                           995  MS_NUMBER 
+00001C88                           996  * Get Hexadecimal/Decimal Data
+00001C88  41F8 115E                997      LEA DATA1,A0 ; Set Pointer to Second Data Save Location
+00001C8C  4EB8 1276                998      JSR GET_DATA ; Get Data
+00001C90  BC3C 0001                999      CMP.B #1,D6 ; Check if D6 = 1
+00001C94  6700 0084               1000      BEQ MS_INV ; If yes, then Command is Invalid
+00001C98  2410                    1001      MOVE.L (A0),D2 ; Get Data in D2
+00001C9A                          1002      
+00001C9A  4EB8 133E               1003      JSR CHK_END ; Check if reached end of input. If not, then Command Invalid
+00001C9E  BC3C 0001               1004      CMP.B #1,D6 ; Check if D6 = 1
+00001CA2  6700 0076               1005      BEQ MS_INV ; If yes, then Command is Invalid
+00001CA6                          1006  
+00001CA6  B4BC 000000FF           1007      CMP.L #$FF,D2 ; Check if D2 > $FF
+00001CAC  6E00 0008               1008      BGT MS_1 ; If no, then Data is Larger than a Byte
+00001CB0                          1009  
+00001CB0                          1010  * Write Byte Size Data to Address
+00001CB0  1282                    1011      MOVE.B D2,(A1)
+00001CB2  6000 0014               1012      BRA MS_3 ; Already know Size of Data
+00001CB6                          1013      
+00001CB6  B4BC 0000FFFF           1014  MS_1 CMP.L #$FFFF,D2 ; Check if D2 > $FFFF
+00001CBC  6E00 0008               1015      BGT MS_2 ; If no, then Data is Larger than a Word
+00001CC0                          1016      
+00001CC0                          1017  * Write Word Size Data to Address
+00001CC0  3282                    1018      MOVE.W D2,(A1)
+00001CC2  6000 0004               1019      BRA MS_3 ; Already know Size of Data
+00001CC6                          1020      
+00001CC6                          1021  MS_2 
+00001CC6                          1022  * Write Log Word Size Data to Address
+00001CC6  2282                    1023      MOVE.L D2,(A1)
+00001CC8                          1024      
+00001CC8                          1025  MS_3 
+00001CC8                          1026  * Display Address
+00001CC8  2002                    1027      MOVE.L D2,D0 ; Save D2 in D0
+00001CCA  2409                    1028      MOVE.L A1,D2 ; Get START Address in D2
+00001CCC  163C 0002               1029      MOVE.B #2,D3 ; Set Number of Bytes to Display = 2
+00001CD0  4EB9 0000220C           1030      JSR DISPREG ; Display Address
+00001CD6  2400                    1031      MOVE.L D0,D2 ; Restore D2
+00001CD8                          1032      
+00001CD8  4EB8 110A               1033      JSR SPACE ; Leave a Blank Space
+00001CDC                          1034   
+00001CDC  B4BC 000000FF           1035      CMP.L #$FF,D2 ; Check if D2 > $FF
+00001CE2  6E00 000C               1036      BGT MS_4 ; If no, then Data is Larger than a Byte
+00001CE6                          1037      
+00001CE6                          1038  * Confirm that Byte Size Data was Written to Address
+00001CE6  1411                    1039      MOVE.B (A1),D2
+00001CE8  163C 0001               1040      MOVE.B #1,D3 ; Number of Bytes to Display = 1
+00001CEC  6000 001C               1041      BRA MS_6 ; Already know Size of Data
+00001CF0                          1042      
+00001CF0  B4BC 0000FFFF           1043  MS_4 CMP.L #$FFFF,D2 ; Check if D2 > $FFFF
+00001CF6  6E00 000C               1044      BGT MS_5 ; If no, then Data is Larger than a Word
+00001CFA                          1045      
+00001CFA                          1046  * Confirm that Word Size Data was Written to Address
+00001CFA  3411                    1047      MOVE.W (A1),D2
+00001CFC  163C 0002               1048      MOVE.B #2,D3 ; Number of Bytes to Display = 2
+00001D00  6000 0008               1049      BRA MS_6 ; Already know Size of Data
+00001D04                          1050      
+00001D04                          1051  MS_5
+00001D04                          1052  * Confirm that Long Word Size Data was Written to Address
+00001D04  2411                    1053      MOVE.L (A1),D2
+00001D06  163C 0004               1054      MOVE.B #4,D3 ; Number of Bytes to Display = 4
+00001D0A                          1055      
+00001D0A  4EB9 0000220C           1056  MS_6 JSR DISPREG ; Display Value of Data Written to Memory
+00001D10                          1057      
+00001D10  4EB8 10F6               1058      JSR NEWLINE ; Leave a Blank Line 
+00001D14                          1059      
+00001D14  4CDF 1F4F               1060      MOVEM.L (A7)+,D0-D3/D6/A0-A4 ; Restore Registers from Stack
+00001D18  4E75                    1061      RTS ; Return from Subroutine
+00001D1A                          1062         
+00001D1A  4EB8 135C               1063  MS_INV JSR INVALID ; Display Error Message
+00001D1E  4CDF 1F4F               1064      MOVEM.L (A7)+,D0-D3/D6/A0-A4 ; Restore Registers from Stack
+00001D22  4E75                    1065      RTS ; Return from Subroutine
+00001D24                          1066  *-----------------------------------------------------------------------------------------------------------   
+00001D24                          1067  BF
+00001D24                          1068  * Fills Block of Memory With Inputted Word Size Data
+00001D24                          1069  *
+00001D24  2078 102A               1070      MOVE.L $102A,A0 ; Restore A0 from Memory
+00001D28  48E7 82E0               1071      MOVEM.L D0/D6/A0-A2,-(A7) ; Save Registers to Stack
+00001D2C                          1072      
+00001D2C                          1073  * Get START Address in A1
+00001D2C  41F8 115E               1074      LEA DATA1,A0 ; Set Pointer to First Data Save Location
+00001D30  4EB8 1276               1075      JSR GET_DATA ; Get Data from Input
+00001D34  BC3C 0001               1076      CMP.B #1,D6 ; Check if D6 = 1
+00001D38  6700 005A               1077      BEQ BF_INV ; If yes, then Command is Invalid
+00001D3C  2258                    1078      MOVE.L (A0)+,A1 ; Get First Address in A1, and then Set Pointer to Second Data Save Location
+00001D3E                          1079      
+00001D3E                          1080  * Check if START Address is Even
+00001D3E  2009                    1081      MOVE.L A1,D0 ; Get Address in D0
+00001D40  0800 0000               1082      BTST #0,D0 ; Check if D0 is even
+00001D44  6600 004E               1083      BNE BF_INV ; If no, then Address is Invalid
+00001D48                          1084  
+00001D48                          1085  * Get END Address in A2
+00001D48  4EB8 1276               1086      JSR GET_DATA ; Get Data from Input
+00001D4C  BC3C 0001               1087      CMP.B #1,D6 ; Check if D6 = 1
+00001D50  6700 0042               1088      BEQ BF_INV ; If yes, then Command is Invalid
+00001D54  2458                    1089      MOVE.L (A0)+,A2 ; Get Second Address in A2, and then Set Pointer to Third Data Save Location
+00001D56                          1090      
+00001D56                          1091  * Check if END Address is Even
+00001D56  200A                    1092      MOVE.L A2,D0 ; Get Address in D0
+00001D58  0800 0000               1093      BTST #0,D0 ; Check if D0 is even
+00001D5C  6600 0036               1094      BNE BF_INV ; If no, then Address is Invalid
+00001D60                          1095      
+00001D60                          1096  * Get Data in D0
+00001D60  4EB8 1276               1097      JSR GET_DATA ; Get Data from Input
+00001D64  BC3C 0001               1098      CMP.B #1,D6 ; Check if D6 = 1
+00001D68  6700 002A               1099      BEQ BF_INV ; If yes, then Command is Invalid
+00001D6C  2010                    1100      MOVE.L (A0),D0 ; Get Data in D0
+00001D6E                          1101      
+00001D6E                          1102  * Check if Data is Word Size
+00001D6E  B0BC 0000FFFF           1103      CMP.L #$FFFF,D0 ; Check id D0 > Largest Word
+00001D74  6E00 001E               1104      BGT BF_INV ; If yes, then Data is not Word Size
+00001D78                          1105      
+00001D78  4EB8 133E               1106      JSR CHK_END ; Check if reached end of input. If not, then Command Invalid
+00001D7C  BC3C 0001               1107      CMP.B #1,D6 ; Check if D6 = 1
+00001D80  6700 0012               1108      BEQ BF_INV ; If yes, then Command is Invalid
+00001D84                          1109  
+00001D84  B5C9                    1110  BF_LOOP CMP.L A1,A2 ; Check if A2 <= A1
+00001D86  6F00 0006               1111      BLE BF_END ; If yes, then Block Fill Complete
+00001D8A                          1112      
+00001D8A  32C0                    1113      MOVE.W D0,(A1)+ ; Fill Word in the Block
+00001D8C  60F6                    1114      BRA BF_LOOP ; Loop While in Address Range
+00001D8E                          1115  
+00001D8E  4CDF 0741               1116  BF_END MOVEM.L (A7)+,D0/D6/A0-A2 ; Restore Registers from Stack
+00001D92  4E75                    1117      RTS ; Return from Subroutine 
+00001D94                          1118      
+00001D94  4EB8 135C               1119  BF_INV JSR INVALID ; Display Error Message
+00001D98  4CDF 0741               1120      MOVEM.L (A7)+,D0/D6/A0-A2 ; Restore Registers from Stack
+00001D9C  4E75                    1121      RTS ; Return from Subroutine 
+00001D9E                          1122  *-----------------------------------------------------------------------------------------------------------
+00001D9E                          1123  BMOV
+00001D9E                          1124  * Copy a Block of Memory from One Place to Another
+00001D9E                          1125  * Inputs: Start & End Address of Source, Start Address of Destination
+00001D9E                          1126  
+00001D9E  2078 102A               1127      MOVE.L $102A,A0 ; Restore A0 from Memory
+00001DA2  48E7 02F0               1128      MOVEM.L D6/A0-A3,-(A7) ; Save Registers to Stack 
+00001DA6                          1129      
+00001DA6                          1130  * Get START Address in A1
+00001DA6  41F8 115E               1131      LEA DATA1,A0 ; Set Pointer to First Data Save Location
+00001DAA  4EB8 1276               1132      JSR GET_DATA ; Get Data from Input
+00001DAE  BC3C 0001               1133      CMP.B #1,D6 ; Check if D6 = 1
+00001DB2  6700 003C               1134      BEQ BMOV_INV ; If yes, then Command is Invalid
+00001DB6  2258                    1135      MOVE.L (A0)+,A1 ; Get First Address in A1, and then Set Pointer to Second Data Save Location
+00001DB8                          1136  
+00001DB8                          1137  * Get END Address in A2
+00001DB8  4EB8 1276               1138      JSR GET_DATA ; Get Data from Input
+00001DBC  BC3C 0001               1139      CMP.B #1,D6 ; Check if D6 = 1
+00001DC0  6700 002E               1140      BEQ BMOV_INV ; If yes, then Command is Invalid
+00001DC4  2458                    1141      MOVE.L (A0)+,A2 ; Get Second Address in A2, and then Set Pointer to Third Data Save Location
+00001DC6                          1142      
+00001DC6                          1143  * Get START Address #2 in A3
+00001DC6  4EB8 1276               1144      JSR GET_DATA ; Get Data from Input
+00001DCA  BC3C 0001               1145      CMP.B #1,D6 ; Check if D6 = 1
+00001DCE  6700 0020               1146      BEQ BMOV_INV ; If yes, then Command is Invalid
+00001DD2  2650                    1147      MOVE.L (A0),A3 ; Get Second Address in A2
+00001DD4                          1148      
+00001DD4  4EB8 133E               1149      JSR CHK_END ; Check if reached end of input. If not, then Command Invalid
+00001DD8  BC3C 0001               1150      CMP.B #1,D6 ; Check if D6 = 1
+00001DDC  6700 0012               1151      BEQ BMOV_INV ; If yes, then Command is Invalid
+00001DE0                          1152  
+00001DE0  B5C9                    1153  BMOV_LOOP CMP.L A1,A2 ; Check if A2 <= A1
+00001DE2  6F00 0006               1154      BLE BMOV_END ; If yes, then Block Move Complete
+00001DE6                          1155      
+00001DE6  16D9                    1156      MOVE.B (A1)+,(A3)+ ; Move Byte from Block
+00001DE8  60F6                    1157      BRA BMOV_LOOP ; Loop While in Address Range
+00001DEA                          1158  
+00001DEA  4CDF 0F40               1159  BMOV_END MOVEM.L (A7)+,D6/A0-A3 ; Restore Registers from Stack
+00001DEE  4E75                    1160      RTS ; Return from Subroutine
+00001DF0                          1161      
+00001DF0  4EB8 135C               1162  BMOV_INV JSR INVALID ; Display Error Message
+00001DF4  4CDF 0F40               1163      MOVEM.L (A7)+,D6/A0-A3 ; Restore Registers from Stack
+00001DF8  4E75                    1164      RTS ; Return from Subroutine
+00001DFA                          1165  *-----------------------------------------------------------------------------------------------------------
+00001DFA                          1166  BTST
+00001DFA                          1167  * Desctructive Test for a Memory Block
+00001DFA                          1168  * Data is Alternatively Read & Written to Ensure that the Memory Location can Maintain Data
+00001DFA                          1169  
+00001DFA  2078 102A               1170      MOVE.L $102A,A0 ; Restore A0 from Memory
+00001DFE  48E7 FCF0               1171      MOVEM.L D0-D5/A0-A3,-(A7) ; Save Registers to Stack
+00001E02                          1172      
+00001E02                          1173  * Get START Address in A1
+00001E02  41F8 115E               1174      LEA DATA1,A0 ; Set Pointer to First Data Save Location
+00001E06  4EB8 1276               1175      JSR GET_DATA ; Get Data from Input
+00001E0A  BC3C 0001               1176      CMP.B #1,D6 ; Check if D6 = 1
+00001E0E  6700 009E               1177      BEQ BTST_INV ; If yes, then Command is Invalid
+00001E12  2258                    1178      MOVE.L (A0)+,A1 ; Get First Address in A1, and then Set Pointer to Second Data Save Location
+00001E14                          1179  
+00001E14                          1180  * Get END Address in A2
+00001E14  4EB8 1276               1181      JSR GET_DATA ; Get Data from Input
+00001E18  BC3C 0001               1182      CMP.B #1,D6 ; Check if D6 = 1
+00001E1C  6700 0090               1183      BEQ BTST_INV ; If yes, then Command is Invalid
+00001E20  2458                    1184      MOVE.L (A0)+,A2 ; Get Second Address in A2, and then Set Pointer to Third Data Save Location
+00001E22                          1185      
+00001E22  4EB8 133E               1186      JSR CHK_END ; Check if reached end of input. If not, then Command Invalid
+00001E26  BC3C 0001               1187      CMP.B #1,D6 ; Check if D6 = 1
+00001E2A  6700 0082               1188      BEQ BTST_INV ; If yes, then Command is Invalid
+00001E2E                          1189  
+00001E2E  2049                    1190      MOVE.L A1,A0 ; Make Copy of START Address in A0
+00001E30  2648                    1191      MOVE.L A0,A3 ; Make Copy of START Address in A3
+00001E32                          1192  
+00001E32  183C 00AA               1193      MOVE.B #$AA,D4 ; Data to be written
+00001E36                          1194      
+00001E36                          1195  * Write Data to Block
+00001E36  B5C9                    1196  BTST_LOOP1 CMP.L A1,A2 ; Check if A2 <= A1
+00001E38  6F00 0006               1197      BLE BTST_NEXT1 ; If yes, then Block Write Complete
+00001E3C                          1198      
+00001E3C  12C4                    1199      MOVE.B D4,(A1)+ ; Write Byte to Block
+00001E3E  60F6                    1200      BRA BTST_LOOP1 ; Loop While in Address Range
+00001E40                          1201      
+00001E40                          1202  BTST_NEXT1  ;MOVE.B #$3C,(A0) ; Create a Block Test Error at Starting Address
+00001E40                          1203  
+00001E40                          1204  * Read Data from Block
+00001E40  B5C8                    1205  BTST_LOOP2 CMP.L A0,A2 ; Check if A2 <= A0
+00001E42  6F00 000C               1206      BLE BTST_PASS ; If yes, then Block Read Complete
+00001E46                          1207      
+00001E46  1A18                    1208      MOVE.B (A0)+,D5 ; Read Byte from Block into Temporary Register
+00001E48  BA04                    1209      CMP.B D4,D5 ; Check if Read Value = Written Value
+00001E4A  6600 0024               1210      BNE BTST_FAIL ; If no, then Block Test Failed
+00001E4E  60F0                    1211      BRA BTST_LOOP2 ; Loop While in Address Range
+00001E50                          1212      
+00001E50  204B                    1213  BTST_PASS MOVE.L A3,A0 ; Restore START Address in A0
+00001E52  224B                    1214      MOVE.L A3,A1 ; Restore START Address in A1
+00001E54                          1215      
+00001E54  B83C 0055               1216      CMP.B #$55,D4 ; Check if D4 = $55
+00001E58  6700 0008               1217      BEQ BTST_SUCCESS ; Passed both Block Tests
+00001E5C                          1218      
+00001E5C  183C 0055               1219      MOVE.B #$55,D4 ; New Data to be Written
+00001E60  60D4                    1220      BRA BTST_LOOP1 ; Perform Operation Twice
+00001E62                          1221      
+00001E62                          1222  * Display Block Test Passed Message
+00001E62  43F8 1398               1223  BTST_SUCCESS LEA BPASS,A1
+00001E66  103C 000D               1224      MOVE.B #13,D0 ; Set TRAP Funtion to Output String Starting at A1 with CR
+00001E6A  4E4F                    1225      TRAP #15
+00001E6C  6000 003A               1226      BRA BTST_END ; End of Block Test
+00001E70                          1227      
+00001E70                          1228  * Display Block Test Failed Message
+00001E70  43F8 13AB               1229  BTST_FAIL LEA BFAIL,A1
+00001E74  103C 000D               1230      MOVE.B #13,D0 ; Set TRAP Funtion to Output String Starting at A1 with CR
+00001E78  4E4F                    1231      TRAP #15
+00001E7A                          1232      
+00001E7A                          1233  * Display Failure Address
+00001E7A  2408                    1234      MOVE.L A0,D2 ; Get Address of Latter Byte
+00001E7C  5382                    1235      SUB.L #1,D2 ; Get Address of Failed Byte
+00001E7E  163C 0002               1236      MOVE.B #2,D3 ; Set Number of Bytes to Display = 2
+00001E82  4EB9 0000220C           1237      JSR DISPREG ; Display Failure Address
+00001E88                          1238      
+00001E88  4EB8 110A               1239      JSR SPACE ; Leave a Blank Space
+00001E8C                          1240      
+00001E8C                          1241  * Display Written Byte
+00001E8C  163C 0001               1242      MOVE.B #1,D3 ; Set Number of Bytes to Display = 1
+00001E90  2404                    1243      MOVE.L D4,D2 ; Data to be Written
+00001E92  4EB9 0000220C           1244      JSR DISPREG ; Display Written Byte
+00001E98                          1245      
+00001E98  4EB8 110A               1246      JSR SPACE ; Leave a Blank Space
+00001E9C                          1247      
+00001E9C                          1248  * Display Read Byte
+00001E9C  2405                    1249      MOVE.L D5,D2 ; Data to be Written
+00001E9E  4EB9 0000220C           1250      JSR DISPREG ; Display Read Byte
+00001EA4                          1251      
+00001EA4  4EB8 10F6               1252      JSR NEWLINE ; Print a Blank Line
+00001EA8                          1253      
+00001EA8  4CDF 0F3F               1254  BTST_END MOVEM.L (A7)+,D0-D5/A0-A3 ; Restore Registers from Stack
+00001EAC  4E75                    1255      RTS ; Return from Subroutine
+00001EAE                          1256      
+00001EAE  4EB8 135C               1257  BTST_INV JSR INVALID ; Display Error Message
+00001EB2  4CDF 0F3F               1258      MOVEM.L (A7)+,D0-D5/A0-A3 ; Restore Registers from Stack
+00001EB6  4E75                    1259      RTS ; Return from Subroutine
+00001EB8                          1260  *-----------------------------------------------------------------------------------------------------------
+00001EB8                          1261  BSCH
+00001EB8                          1262  * Searches for a String in Memory
+00001EB8                          1263  * Returns all matches
+00001EB8                          1264  
+00001EB8  2078 102A               1265      MOVE.L $102A,A0 ; Restore A0 from Memory
+00001EBC  48E7 F8FC               1266      MOVEM.L D0-D4/A0-A5,-(A7) ; Save Registers to Stack
+00001EC0                          1267      
+00001EC0                          1268  * Get START Address in A1
+00001EC0  41F8 115E               1269      LEA DATA1,A0 ; Set Pointer to First Data Save Location
+00001EC4  4EB8 1276               1270      JSR GET_DATA ; Get Data from Input
+00001EC8  BC3C 0001               1271      CMP.B #1,D6 ; Check if D6 = 1
+00001ECC  6700 00D6               1272      BEQ BSCH_INV ; If yes, then Command is Invalid
+00001ED0  2258                    1273      MOVE.L (A0)+,A1 ; Get First Address in A1, and then Set Pointer to Second Data Save Location
+00001ED2                          1274      
+00001ED2                          1275  * Get END Address in A2
+00001ED2  4EB8 1276               1276      JSR GET_DATA ; Get Data from Input
+00001ED6  BC3C 0001               1277      CMP.B #1,D6 ; Check if D6 = 1
+00001EDA  6700 00C8               1278      BEQ BSCH_INV ; If yes, then Command is Invalid
+00001EDE  2458                    1279      MOVE.L (A0)+,A2 ; Get Second Address in A2, and then Set Pointer to Third Data Save Location
+00001EE0                          1280  
+00001EE0                          1281  * Look for Space Character followed by a Double Quote
+00001EE0  4BF8 115A               1282      LEA INP_PTR,A5 ; Get Address of Input Pointer Location in A5
+00001EE4  2855                    1283      MOVE.L (A5),A4 ; Get Current Location of Input Pointer in A4
+00001EE6                          1284      
+00001EE6  0C1C 0020               1285      CMP.B #$20,(A4)+ ; Check if Next Character is a Space
+00001EEA  6600 00B8               1286      BNE BSCH_INV ; If no, then Command is Invalid
+00001EEE                          1287      
+00001EEE  0C1C 0022               1288      CMP.B #$22,(A4)+ ; Check if Next Character is a Double Quote
+00001EF2  6600 00B0               1289      BNE BSCH_INV ; If no, then Command is Invalid
+00001EF6                          1290      
+00001EF6  264C                    1291      MOVE.L A4,A3 ; Store Starting Address of String Input in A3
+00001EF8                          1292      
+00001EF8                          1293  * Check if String Ends with Double Quote and has at least one character
+00001EF8  0C1C 0022               1294      CMP.B #$22,(A4)+ ; Check if Next Character is a Double Quote
+00001EFC  6700 00A6               1295      BEQ BSCH_INV ; If yes, Command is Invalid Since String Cannot Be Empty
+00001F00  538C                    1296      SUB.L #1,A4 ; If no, Go Back to Previous Character
+00001F02                          1297  
+00001F02  0C1C 0022               1298  BSTR_LOOP CMP.B #$22,(A4)+ ; Check if Next Character is a Double Quote
+00001F06  6700 000E               1299      BEQ BSTR_END ; If yes, then Reached End of String
+00001F0A                          1300      
+00001F0A  0C24 0000               1301      CMP.B #0,-(A4) ; Check if Character is null
+00001F0E  6700 0094               1302      BEQ BSCH_INV ; If yes, then Command is Invalid
+00001F12  528C                    1303      ADD.L #1,A4 ; Go to Next Character
+00001F14  60EC                    1304      BRA BSTR_LOOP ; If no, then Keep Looping 
+00001F16                          1305      
+00001F16  2A8C                    1306  BSTR_END MOVE.L A4,(A5) ; Store Current Location of Input Pointer in INP_PTR
+00001F18                          1307  
+00001F18  4EB8 133E               1308      JSR CHK_END ; Check if reached end of input. If not, then Command Invalid
+00001F1C  BC3C 0001               1309      CMP.B #1,D6 ; Check if D6 = 1
+00001F20  6700 0082               1310      BEQ BSCH_INV ; If yes, then Command is Invalid
+00001F24                          1311      
+00001F24  4284                    1312      CLR.L D4 ; Clear Flag to Check if String is Found
+00001F26                          1313      
+00001F26  B5C9                    1314  BSCH_NO CMPA.L A1,A2 ; Check if A2 <= A1
+00001F28  6F00 0060               1315       BLE BSCH_DONE ; If yes, Search Exhausted
+00001F2C  284B                    1316       MOVE.L A3,A4  ; Make a copy of Start Address of Input String
+00001F2E  2A49                    1317       MOVE.L A1,A5  ; Save Start Address of Located String in A5
+00001F30  B5C9                    1318  BSCH_YES  CMPA.L A1,A2 ; Check if A2 <= A1
+00001F32  6F00 0056               1319       BLE BSCH_DONE ; If yes, Search Exhausted
+00001F36  121C                    1320       MOVE.B (A4)+,D1 ; Get character from Input String in D1
+00001F38  B23C 0022               1321       CMP.B #$22,D1 ; Check if Character is a Double Quote
+00001F3C  6700 000A               1322       BEQ BSCH_MATCH ; If yes, then Match Found
+00001F40  1419                    1323       MOVE.B (A1)+,D2 ; Get character to Compare with in D2
+00001F42  B401                    1324       CMP.B D1,D2 ; Check if Characters Match
+00001F44  66E0                    1325       BNE BSCH_NO ; If no, Restart Search from Following Address
+00001F46  60E8                    1326       BRA BSCH_YES ; Continue Searching
+00001F48                          1327         
+00001F48  7801                    1328  BSCH_MATCH MOVE.L #1,D4 ; Set Flag to Denote String Was Found
+00001F4A  143C 0010               1329      MOVE.B #16,D2 ; Set Base for Output Operation to 16
+00001F4E                          1330  
+00001F4E                          1331  * Display Address
+00001F4E                          1332      
+00001F4E  240D                    1333      MOVE.L A5,D2 ; Get START Address in D2
+00001F50  163C 0002               1334      MOVE.B #2,D3 ; Set Number of Bytes to Display = 2
+00001F54  4EB9 0000220C           1335      JSR DISPREG ; Display Address
+00001F5A                          1336      
+00001F5A  4EB8 110A               1337      JSR SPACE ; Leave a Blank Space
+00001F5E                          1338     
+00001F5E                          1339  * Display String
+00001F5E  4EB8 111E               1340      JSR QUOTE ; Display Double Quote
+00001F62                          1341      
+00001F62  103C 0006               1342      MOVE.B #6,D0 ; Set TRAP Function to Output Character in D1.B
+00001F66                          1343  
+00001F66  B3CD                    1344  BSD_LOOP CMP.L A5,A1 ; Check if A1 <= A5
+00001F68  6F00 0008               1345      BLE BSD_END ; If yes, then Memory Set Display Complete
+00001F6C                          1346      
+00001F6C  121D                    1347      MOVE.B (A5)+,D1 ; Get Character in D1
+00001F6E  4E4F                    1348      TRAP #15
+00001F70  60F4                    1349      BRA BSD_LOOP ; Loop till End of String
+00001F72                          1350      
+00001F72  4EB8 111E               1351  BSD_END JSR QUOTE ; Display Double Quote
+00001F76                          1352  
+00001F76  4EB8 110A               1353      JSR SPACE ; Leave Blank Space
+00001F7A                          1354      
+00001F7A  2A49                    1355      MOVE.L A1,A5 ; Save Value of A1 in A5
+00001F7C                          1356      
+00001F7C                          1357  * Display Success Message
+00001F7C  43F8 13BE               1358      LEA SFOUND,A1
+00001F80  103C 000D               1359      MOVE.B #13,D0
+00001F84  4E4F                    1360      TRAP #15
+00001F86  224D                    1361      MOVE.L A5,A1 ; Restore Value of A1
+00001F88                          1362      
+00001F88  609C                    1363      BRA BSCH_NO ; Look for More Matches
+00001F8A                          1364  
+00001F8A  B8BC 00000001           1365  BSCH_DONE CMP.L #1,D4 ; Check Flag to See if String Was Found
+00001F90  6700 000C               1366      BEQ BSCH_END ; If yes, then Block Search Complete
+00001F94                          1367      
+00001F94                          1368  * Display Failure Message Since String Was Not Found
+00001F94  43F8 13CE               1369      LEA SLOST,A1
+00001F98  103C 000D               1370      MOVE.B #13,D0
+00001F9C  4E4F                    1371      TRAP #15
+00001F9E                          1372      
+00001F9E  4CDF 3F1F               1373  BSCH_END MOVEM.L (A7)+,D0-D4/A0-A5 ; Restore Registers from Stack
+00001FA2  4E75                    1374      RTS ; Return from Subroutine
+00001FA4                          1375      
+00001FA4  4EB8 135C               1376  BSCH_INV JSR INVALID ; Display Error Message
+00001FA8  4CDF 3F1F               1377      MOVEM.L (A7)+,D0-D4/A0-A5 ; Restore Registers from Stack
+00001FAC  4E75                    1378      RTS ; Return from Subroutine
+00001FAE                          1379  *----------------------------------------------------------------------------------------------------------- 
+00001FAE                          1380  GO
+00001FAE                          1381  * Executes Code in Memory Starting at the Inputted Address
+00001FAE                          1382  *
+00001FAE  2078 102A               1383      MOVE.L $102A,A0 ; Restore A0 from Memory
+00001FB2  48E7 0282               1384      MOVEM.L D6/A0/A6,-(A7) ; Save Registers to Stack
+00001FB6                          1385      
+00001FB6                          1386  * Get Address in A6
+00001FB6  41F8 115E               1387      LEA DATA1,A0
+00001FBA  4EB8 1276               1388      JSR GET_DATA
+00001FBE  BC3C 0001               1389      CMP.B #1,D6 ; Check if D6 = 1
+00001FC2  6700 001A               1390      BEQ NO_GO ; If yes, then Command is Invalid
+00001FC6  2C50                    1391      MOVE.L (A0),A6
+00001FC8                          1392      
+00001FC8  4EB8 133E               1393      JSR CHK_END ; Check if reached end of input. If not, then Command Invalid
+00001FCC  BCBC 00000001           1394      CMP.L #1,D6 ; Check if D6 = 1
+00001FD2  6700 000A               1395      BEQ NO_GO ; If yes, then Command is Invalid
+00001FD6                          1396     
+00001FD6  4CDF 0140               1397      MOVEM.L (A7)+,D6/A0 ; Restore Registers from Stack
+00001FDA  508F                    1398      ADD.L #8,A7 ; Throw Two Long Words from Stack
+00001FDC                          1399   
+00001FDC                          1400  * Jump to Adress
+00001FDC  4ED6                    1401      JMP (A6) 
+00001FDE                          1402      
+00001FDE  4EB8 135C               1403  NO_GO JSR INVALID ; Display Error Message
+00001FE2  4CDF 4140               1404      MOVEM.L (A7)+,D6/A0/A6 ; Restore Registers from Stack 
+00001FE6  4E75                    1405      RTS ; Return from Subroutine
+00001FE8                          1406  *-----------------------------------------------------------------------------------------------------------
+00001FE8                          1407  DF 
+00001FE8                          1408  * Displays Current Values PC, SR, US, SS, Data Registers and Address Registers
+00001FE8                          1409  *
+00001FE8  2078 102A               1410      MOVE.L $102A,A0 ; Restore A0 from Memory
+00001FEC                          1411      
+00001FEC  2F06                    1412      MOVE.L D6,-(A7) ; Save D6 on Stack
+00001FEE                          1413      
+00001FEE  4EB8 133E               1414      JSR CHK_END ; Check if reached end of input. If not, then Command Invalid
+00001FF2  BCBC 00000001           1415      CMP.L #1,D6 ; Check if D6 = 0
+00001FF8  6700 0138               1416      BEQ NO_DF ; If yes, then command is invalid
+00001FFC                          1417      
+00001FFC  2C1F                    1418      MOVE.L (A7)+,D6 ; Restore D6 from Stack
+00001FFE  2F08                    1419      MOVE.L A0,-(A7) ; Save A0 on the Stack
+00002000                          1420      
+00002000                          1421  * Save Value of PC in memory (REG_X)
+00002000  41F8 1028               1422      LEA REG_X,A0 ; Get Address of REG_X in A0
+00002004  588F                    1423      ADD.L #4,A7 ; Get to PC Location
+00002006  2097                    1424      MOVE.L (A7),(A0) ; Save Value
+00002008  598F                    1425      SUB.L #4,A7 ; Return to Otiginal Location
+0000200A                          1426      
+0000200A                          1427  * Save Value of SS (equal to A7) in memory
+0000200A  41F8 102C               1428      LEA REG_Y,A0 ; Get Address of REG_Y in A0
+0000200E  208F                    1429      MOVE.L A7,(A0) ; Save SS/A7 in REG_Y (Memory)
+00002010  5090                    1430      ADD.L #8,(A0) ; Get Actual Value of SS/A7 in REG_X
+00002012                          1431      
+00002012  205F                    1432      MOVE.L (A7)+,A0 ; Restore A0 from the Stack
+00002014                          1433      
+00002014  48E7 FFFE               1434      MOVEM.L D0-D7/A0-A6,-(A7) ; Store All Registers on Stack
+00002018  48E7 FFFE               1435      MOVEM.L D0-D7/A0-A6,-(A7) ; Store Another Copy of All Registers on Stack
+0000201C                          1436      
+0000201C                          1437  * Display PC
+0000201C  123C 0050               1438      MOVE.B #$50,D1 ; Output Character 'P' 
+00002020  103C 0006               1439      MOVE.B #6,D0
+00002024  4E4F                    1440      TRAP #15
+00002026                          1441      
+00002026  123C 0043               1442      MOVE.B #$43,D1 ; Output Character 'C' 
+0000202A  4E4F                    1443      TRAP #15
+0000202C                          1444      
+0000202C  123C 003D               1445      MOVE.B #$3D,D1 ; Output Character '=' 
+00002030  4E4F                    1446      TRAP #15
+00002032                          1447      
+00002032  41F8 1028               1448      LEA REG_X,A0 ; Get Address of REG_X in A0
+00002036  2410                    1449      MOVE.L (A0),D2 ; Get PC in D2
+00002038  7604                    1450      MOVE.L #4,D3 ; Set Number of Bytes to Display = 4
+0000203A  4EB9 0000220C           1451      JSR DISPREG
+00002040                          1452      
+00002040  4EB8 110A               1453      JSR SPACE ; Leave a Blank Space
+00002044                          1454      
+00002044                          1455  * Display SR
+00002044  123C 0053               1456      MOVE.B #$53,D1 ; Output Character 'S' 
+00002048  103C 0006               1457      MOVE.B #6,D0
+0000204C  4E4F                    1458      TRAP #15
+0000204E                          1459      
+0000204E  123C 0052               1460      MOVE.B #$52,D1 ; Output Character 'R' 
+00002052  4E4F                    1461      TRAP #15
+00002054                          1462      
+00002054  123C 003D               1463      MOVE.B #$3D,D1 ; Output Character '=' 
+00002058  4E4F                    1464      TRAP #15
+0000205A                          1465  
+0000205A  40C2                    1466      MOVE SR,D2 ; Get SR in D2
+0000205C  163C 0002               1467      MOVE.B #2,D3 ; Set Number of Bytes to Display = 2
+00002060  4EB9 0000220C           1468      JSR DISPREG
+00002066                          1469      
+00002066  4EB8 110A               1470      JSR SPACE ; Leave a Blank Space
+0000206A                          1471       
+0000206A                          1472  * Display US
+0000206A  123C 0055               1473      MOVE.B #$55,D1 ; Output Character 'U' 
+0000206E  103C 0006               1474      MOVE.B #6,D0
+00002072  4E4F                    1475      TRAP #15
+00002074                          1476      
+00002074  123C 0053               1477      MOVE.B #$53,D1 ; Output Character 'S' 
+00002078  4E4F                    1478      TRAP #15
+0000207A                          1479      
+0000207A  123C 003D               1480      MOVE.B #$3D,D1 ; Output Character '=' 
+0000207E  4E4F                    1481      TRAP #15
+00002080                          1482  
+00002080  4E69                    1483      MOVE USP,A1 ; Get US in A1
+00002082  2409                    1484      MOVE.L A1,D2 ; Get US in D2
+00002084  7604                    1485      MOVE.L #4,D3 ; Set Number of Bytes to Display = 4
+00002086  4EB9 0000220C           1486      JSR DISPREG
+0000208C                          1487      
+0000208C  4EB8 110A               1488      JSR SPACE ; Leave a Blank Space
+00002090                          1489      
+00002090                          1490  * Display SS
+00002090  123C 0053               1491      MOVE.B #$53,D1 ; Output Character 'S' 
+00002094  103C 0006               1492      MOVE.B #6,D0
+00002098  4E4F                    1493      TRAP #15
+0000209A                          1494      
+0000209A  123C 0053               1495      MOVE.B #$53,D1 ; Output Character 'S' 
+0000209E  4E4F                    1496      TRAP #15
+000020A0                          1497      
+000020A0  123C 003D               1498      MOVE.B #$3D,D1 ; Output Character '=' 
+000020A4  4E4F                    1499      TRAP #15
+000020A6                          1500  
+000020A6  41F8 102C               1501      LEA REG_Y,A0 ; Get Address of REG_Y in A0
+000020AA  2410                    1502      MOVE.L (A0),D2 ; Get SS from Memory
+000020AC  4EB9 0000220C           1503      JSR DISPREG
+000020B2                          1504      
+000020B2  4EB8 10F6               1505      JSR NEWLINE ; Go to Next Line
+000020B6                          1506  
+000020B6                          1507  DISP_DA
+000020B6                          1508      
+000020B6  1A3C 0000               1509      MOVE.B #0,D5 ; Counter: 0 = D, 1 = A, >1 = Operation Complete
+000020BA  103C 0006               1510      MOVE.B #6,D0 ; Output Character in D1.B
+000020BE  7604                    1511      MOVE.L #4,D3 ; Set Number of Bytes to Display = 4
+000020C0                          1512  
+000020C0                          1513  DA_START 
+000020C0  183C 0030               1514      MOVE.B #$30,D4 ; Counter for Register Number    
+000020C4                          1515      
+000020C4  BA3C 0001               1516  RLOOP CMP.B #1,D5 ; Check if Couter is 1
+000020C8  6700 000A               1517      BEQ A_REG ; If yes, then Register to be Displayed is an Adress Register
+000020CC                          1518      
+000020CC  123C 0044               1519      MOVE.B #$44,D1 ; Output Character 'D' 
+000020D0  6000 0006               1520      BRA D_REG ; Register to be Displayed is a Data Register
+000020D4                          1521      
+000020D4  123C 0041               1522  A_REG MOVE.B #$41,D1 ; Output Character 'A'
+000020D8                          1523  
+000020D8  4E4F                    1524  D_REG TRAP #15
+000020DA                          1525  
+000020DA  1204                    1526      MOVE.B D4,D1 ; Output Register Number 
+000020DC  4E4F                    1527      TRAP #15
+000020DE                          1528      
+000020DE  123C 003D               1529      MOVE.B #$3D,D1 ; Output Character '=' 
+000020E2  4E4F                    1530      TRAP #15
+000020E4                          1531      
+000020E4  4A05                    1532      TST.B D5 ; Check if Data Registers are Being Displayed
+000020E6  6700 000A               1533      BEQ CONTINUE ; If yes, then Continue
+000020EA                          1534      
+000020EA  B83C 0037               1535      CMP.B #$37,D4 ; Check if A7 is to be Displayed
+000020EE  6700 0030               1536      BEQ DF_DONE ; If yes, then Exit Display Registers Loop
+000020F2                          1537      
+000020F2  241F                    1538  CONTINUE MOVE.L (A7)+,D2 ; Get Register Value from Stack
+000020F4  4EB9 0000220C           1539      JSR DISPREG
+000020FA                          1540      
+000020FA  4EB8 110A               1541      JSR SPACE ; Leave a Blank Space
+000020FE                          1542      
+000020FE  5204                    1543      ADD.B #1,D4 ; Increment Register Number
+00002100                          1544      
+00002100  B83C 0034               1545      CMP.B #$34,D4 ; Check if Register Number < 4
+00002104  6DBE                    1546      BLT RLOOP ; Loop for Registers D0-D3 & A0-A3
+00002106                          1547      
+00002106  B83C 0034               1548      CMP.B #$34,D4 ; Check if Register Number != 4
+0000210A  6600 0006               1549      BNE SAME_LINE ; If no, then Display Next Register on the Same Line
+0000210E  4EB8 10F6               1550      JSR NEWLINE ; If yes, then Display Next Register on the Next Line
+00002112                          1551      
+00002112  B83C 0038               1552  SAME_LINE CMP.B #$38,D4 ; Check if Register Number < 8
+00002116  6DAC                    1553      BLT RLOOP ; Loop for Registers D4-D7
+00002118                          1554   
+00002118  5205                    1555      ADD.B #1,D5 ; Increment Counter
+0000211A  4EB8 10F6               1556      JSR NEWLINE ; Go to Next Line
+0000211E  60A0                    1557      BRA DA_START ; Continue Displaying Registers till A7
+00002120                          1558      
+00002120  2410                    1559  DF_DONE MOVE.L (A0),D2 ; Get A7 from Memory
+00002122  4EB9 0000220C           1560      JSR DISPREG ; Display A7
+00002128                          1561      
+00002128  4EB8 10F6               1562      JSR NEWLINE ; Leave a Blank Line
+0000212C                          1563      
+0000212C  4CDF 7FFF               1564      MOVEM.L (A7)+,D0-D7/A0-A6 ; Restore All Registers from Stack
+00002130  4E75                    1565      RTS ; Return from Subroutine
+00002132                          1566      
+00002132  4EB8 135C               1567  NO_DF JSR INVALID ; Display Error Message
+00002136  2C1F                    1568      MOVE.L (A7)+,D6 ; Restore D6 from Stack
+00002138  4E75                    1569      RTS ; Return from Subroutine
+0000213A                          1570  *-----------------------------------------------------------------------------------------------------------    
+0000213A                          1571  EXIT
+0000213A                          1572  * Exits the Monitor Program
+0000213A                          1573  *
+0000213A  2078 102A               1574      MOVE.L $102A,A0 ; Restore A0 from Memory
+0000213E  2F06                    1575      MOVE.L D6,-(A7) ; Save Register to Stack
+00002140                          1576      
+00002140  4EB8 133E               1577      JSR CHK_END ; Check if reached end of input. If not, then Command Invalid
+00002144  BCBC 00000001           1578      CMP.L #1,D6 ; Check if D6 = 0
+0000214A  6700 0010               1579      BEQ NO_EXIT ; If yes, then Command Invalid
+0000214E                          1580      
+0000214E  4EB8 10F6               1581      JSR NEWLINE ; Display Blank Line
+00002152                          1582  
+00002152  4EB8 1146               1583      JSR THANKYOU ; Display Thank You Message
+00002156                          1584      
+00002156                          1585  * Exit Monitor Program
+00002156  103C 0009               1586      MOVE.B #9,D0 ; Set TRAP Function to HALT Simulator
+0000215A  4E4F                    1587      TRAP #15
+0000215C                          1588      
+0000215C  4EB8 135C               1589  NO_EXIT JSR INVALID ; Display Error Message
+00002160  2C1F                    1590      MOVE.L (A7)+,D6 ; Restore Register from Stack
+00002162  4E75                    1591      RTS ; Return from Subroutine
+00002164                          1592  *-----------------------------------------------------------------------------------------------------------
+00002164                          1593  BREV 
+00002164                          1594  * Reverse the order of Bytes in a Block of Data between 2 Inputted Addresses
+00002164                          1595  * (Can be used to reverse strings)
+00002164                          1596  
+00002164  2078 102A               1597      MOVE.L $102A,A0 ; Restore A0 from Memory
+00002168  48E7 06E0               1598      MOVEM.L D5-D6/A0-A2,-(A7) ; Save Registers to Stack
+0000216C                          1599  
+0000216C                          1600  * Get START Address in A1
+0000216C  41F8 115E               1601      LEA DATA1,A0 ; Set Pointer to First Data Save Location
+00002170  4EB8 1276               1602      JSR GET_DATA ; Get Data from Input
+00002174  BC3C 0001               1603      CMP.B #1,D6 ; Check if D6 = 1
+00002178  6700 0032               1604      BEQ BREV_INV ; If yes, then Command is Invalid
+0000217C  2258                    1605      MOVE.L (A0)+,A1 ; Get First Address in A1, and then Set Pointer to Second Data Save Location
+0000217E                          1606      
+0000217E                          1607  * Get END Address in A2
+0000217E  4EB8 1276               1608      JSR GET_DATA ; Get Data from Input
+00002182  BC3C 0001               1609      CMP.B #1,D6 ; Check if D6 = 1
+00002186  6700 0024               1610      BEQ BREV_INV ; If yes, then Command is Invalid
+0000218A  2450                    1611      MOVE.L (A0),A2 ; Get Second Address in A2
+0000218C                          1612      
+0000218C  4EB8 133E               1613      JSR CHK_END ; Check if Command is null terminated
+00002190  BC3C 0001               1614      CMP.B #1,D6 ; Check if D6 = 1
+00002194  6700 0016               1615      BEQ BREV_INV ; If yes, then Command is Invalid
+00002198                          1616      
+00002198  B5C9                    1617  BREV_LOOP CMP.L A1,A2 ; Check if A2 <= A1
+0000219A  6F00 000A               1618      BLE BREV_DONE ; If yes, then Subroutine Complete
+0000219E                          1619      
+0000219E                          1620  * Swap First and Last Byte
+0000219E  1A11                    1621      MOVE.B (A1),D5 ; Move First Byte to Temporary Regiter
+000021A0  12E2                    1622      MOVE.B -(A2),(A1)+ ; Move Last Byte in First Address, then Increment Start Address
+000021A2  1485                    1623      MOVE.B D5,(A2) ; Move First Byte from Temporary Register to Last Address
+000021A4                          1624      
+000021A4  60F2                    1625      BRA BREV_LOOP ; Loop till Entire Block is Reversed
+000021A6                          1626      
+000021A6  4CDF 0760               1627  BREV_DONE MOVEM.L (A7)+,D5-D6/A0-A2 ; Restore Registers from Stack
+000021AA  4E75                    1628      RTS ; Return from Subroutine
+000021AC                          1629      
+000021AC  4EB8 135C               1630  BREV_INV JSR INVALID ; Display Error Message
+000021B0  4CDF 0760               1631       MOVEM.L (A7)+,D5-D6/A0-A2 ; Restore Registers from Stack
+000021B4  4E75                    1632      RTS ; Return from Subroutine
+000021B6                          1633  *-----------------------------------------------------------------------------------------------------------
+000021B6                          1634  UPPER
+000021B6                          1635  * Convert Null Terminated String Starting At Inputted Address to Uppercase Letters
+000021B6                          1636  *
+000021B6  2078 102A               1637      MOVE.L $102A,A0 ; Restore A0 from Memory
+000021BA  48E7 02C0               1638      MOVEM.L D6/A0-A1,-(A7) ; Save Registers to Stack
+000021BE                          1639  
+000021BE                          1640  * Get START Address in A1
+000021BE  41F8 115E               1641      LEA DATA1,A0 ; Set Pointer to First Data Save Location
+000021C2  4EB8 1276               1642      JSR GET_DATA ; Get Data from Input
+000021C6  BC3C 0001               1643      CMP.B #1,D6 ; Check if D6 = 1
+000021CA  6700 0036               1644      BEQ UPPER_INV ; If yes, then Command is Invalid
+000021CE  2250                    1645      MOVE.L (A0),A1 ; Get First Address in A1
+000021D0                          1646      
+000021D0  4EB8 133E               1647      JSR CHK_END ; Check if Command is null terminated
+000021D4  BC3C 0001               1648      CMP.B #1,D6 ; Check if D6 = 1
+000021D8  6700 0028               1649      BEQ UPPER_INV ; If yes, then Command is Invalid
+000021DC                          1650      
+000021DC  0C11 0000               1651  UPPER_LOOP CMP.B #0,(A1) ; Check if Character is null
+000021E0  6D00 001A               1652      BLT UPPER_END ; If yes, then operation complete  
+000021E4                          1653      
+000021E4  0C11 0061               1654      CMP.B #$61,(A1) ; Check if (A1) < $61 (Character 'a')
+000021E8  6D00 000E               1655      BLT NO_ALF ; If yes, then character is not a lowercase alphabet
+000021EC                          1656      
+000021EC  0C11 007A               1657      CMP.B #$7A,(A1) ; Check if (A1) > $7A (Character 'z')
+000021F0  6E00 0006               1658      BGT NO_ALF ; If yes, then character is not a lowercase alphabet
+000021F4                          1659      
+000021F4  0411 0020               1660      SUB.B #$20,(A1) ; Convert alphabet to uppercase
+000021F8                          1661      
+000021F8  5289                    1662  NO_ALF ADD.L #1,A1 ; Go to next character
+000021FA  60E0                    1663      BRA UPPER_LOOP ; Loop till null character
+000021FC                          1664  
+000021FC  4CDF 0340               1665  UPPER_END MOVEM.L (A7)+,D6/A0-A1 ; Restore Registers from Stack
+00002200  4E75                    1666      RTS ; Return from subroutine  
+00002202                          1667      
+00002202  4EB8 135C               1668  UPPER_INV JSR INVALID ; Display Error Message
+00002206  4CDF 0340               1669      MOVEM.L (A7)+,D6/A0-A1 ; Restore Registers from Stack
+0000220A  4E75                    1670      RTS ; Return from subroutine  
+0000220C                          1671  *-----------------------------------------------------------------------------------------------------------
+0000220C                          1672  DISPREG 
+0000220C                          1673  * Displays Value in D2, Size (Number of Bytes in D3)
+0000220C                          1674  *
+0000220C  48E7 FC80               1675        MOVEM.L D0-D5/A0,-(A7) ; Save Registers to Stack
+00002210                          1676        
+00002210  41F8 1028               1677        LEA REG_X,A0 ; Get Start Address of Register X Space
+00002214  2082                    1678        MOVE.L D2,(A0) ; Store Data to be Displayed in Register X Space
+00002216                          1679        
+00002216  7A04                    1680        MOVE.L #4,D5 ; Offset for Start Address of Bytes to be Displayed = 4-Size
+00002218  9A03                    1681        SUB.B D3,D5 ; Offset = 4-Size
+0000221A                          1682        
+0000221A  D1C5                    1683        ADD.L D5,A0 ; Add Offset to Start Address
+0000221C                          1684        
+0000221C  103C 0006               1685        MOVE.B #6,D0 ; Set TRAP Function Number to Output Character in D1.B 
+00002220                          1686        
+00002220  1218                    1687  NBYTES MOVE.B (A0)+,D1 ; Get Byte in D1
+00002222  1801                    1688        MOVE.B D1,D4 ; Make Copy of Byte in D4
+00002224  E809                    1689        LSR.B #4,D1 ; Get Upper Half Byte in D1
+00002226  C83C 000F               1690        AND.B #$0F,D4 ; Get Lower Half Byte in D4
+0000222A                          1691        
+0000222A  1A3C 0002               1692        MOVE.B #2,D5 ; Counter for Number of Half Bytes per Byte
+0000222E                          1693        
+0000222E  B23C 0009               1694  TWICE CMP.B #9,D1 ; Check if D1 > 9
+00002232  6E00 000A               1695        BGT ALPHA ; If yes, then Half Byte is A-F
+00002236  0601 0030               1696        ADD.B #$30,D1 ; If no, then Add #$30 to Half-Byte to Convert into ASCII
+0000223A  6000 0006               1697        BRA NEXT ; Go to Next Step
+0000223E  0601 0037               1698  ALPHA ADD.B #$37,D1 ; Add #$37 to Half Byte to Convert into ASCII
+00002242  4E4F                    1699  NEXT  TRAP #15 ; Display Half Byte
+00002244                          1700  
+00002244  1204                    1701        MOVE.B D4,D1 ; Get Lower Half Byte in D1
+00002246  5305                    1702        SUB.B #1,D5 ; Decrement Counter
+00002248  66E4                    1703        BNE TWICE ; Perform Operation Twice
+0000224A                          1704        
+0000224A  5303                    1705        SUB.B #1,D3 ; Decrement Counter
+0000224C  66D2                    1706        BNE NBYTES ; Perform Operation for N Bytes
+0000224E                          1707        
+0000224E  4CDF 013F               1708        MOVEM.L (A7)+,D0-D5/A0 ; Restore Registers from Stack
+00002252  4E75                    1709        RTS ; Return from Subroutine
+00002254                          1710  *-----------------------------------------------------------------------------------------------------------
+00002254                          1711  REVERSE
+00002254                          1712  * Reverses Data in Memory (Word Size Operation)
+00002254                          1713  *
+00002254  48E7 80E0               1714      MOVEM.L D0/A0-A2,-(A7) ; Save Registers to Stack
+00002258                          1715      
+00002258  41F8 115E               1716      LEA DATA1,A0 ; Set Pointer to Start Address of Data 1
+0000225C  2258                    1717      MOVE.L (A0)+,A1 ; Get Data 1 in A1
+0000225E  2458                    1718      MOVE.L (A0)+,A2 ; Get Data 2 in A2
+00002260                          1719      
+00002260  B5C9                    1720  LOOP CMP.L A1,A2 ; Ckeck if A2 <= A1
+00002262  6F00 000A               1721      BLE REVERSE_END ; If yes, then Reversal Complete
+00002266                          1722      
+00002266  3011                    1723      MOVE.W (A1),D0 ; Move Word from Start of List to Temporary Register
+00002268  32E2                    1724      MOVE.W -(A2),(A1)+ ; Move Word from End of List to Start of List and then Shrink List
+0000226A  3480                    1725      MOVE.W D0,(A2) ; Move Word from Temporary Register to End of List
+0000226C  60F2                    1726      BRA LOOP ; Loop while in Address Range
+0000226E                          1727      
+0000226E  4CDF 0701               1728  REVERSE_END MOVEM.L (A7)+,D0/A0-A2 ; Restore Registers from Stack
+00002272  4E75                    1729      RTS ; Return from subroutine  
+00002274                          1730  *----------------------------------------------------------------------------------------------------------- 
+00002274                          1731  *-----------------------------------------------------------------------------------------------------------    
+00002274                          1732      
+00002274                          1733  
+00002274                          1734      
+00002274                          1735  ***************************
+00002274                          1736  ***   EXCEPTION SPACE   ***
+00002274                          1737  ***************************
+00002274                          1738  *-----------------------------------------------------------------------------------------------------------
+00002274                          1739  *-------------------------------------------- DATA SPACE ---------------------------------------------------
+00002274                          1740  
+00002274                          1741  * Error Messages for Exceptions
+00002274= 42 55 53 20 45 52 ...   1742  SBERR  DC.B 'BUS ERROR OCCURRED!'
+00002287= 00                      1743         DC.B 0
+00002288                          1744  
+00002288= 41 44 44 52 45 53 ...   1745  SADR   DC.B 'ADDRESS ERROR OCCURRED!'
+0000229F= 00                      1746         DC.B 0
+000022A0                          1747       
+000022A0= 49 4C 4C 45 47 41 ...   1748  SILL   DC.B 'ILLEGAL INSTRUCTION ERROR OCCURRED!'
+000022C3= 00                      1749         DC.B 0
+000022C4                          1750  
+000022C4= 50 52 49 56 49 4C ...   1751  SPRIV  DC.B 'PRIVILEGE VIOLATION ERROR OCCURRED!'
+000022E7= 00                      1752         DC.B 0
+000022E8                          1753       
+000022E8= 44 49 56 20 5A 45 ...   1754  SZERO  DC.B 'DIV ZERO ERROR OCCURRED!'
+00002300= 00                      1755         DC.B 0
+00002301                          1756  
+00002301= 43 48 4B 20 49 4E ...   1757  SCHK   DC.B 'CHK INSTRUCTION ERROR OCCURRED!'
+00002320= 00                      1758         DC.B 0
+00002321                          1759       
+00002321= 4C 49 4E 45 20 41 ...   1760  SLINEA DC.B 'LINE A EMULATOR ERROR OCCURRED!'
+00002340= 00                      1761         DC.B 0
+00002341                          1762  
+00002341= 4C 49 4E 45 20 46 ...   1763  SLINEF DC.B 'LINE F EMULATOR ERROR OCCURRED!'
+00002360= 00                      1764         DC.B 0
+00002361= 00                      1765         DC.B 0
+00002362                          1766         
+00002362                          1767  *-----------------------------------------------------------------------------------------------------------
+00002362                          1768  *-------------------------------------------- PROGRAM SPACE ------------------------------------------------
+00002362                          1769  BUS_ERR 
+00002362  43F8 2274               1770      LEA SBERR,A1 ; Load Error Message
+00002366  6000 0006               1771      BRA BUS_ADR ; Execute Code Common to  Bus & Address Errors
+0000236A                          1772  ADRS_ERR
+0000236A  43F8 2288               1773      LEA SADR,A1 ; Load Error Message
+0000236E                          1774  *-----------------------------------------------------------------------------------------------------------    
+0000236E                          1775  * Code Common to  Bus & Address Errors
+0000236E  4EB8 10F6               1776  BUS_ADR JSR NEWLINE ; Go to Next Line
+00002372                          1777      
+00002372  103C 000D               1778      MOVE.B #13,D0
+00002376  4E4F                    1779      TRAP #15 
+00002378                          1780      
+00002378  301F                    1781      MOVE.W (A7)+,D0 ; Throw First Word from Stack
+0000237A                          1782      
+0000237A  201F                    1783      MOVE.L (A7)+,D0 ; Get Bus Address in D0
+0000237C  321F                    1784      MOVE.W (A7)+,D1 ; Get Instruction Register in D1
+0000237E                          1785      
+0000237E  341F                    1786      MOVE.W (A7)+,D2 ; Get Supervisor Status Word in D2
+00002380  163C 0002               1787      MOVE.B #2,D3 ; Set Number of Bytes to Display = 2
+00002384  4EB8 220C               1788      JSR DISPREG ; Display SSW
+00002388                          1789      
+00002388  4EB8 110A               1790      JSR SPACE ; Leave Blank Space
+0000238C                          1791      
+0000238C  2400                    1792      MOVE.l D0,D2 ; Get Bus Address in D2
+0000238E  163C 0004               1793      MOVE.B #4,D3 ; Set Number of Bytes to Display = 4
+00002392  4EB8 220C               1794      JSR DISPREG ; Display BA
+00002396                          1795      
+00002396  4EB8 110A               1796      JSR SPACE ; Leave Blank Space
+0000239A                          1797      
+0000239A  2401                    1798      MOVE.l D1,D2 ; Get Instruction Register in D2
+0000239C  163C 0002               1799      MOVE.B #2,D3 ; Set Number of Bytes to Display = 2
+000023A0  4EB8 220C               1800      JSR DISPREG ; Display IR
+000023A4                          1801      
+000023A4  4EB8 10F6               1802      JSR NEWLINE ; Go to Next Line
+000023A8                          1803      
+000023A8  2A1F                    1804      MOVE.L (A7)+,D5 ; Throw Long Word from Stack
+000023AA                          1805  
+000023AA                          1806  ERR_DF ; Short Hand Way to Display Data & Address Register Values Using the DF Command
+000023AA                          1807  
+000023AA  48E7 0080               1808      MOVEM.L A0,-(A7) ; Save A0 on Stack
+000023AE                          1809      
+000023AE  41F8 1166               1810      LEA DATA3,A0 ; Load Address of DATA3 in A0
+000023B2  208F                    1811      MOVE.L A7,(A0) ; Store Value of A7 in DATA3
+000023B4  5890                    1812      ADD.L #4,(A0) ; Get Value of Stack at the Time of Exception
+000023B6                          1813      
+000023B6  508F                    1814      ADD.L #8,A7 ; Move 2 Long Words Down the Stack
+000023B8  4878 23CE               1815      PEA *+22 ; Effective Address to Return from RTS
+000023BC  598F                    1816      SUB.L #4,A7 ; Move 1 Long Word Up the Stack
+000023BE                          1817      
+000023BE  4CDF 0100               1818      MOVEM.L (A7)+,A0 ; Restore A0 from Stack
+000023C2                          1819      
+000023C2  48E7 FFFE               1820      MOVEM.L D0-D7/A0-A6,-(A7) ; Store All Registers on Stack
+000023C6  48E7 FFFE               1821      MOVEM.L D0-D7/A0-A6,-(A7) ; Store Another Copy of All Registers on Stack
+000023CA                          1822      
+000023CA  6000 FCEA               1823      BRA DISP_DA ; Call Part of the DF Command 
+000023CE                          1824  
+000023CE  548F                    1825      ADD.L #2,A7 ; Throw Long Word from Stack  
+000023D0                          1826      
+000023D0  6000 ECF2               1827      BRA RUN_MONITOR ; Return to Terminal
+000023D4                          1828  *-----------------------------------------------------------------------------------------------------------       
+000023D4                          1829  ILL_INST
+000023D4  43F8 22A0               1830      LEA SILL,A1 ; Load Error Message
+000023D8  6000 002A               1831      BRA O_ERRS ; Execute Code Common to All Exceptions Except Bus & Address Errors
+000023DC                          1832  
+000023DC                          1833  DIV_ZERO
+000023DC  43F8 22E8               1834      LEA SZERO,A1 ; Load Error Message
+000023E0  6000 0022               1835      BRA O_ERRS ; Execute Code Common to All Exceptions Except Bus & Address Errors
+000023E4                          1836  
+000023E4                          1837  CHK_INST
+000023E4  43F8 2301               1838      LEA SCHK,A1 ; Load Error Message
+000023E8  6000 001A               1839      BRA O_ERRS ; Execute Code Common to All Exceptions Except Bus & Address Errors
+000023EC                          1840      
+000023EC                          1841  PRIV_VIOL
+000023EC  43F8 22C4               1842      LEA SPRIV,A1 ; Load Error Message
+000023F0  6000 0012               1843      BRA O_ERRS ; Execute Code Common to All Exceptions Except Bus & Address Errors
+000023F4                          1844  
+000023F4                          1845  LINE_A
+000023F4  43F8 2321               1846      LEA SLINEA,A1 ; Load Error Message
+000023F8  6000 000A               1847      BRA O_ERRS ; Execute Code Common to All Exceptions Except Bus & Address Errors
+000023FC                          1848  
+000023FC                          1849  LINE_F
+000023FC  43F8 2341               1850      LEA SLINEF,A1 ; Load Error Message
+00002400  6000 0002               1851      BRA O_ERRS ; Execute Code Common to All Exceptions Except Bus & Address Errors
+00002404                          1852  *-----------------------------------------------------------------------------------------------------------  
+00002404                          1853  * Code Common to All Exceptions Except Bus & Address Errors  
+00002404  4EB8 10F6               1854  O_ERRS  JSR NEWLINE ; Go to Next Line
+00002408  103C 000D               1855      MOVE.B #13,D0 ; Display String at A1
+0000240C  4E4F                    1856      TRAP #15 
+0000240E                          1857      
+0000240E  609A                    1858      BRA ERR_DF ; Display Data & Address Registers
+00002410                          1859  *-----------------------------------------------------------------------------------------------------------
+00002410                          1860  *----------------------------------------------------------------------------------------------------------- 
+00002410                          1861     
+00002410                          1862  *-----------------------------------------------------------------------------------------------------------
+00002410                          1863  *-------------------------------------  END OF MONITOR PROGRAM ---------------------------------------------
+00002410                          1864  *-----------------------------------------------------------------------------------------------------------
+00002410                          1865  
+00002410                          1866  
+00002410                          1867  
+00002410                          1868  
+00002410                          1869  *-----------------------------------------------------------------------------------------------------------
+00002410                          1870  *------------------------------------- CODE TO TEST OUT EXCEPTIONS -----------------------------------------
+00002410                          1871  *-----------------------------------------------------------------------------------------------------------
+00002410                          1872  
+00002410                          1873  * ADDRESS ERROR
+00004100                          1874      ORG $4100
+00004100  2038 5001               1875  ERR_ADR MOVE.L $5001,D0 ; Trying to Access Long Word at Odd Address
+00004104                          1876  
+00004104                          1877  * BUS ERROR
+00004200                          1878      ORG $4200
+00004200  1039 000FFFFF           1879  ERR_BUS MOVE.B $FFFFF,D0 ; Trying to Access Invalid Address
+00004206                          1880  
+00004206                          1881  * ILLEGAL INSTRUCTION ERROR
+00004300                          1882      ORG $4300
+00004300  4AFC                    1883  ERR_ILL ILLEGAL ; Illegal Instruction
+00004302                          1884  
+00004302                          1885  * PRIVILEGE VIOLATION ERROR
+00004400                          1886      ORG $4400
+00004400  46FC 0000               1887  ERR_PRIV MOVE #0,SR ; Go to User Mode
+00004404  4E69                    1888      MOVE USP,A1 ; Try to Use Priviledged Instruction
+00004406                          1889  
+00004406                          1890  * DIVIDE BY ZERO ERROR
+00004500                          1891      ORG $4500
+00004500  88FC 0000               1892  ERR_DIV  DIVU #0,D4 ; Trying to Divide a Number by Zero
+00004504                          1893  
+00004504                          1894  * CHK INSTRUCTION ERROR
+00004600                          1895      ORG $4600
+00004600  103C 0005               1896  ERR_CHK MOVE.B #5,D0 ; Store a Value in D0
+00004604  41BC 0001               1897          CHK #1,D0 ; CHK: 0 < D0 < 1
+00004608                          1898          
+00004608                          1899  * LINE A EMULATOR ERROR
+00004700                          1900      ORG $4700
+00004700                          1901  ERR_LINEA ; Store $A000 here using MM Command
+00004700                          1902  
+00004700                          1903  * LINE F EMULATOR ERROR
+00004800                          1904      ORG $4800
+00004800                          1905  ERR_LINEF ; Store $F000 here using MM Command
+00004800                          1906  
+00004800                          1907  *-----------------------------------------------------------------------------------------------------------
+00004800                          1908  *--------------------------------------------------- END OF CODE -------------------------------------------
+00004800                          1909  *-----------------------------------------------------------------------------------------------------------
+00004800                          1910  
+00004800                          1911  
+00004800                          1912      END    START        ; last line of source
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ADRS_ERR            236A
+ALPHA               223E
+AT_END              1236
+A_REG               20D4
+BF                  1D24
+BFAIL               13AB
+BF_END              1D8E
+BF_INV              1D94
+BF_LOOP             1D84
+BMOV                1D9E
+BMOV_END            1DEA
+BMOV_INV            1DF0
+BMOV_LOOP           1DE0
+BPASS               1398
+BREV                2164
+BREV_DONE           21A6
+BREV_INV            21AC
+BREV_LOOP           2198
+BSCH                1EB8
+BSCH_DONE           1F8A
+BSCH_END            1F9E
+BSCH_INV            1FA4
+BSCH_MATCH          1F48
+BSCH_NO             1F26
+BSCH_YES            1F30
+BSD_END             1F72
+BSD_LOOP            1F66
+BSTR_END            1F16
+BSTR_LOOP           1F02
+BTST                1DFA
+BTST_END            1EA8
+BTST_FAIL           1E70
+BTST_INV            1EAE
+BTST_LOOP1          1E36
+BTST_LOOP2          1E40
+BTST_NEXT1          1E40
+BTST_PASS           1E50
+BTST_SUCCESS        1E62
+BUS_ADR             236E
+BUS_ERR             2362
+CE                  117A
+CE_V                1354
+CHK_CMD             11EC
+CHK_END             133E
+CHK_INST            23E4
+CHK_INV             1266
+CK_END              1356
+CMD_A               11D0
+CMD_N               117B
+COMPLETE            130A
+CONTINUE            20F2
+CONV                1378
+DATA1               115E
+DATA2               1162
+DATA3               1166
+DA_START            20C0
+DEFAULT             1A3E
+DF                  1FE8
+DF_DONE             2120
+DISPREG             220C
+DISP_DA             20B6
+DIV_ZERO            23DC
+D_REG               20D8
+EOD                 12FC
+ERRC                116A
+ERR_ADR             4100
+ERR_BUS             4200
+ERR_CHK             4600
+ERR_DF              23AA
+ERR_DIV             4500
+ERR_ILL             4300
+ERR_LINEA           4700
+ERR_LINEF           4800
+ERR_PRIV            4400
+EXIT                213A
+FOUND               1244
+GD_INV              1314
+GET2ADR             1980
+GET_DATA            1276
+GET_MODE            131E
+GO                  1FAE
+HELP                18FE
+HEX                 12E4
+HEX_DEC             1370
+H_DONE              193E
+H_INV               1944
+H_LOOP              191C
+H_N1                1926
+H_N2                1938
+H_N3                193A
+ILL_INST            23D4
+ILOOP               1A5C
+INEXT               1A68
+INFO                13E4
+INPUT               1009
+INP_PTR             115A
+INVALID             135C
+ISNUM               12A2
+LINE_A              23F4
+LINE_F              23FC
+LOOP                2260
+MATCH1              1210
+MATCH2              1220
+MDSP                194E
+MD_DONE             19C2
+MD_INV              19C8
+MD_LOOP             199A
+MM                  1A9A
+MM_DONE             1BE8
+MM_INPUT            1398
+MM_INV              1BEE
+MM_LOOP             1B10
+MM_N1               1B24
+MM_N2               1B38
+MM_N3               1B88
+MM_N4               1B98
+MM_N5               1BC8
+MM_N6               1BE2
+MM_READ             1B3E
+MM_START            1AFE
+MM_WDONE            1BE4
+MM_WRITE            1B9E
+MODEB               1AF6
+MODEL               1AFC
+MODEW               1AF0
+MS                  1BF8
+MS_1                1CB6
+MS_2                1CC6
+MS_3                1CC8
+MS_4                1CF0
+MS_5                1D04
+MS_6                1D0A
+MS_END              1C5A
+MS_INV              1D1A
+MS_LOOP             1C4E
+MS_NUMBER           1C88
+NBYTES              2220
+NEWLINE             10F6
+NEXT                2242
+NOTHEX              129A
+NO_ALF              21F8
+NO_DF               2132
+NO_EXIT             215C
+NO_GO               1FDE
+OLOOP               1A52
+ONEXT               1A70
+O_ERRS              2404
+PRIV_VIOL           23EC
+QUOTE               111E
+REG_X               1028
+REG_Y               102C
+REVERSE             2254
+REVERSE_END         226E
+RLOOP               20C4
+RUN_MONITOR         10C4
+SADR                2288
+SAME_LINE           2112
+SBERR               2274
+SCHK                2301
+SFOUND              13BE
+SILL                22A0
+SLINEA              2321
+SLINEF              2341
+SLOST               13CE
+SORTW               19D2
+SORTW_INPUT         1398
+SORT_DONE           1A8A
+SORT_END            1A7A
+SORT_INV            1A90
+SORT_START          1A4C
+SPACE               110A
+SPRIV               22C4
+STACK               3000
+START               1068
+START_MDSP          198E
+STR_END             1C3E
+STR_LOOP            1C2A
+SZERO               22E8
+TE                  1008
+TERMINAL            10D2
+THANK               104D
+THANKYOU            1146
+TKE                 1067
+TML                 1000
+TWICE               222E
+UPPER               21B6
+UPPER_END           21FC
+UPPER_INV           2202
+UPPER_LOOP          21DC
+WE                  104C
+WELC                1030
+WELCOME             1132
