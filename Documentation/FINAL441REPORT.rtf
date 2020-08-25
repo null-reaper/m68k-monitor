@@ -1,0 +1,3403 @@
+{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Times New Roman;}{\f1\fnil\fcharset0 Arial;}{\f2\fnil Courier New;}{\f3\fnil\fcharset0 Courier New;}{\f4\fnil Times New Roman;}{\f5\fnil\fcharset0 Calibri;}}
+{\colortbl ;\red0\green0\blue255;\red0\green0\blue0;\red128\green0\blue128;\red0\green128\blue0;\red0\green128\blue128;}
+{\*\generator Riched20 10.0.17134}\viewkind4\uc1 
+\pard\qc\f0\fs52\lang9\par
+\par
+ECE 441\par
+Microprocessors\par
+\fs28 Instructor:  Dr. Jafar Saniie\par
+Teaching Assistant:  Who?\par
+\fs24\par
+\fs32 Final Project Report:\par
+\b\f1\fs28 MONITOR PROJECT\f0\fs32  \par
+\b0 **/**/2018\par
+\fs28\par
+\par
+\par
+\fs24\par
+\fs28 By:  Clive Gomes\par
+
+\pard\tx4320\tx8640\fs24\par
+
+\pard Acknowledgment: I acknowledge all of the work including figures and codes are belongs to me and/or persons who are referenced.\par
+\par
+\par
+
+\pard\qc Signature : _____________________________________\par
+
+\pard\sb120\qc\tqr\tlul\tx9350\b\i\fs28 Table of Contents\par
+
+\pard\b0\i0\fs24\par
+\par
+
+\pard\sb120\qc\tqr\tlul\tx9350\b\i\fs28 Abstract\tab 2\par
+1-) Introduction\tab 2\par
+2-) Monitor Program\tab 3\par
+
+\pard\li240\sb120\tqr\tlul\tx9350\i0\fs22 2.1-) Command Interpreter\tab 4\par
+
+\pard\li480\tqr\tlul\tx9350\b0\fs20 2.1.1-) Algorithm and Flowchart\tab 5\fs24\par
+\fs20 2.1.2-) 68000 Assembly Code\tab 5\fs24\par
+
+\pard\par
+
+\pard\li240\sb120\tqr\tlul\tx9350\b\fs22 2.2-) Debugger Commands\tab 6\par
+
+\pard\li480\tqr\tlul\tx9350\b0\fs20 2.2.1-) Debugger Command # 1\tab 6\fs24\par
+\fs20 2.2.2-) Debugger Command # 2\tab 7\par
+2.2.3-) Debugger Command # 3\tab 7\fs24\par
+\fs20 2.2.4-) Debugger Command # 4\tab 8\fs24\par
+\fs20 2.2.5-) Debugger Command # 5\tab 8\par
+2.2.6-) Debugger Command # 6\tab 9\fs24\par
+\fs20 2.2.7-) Debugger Command # 7\tab 10\par
+2.2.8-) Debugger Command # 8\tab 10\fs24\par
+\fs20 2.2.9-) Debugger Command # 9\tab 11\fs24\par
+\fs20 2.2.10-) Debugger Command # 10\tab 11\par
+2.2.11-) Debugger Command # 11\tab 12\fs24\par
+\fs20 2.2.12-) Debugger Command # 12\tab 12\par
+
+\pard\fs24\par
+
+\pard\li240\sb120\tqr\tlul\tx9350\b\fs22 2.3-)Exception Handlers \tab 13\par
+
+\pard\li480\tqr\tlul\tx9350\b0\fs20 2.3.1-) Bus Error Exception\tab 13\fs24\par
+\fs20 2.3.2-) Address Error Exception\tab 14\par
+2.3.3-) Illegal Instruction Exception\tab 14\fs24\par
+\fs20 2.3.4-) Privilege Violation Exception\tab 14\fs24\par
+\fs20 2.3.5-) Divide by Zero Exception\tab 15\fs24\par
+\fs20 2.3.6-) Line A and Line F Emulators \tab 15\fs24\par
+
+\pard\li240\sb120\tqr\tlul\tx9350\b\fs22 2.4-)User Instructional Manual Exception Handlers \tab 16\par
+
+\pard\li480\tqr\tlul\tx9350\b0\fs20 2.4.1-) Help Menu\tab 16\fs24\par
+
+\pard\par
+
+\pard\sb120\qc\tqr\tlul\tx9350\b\i\fs28 3-) Discussion\tab 17\par
+4-) Feature Suggestions\tab 18\par
+6-) Conclusions\tab 19\par
+7-) References\tab 20\par
+
+\pard\b0\i0\fs24\par
+\par
+\par
+\par
+\par
+\par
+
+\pard\sb120\tqr\tlul\tx9350\b\i\fs28 Abstract\par
+
+\pard\fi720\b0\i0\fs24\par
+Microprocessors are used in almost all technological devices out there. As assembly language is used to code microprocessors, the thought of using these might appear daunting to some users, who might require the processor to perform some basic operations. A Monitor Program enables and empowers such users by providing them a simple interface and a set of commands that they can then use to accomplish their required task. This report serves to discuss, at length, the design and implementation of such a Monitor Program.\par
+\par
+
+\pard\keepn\ul\b\i\fs28 1-) Introduction\par
+
+\pard\ulnone\b0\i0\fs24\par
+\par
+ This will be an introduction to your design. You can give design objectives, a clear description of the problem and design methodology and technology used.  Any figures and tables should have clear descriptions. \par
+\par
+If your computer communicates with any device, that device probably uses microprocessors. Microprocessors help printers print, scanners scan and Internet modems get you on the Web. When you copy multimedia items from a cell phone to your computer, both devices perform that task using microprocessors [1]. But their most valuable feature is that they are cheap to manufacture, provide great computing power, and can be made small enough to fit in the palm of our hands! The Motorola 68000 Microprocessor is a great example that demonstrates some of the most striking features of microprocessors. Clearly however, just as in the case for any benefial technology, microprocessors come with certain disadvantages. Since the only language a machine understands is that of 0's and 1's, all software programs need to be converted to machine code. A step above that is assembly code, and this is how microprocessors are programmed. It comprises of a set of instructions (which differ in various architectures) that are used to write the software logic, which is they converted to machine code and executed on the microprocessor. Thus, two things are essential for programming and using microprocessors -- the microprocessor hardware (inclusive of power supply, wired connections and so on) and a development environment to write and test the code. A software like Easy68K provides both of these, and is thus a valuable asset for microprocessor programmers.\par
+\par
+EASy68K is a 68000 Structured Assembly Language IDE that allows you to edit, assemble and run 68000 programs on a Windows PC or Wine. [2] The most important feature of this software is that one doesn't need to own a physical microprocessor as the simulator performs and covers for all (or most) of the hardware features of a typical 68000 processor. Thus, this is the perfect development environment for beginners and experts alike.\par
+\par
+
+\pard\keepn\ul\b\fs28\par
+
+\pard\ulnone\b0\fs24\par
+\par
+\i\fs20 Figure 1.1. Intro 1\par
+\par
+\par
+\par
+\i0\fs24\par
+
+\pard\keepn\ul\b\fs28\par
+\par
+
+\pard\fi720\ulnone\fs24\par
+
+\pard\keepn\ul\b0\fs28\par
+
+\pard\ulnone\fs24\par
+\par
+\par
+\par
+Though using the Easy68K takes care of most of the fixable drawbacks of microprocessors, there is yet another issue that needs to be addressed. At times, a user may need (for whatever reason) to test out a piece of memory hardware. They would usually to use a microprocessor to perform this task, but may not have the skill or time to write a program to do so. This is were Monitor Programs gain importance. A Monitor Program has a simple interface, which provides users some of the most common functions (as commands), which they can then use to perform various operations on a memory device, and also test its functionality. Therefore, to address this need of a program as such, a Monitor Program ("TUTOR 0") was developed and this report is intended to provide a general overview of its features as well as in-depth discussion on the workings of each command. Lastly, the report summarizes some of the design challenges faced when building the software and concludes by discussing additional features that could be included in the design to improve its effectiveness and its usefulness.\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\b\i\fs28 2-) Monitor Program \b0\i0\fs24\par
+\par
+\tab "TUTOR 0" is a Monitor Program built using MC68000 assembly language. The program provides a command-line interface through which the user can perform a variety of functions capable of searching, displaying, modifying, moving and testing memory locations. The current version of this program includes 12 basic debugger commands that the user can enter at the terminal. Each of these commands are discussed extensively in this report, including their functionality, proper usage and design. Flowcharts and algorithms are provided for each command, followed by the assembly code designed to implement them. "TUTOR 0" (from here on, Monitor Program) also supports exception handling, and is able to deal with most of the common exceptions that can arise during regular operation. Descriptions of these, along with a discussion on the implementation of their exception-handling routines, are also provided in this report.\par
+\par
+\par
+\tab Fig. Monitor 1\par
+\par
+\tab On startup, the Monitor Program displays a welcome message and a terminal prompt. This is where the user can enter various commands and use them to accomplish their agenda. When a command is entered, the program first parses the input string to check what command is needed by the user. This is accomplished by a "Command Interpreter" (discussed in the next section), which then causes the program flow to branch of to the selected command. The program then further parsing the input string to acquire all the necessary arguments (data) required by the particular command. Finally, the specific command subroutine uses this data to implement the user-required operation, after which the program returns to the terminal, ready for the next user input. If the input string does not match any of the existing commamnds, or if one or more arguments required by the specific command subroutine is invalid, an error message is displayed and the program returns to the terminal without performing any operation. This is turn protects the contents of the registers and memory from being modified due to accidental or incorrect command inputs.\par
+\par
+\par
+\tab Fig. Program Overview \par
+\par
+\tab At any point during the execution of a command, if any of the common exceptions arise (such as an address error when trying to access a word or long size data starting at an odd address), the Monitor Program branches off to the specific exception-handling subroutine. Based on the exception, the program outputs error messages along with additional information regarding the exception (discussed later). The program then returns to the terminal awaiting the next user input. Note, however, that the contents of registers and memory may have changed due to generated exception, since the program isn't capable of rolling back any changes made up to the point where the exception arises.\par
+ \par
+\tab The Monitor Program code (in memory) is divided up into four distinct spaces:\par
+(1) The Monitor Program: This section comprises of code that displays the initial message, terminal prompt, and gets the user input. \par
+(2) The Command Interpreter: This block of codes contains subroutines that deal with parsing the input string, command interpretation, and acquiring data for the specific commands.\par
+(3) The Command Space: Here, subroutines that perform the operation for each of the command is stored.\par
+(4) The Exception Space: All exception handling routines are located here.\par
+\par
+\tab Fig. Memory Space (Monitor 2)\par
+\par
+\tab Each of these spaces are further divided up into "Data Space" -- where all of the memory data (such as prompts, error messages, reserved memory spaces) is stored -- and "Program Space" -- which contain the actual subroutines. Note that these definitions differ from their actual use in microprocessor architecture and are only used to segment the large code of the Monitor Program into manageable segments.\par
+\par
+\tab Before discussing each of these sections is more detail, below is a list of certain program constraints and assumptions made (regarding the kinds and sizes of input data enterred as well as the commands on the whole) when implementation the code of the Monitor Program.\par
+\par
+
+\pard\fi720\par
+Constraints:\par
+1) The entire Monitor program must lie within the address range 3K byte memory space.\par
+2) A 1K byte size Stack is located at addresses $3000 and above.\par
+3) The program must be able to handle erroneous inputs and recover from them.\par
+\par
+Assumptions:\par
+1) The inputted command string is no longer that 30 characters.\par
+2) Hexadecimal input data are smaller than $FFFFFFF.\par
+3) Decimal input data are smaller than 99999999.\par
+4) Addresses entered do not line within $1000 and $3000.\par
+5) At no point during normal execution does the Stack overflow (data on Stack exceeds 1K bytes).\par
+
+\pard\b\i\fs28\tab\par
+\b0\i0\fs24\par
+Assembly Code for Monitor Program:\par
+\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf1\protect\f2\fs20\lang1033 ***************************\cf2\par
+\cf1 ***   MONITOR  PROGRAM  ***\cf2\par
+\cf1 ***************************\cf2\par
+\cf1 *-----------------------------------------------------------------------------------------------------------\cf2\par
+\cf1 *-------------------------------------------- DATA SPACE ---------------------------------------------------\cf2\par
+\par
+\cf1 * Stack Location\cf2\par
+\cf3 STACK\cf2  \cf4 EQU\cf2  $3000\par
+\par
+\cf1 * Terminal Prompt \cf2\par
+\cf3 TML\cf2  \cf4 DC.B\cf2  \cf5 'TUTOR 0>'\cf2\par
+\cf3 TE\cf2   \cf4 DC.B\cf2  0\par
+\par
+\cf1 * Input Buffer\cf2\par
+\cf3 INPUT\cf2  \cf4 DS.B\cf2  30 \cf1 ; 30 characters max\cf2\par
+      \cf4 DC.B\cf2  0\par
+      \par
+\cf1 * General Purpose Memory Registers (Also Serves As Extra Space In Case Input Is Too Long)\cf2\par
+\cf3 REG_X\cf2  \cf4 DC.L\cf2  0\par
+\cf3 REG_Y\cf2  \cf4 DC.L\cf2  0\par
+\par
+\cf1 * Welcome Message\cf2\par
+\cf3 WELC\cf2  \cf4 DC.B\cf2  \cf5 'Welcome To TUTOR, Version 0!'\cf2\par
+\cf3 WE\cf2    \cf4 DC.B\cf2   0  \par
+\par
+\cf1 * Thank you Message\cf2\par
+\cf3 THANK\cf2  \cf4 DC.B\cf2  \cf5 'Thank You For Using TUTOR!'\cf2\par
+\cf3 TKE\cf2    \cf4 DC.B\cf2   0 \par
+\par
+\cf1 *-----------------------------------------------------------------------------------------------------------\cf2\par
+\cf1 *-------------------------------------------- PROGRAM SPACE ------------------------------------------------\cf2\par
+\cf3 START:\cf2                   \cf1 ; first instruction of program  \cf2\par
+\par
+\cf1 *** STARTS AT $1030\cf2\par
+\par
+\cf1 * Initialize Exception Vectors\cf2\par
+    MOVE.L #STACK,$0\par
+    MOVE.L #BUS_ERR,$8\par
+    MOVE.L #ADRS_ERR,$C\par
+    MOVE.L #ILL_INST,$10\par
+    MOVE.L #DIV_ZERO,$14\par
+    MOVE.L #CHK_INST,$18\par
+    MOVE.L #PRIV_VIOL,$20\par
+    MOVE.L #LINE_A,$28\par
+    MOVE.L #LINE_F,$2C\par
+  \par
+\cf1 * Set Stack Pointer to Top of Stack\cf2\par
+    LEA STACK,A7\par
+    \par
+    JSR NEWLINE \cf1 ; Print Blank Line\cf2\par
+    \par
+    JSR WELCOME \cf1 ; Displays Welcome Message\cf2\par
+        \par
+    BRA RUN_MONITOR \cf1 ; Start Monitor Program  \cf2\par
+\cf1 *-----------------------------------------------------------------------------------------------------------  \cf2\par
+\cf3 RUN_MONITOR\cf2\par
+\cf1 * Monitor Program Main Loop\cf2\par
+\cf1 *\cf2\par
+    JSR TERMINAL \cf1 ; Display Terminal Prompt & Get Input\cf2\par
+    JSR CHK_CMD \cf1 ; Check Entered Command & Branch to Appropriate Subroutine\cf2\par
+    \par
+    BRA RUN_MONITOR \cf1 ; Loop till EXIT Command is Executed\cf2\par
+\cf1 *-----------------------------------------------------------------------------------------------------------\cf2\par
+\cf3 TERMINAL\cf2\par
+\cf1 * Displays Terminal Prompt and Gets User Input    \cf2\par
+\cf1 *\cf2\par
+    MOVEM.L D0-D1/A1,-(A7) \cf1 ; Save Registers to Stack \cf2\par
+    \par
+    JSR NEWLINE \cf1 ; Print Blank Line\cf2\par
+    \par
+\cf1 * Print TUTOR Prompt\cf2\par
+    LEA TML,A1\par
+    MOVE.B #14,D0\par
+    TRAP #15  \par
+    \par
+\cf1 * Get Input String\cf2\par
+    LEA INPUT,A1 \cf1 ; Input (50 characters max)\cf2\par
+    MOVE.B #2,D0\par
+    TRAP #15\par
+     \par
+    MOVEM.L (A7)+,D0-D1/A1 \cf1 ; Restore Registers from Stack  \cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\cf1 *-----------------------------------------------------------------------------------------------------------   \cf2\par
+\cf3 NEWLINE\cf2\par
+\cf1 * Moves Print Cursor to the Next Line\cf2\par
+\cf1 *\cf2\par
+    MOVEM.L D0/A1,-(A7) \cf1 ; Store Registers on Stack\cf2\par
+    \par
+    LEA TE,A1 \cf1 ; Address Starts with null character (To not Print Anything)\cf2\par
+    MOVE.B #13,D0 \cf1 ; Set TRAP Function to Output Null Terminated String Starting at A1\cf2\par
+    TRAP #15  \par
+    \par
+    MOVEM.L (A7)+,D0/A1 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\cf1 *-----------------------------------------------------------------------------------------------------------\cf2\par
+\cf3 SPACE\cf2\par
+\cf1 * Displays a Blank Space\cf2\par
+\cf1 *\cf2\par
+    MOVEM.L D0-D1,-(A7) \cf1 ; Store Registers on Stack\cf2\par
+    \par
+    MOVE.B #$20,D1 \cf1 ; D1.B = ' ' \cf2\par
+    MOVE.B #6,D0 \cf1 ; Set TRAP Function to Output character in D1.B\cf2\par
+    TRAP #15\par
+    \par
+    MOVEM.L (A7)+,D0-D1 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\cf1 *-----------------------------------------------------------------------------------------------------------\cf2\par
+\cf3 QUOTE\cf2\par
+\cf1 * Displays a Double Quote (")\cf2\par
+\cf1 *\cf2\par
+    MOVEM.L D0-D1,-(A7) \cf1 ; Store Registers on Stack\cf2\par
+    \par
+    MOVE.B #$22,D1 \cf1 ; D1.B = Double Quote\cf2\par
+    MOVE.B #6,D0 \cf1 ; Set TRAP Function to Output character in D1.B\cf2\par
+    TRAP #15\par
+    \par
+    MOVEM.L (A7)+,D0-D1 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\cf1 *-----------------------------------------------------------------------------------------------------------\cf2\par
+\cf3 WELCOME\cf2\par
+\cf1 * Displays Welcome Message\cf2\par
+\cf1 *\cf2\par
+    MOVEM.L D0/A1,-(A7) \cf1 ; Store Registers on Stack\cf2\par
+    \par
+\cf1 * Print Welcome Message\cf2\par
+    LEA WELC,A1\par
+    MOVE.B #13,D0\par
+    TRAP #15  \par
+    \par
+    MOVEM.L (A7)+,D0/A1 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\cf1 *-----------------------------------------------------------------------------------------------------------\cf2\par
+\cf3 THANKYOU\cf2\par
+\cf1 * Displays ThankYou Message\cf2\par
+\cf1 *\cf2\par
+    MOVEM.L D0/A1,-(A7) \cf1 ; Store Registers on Stack\cf2\par
+    \par
+\cf1 * Print ThankYou Message\cf2\par
+    LEA THANK,A1\par
+    MOVE.B #14,D0\par
+    TRAP #15  \par
+    \par
+    MOVEM.L (A7)+,D0/A1 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\cf1 *----------------------------------------------------------------------------------------------------------- \cf2\par
+
+\protect0\pard\protect\cf1 *-----------------------------------------------------------------------------------------------------------\cf0\protect0\f0\fs24\lang9\par
+\par
+\par
+\par
+
+\pard\fi720\b\i\fs28 2.1-)  Command Interpreter \par
+
+\pard\b0\i0\fs24\par
+
+\pard\fi720 To execute a command, the user must first enter the command at the terminal. Next, the program must to recognize the entered command and branch to appropriate subroutine to perform its required function. The "Command Interpreter" is a special subsection of the program which facilitates this operation. It checks the user input and determines if the entered string is a valid command. If not, an error message is displayed and the program returns to the terminal, ready for the next user input.\par
+Apart from the command name, the user inputted string may contain additional data that may be used in the operation of the command. These may be addresses, immediate data or strings. Among these, the addresses and immediate may either be hexadecimal (represented by the '$' symbol) or decimal (no '$' symbol). Therefore, the "Command Interpretter" must possess the capability to read and decipher this data, and then provide it to the appropriate subroutines that require them. As far as the scope of this program is concerned, any inputted command must follow a syntax, which is discussed in the following section.\par
+\par
+\b\i 2.1.1-) Syntax\b0\i0\par
+\par
+General Syntax: <Space> <Command Name>  <Data> <Mode> <CR>\par
+\par
+A valid command must begin with a "Space" character. This is true for all commands except for the memory-modify loop in the "MM" (Memory Modify) command, which is discussed later on. The "space" character is followed by the "Command Name" which must be entered in uppercase letters. Following this, there may be 0, 1, 2 or 3 data which need to be separated by "Space" characters. The data can either be a decimal number (for eg. "2500") or a hexadecimal number which must have a leading '$' sign (for eg. "$1A00"). The numbers using symbols A-F must also be written in uppercase letters. Once all the required data has been entered, the command must end with a carriage return <CR> and must not have any trailing "Space" or other characters. Following are examples of valid commands containing different types of data:\par
+\par
+No Data : "TUTOR 0.1> EXIT<CR>"\par
+One Datum : "TUTOR 0.1> GO $9000<CR>"\par
+Two Data : "TUTOR 0.1> MS 7000 'Hello World!'<CR>"\par
+Three Data : "TUTOR 0.1> BF $4000 $5000 865<CR>"\par
+\par
+For some commands, users have the freedom to specify a "Mode" of operation. This is entered by using the semicolon (";") character followed by an uppercase letter specifying the "Mode". Note, however, that the semicolon character must be enterred immediately after the last data, without leaving a blank space in between. The most appropriate example would be the "MM" (Memory Modify) command which has three available modes: B (Byte Operation), W (Word Operation) and L (Long Operation). Following is an example of the use of such a syntax:\par
+\par
+"TUTOR 0.1> MM $8000;L<CR>"\par
+\par
+If the command above is enterred at the terminal, the Monitor program will execute the Memory Modify Operation using Long Word Size Addresses.\par
+\par
+\par
+\b\i 2.1.3-) Overall Design and Components\par
+\par
+\b0\i0 ***Terminal Pic***\par
+
+\pard\par
+
+\pard\fi720 When the Monitor Program is first run, it will display a prompt where the user can enter commands. The user must enter an appropriate command followed by a carriage return to begin processing of the input. These commands are comprised of a "Command Name", "Data" and "Mode". To manage all these kinds of inputs, the "Command Interpretter" has three separate subroutines, each of which controls a certain type of input. Each of these subroutines are discussed extensively in the following sections.\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+"CHK_CMD" (Check Command Name) : This subroutine checks the "Command Name" of the entered command. If it is a valid command, this subroutine calls the appropriate subroutine(s) to perform the required operation. Else, an error message is displayed.\par
+\par
+"GET_DATA" (Get Single Datum) : This subroutine gets a single hexadecimal or decimal datum from the user input string, which can then be used by the subroutines designed to implement the debugger commands. If the data is invalid, an error message is displayed.\par
+\par
+"GET_MODE" (Get Single Datum) : This subroutine determines the mode of operation for certain debugger commands. If the input is invalid, an error message is displayed.\par
+\par
+\par
+Apart from these three major subroutines, there are a few other auxillary subroutines that assist their operation. As these subroutines are short and since their main purpose is to support the three major subroutines, only a short description of their functionality is sufficient.\par
+\par
+"CHK_END" (Check End) : This subroutine checks whether the inputted command has been properly ended with a carriage return. If not, an error message is displayed.\par
+\par
+"INVALID" : This subroutine displays the message "INVALID COMMAND!" to the screen.\par
+\par
+"HEX_DEC" (Hex to Decimal) : This subroutine converts a hexadecimal number in D1 to its corresponding decimal value.\par
+\par
+\par
+\par
+\par
+\par
+\b\i 2.1.4-) CHK_CMD Subroutine\b0\i0\par
+
+\pard\par
+
+\pard\fi720 After the user has inputted a command, this is the first subroutine that is called by the program. Here, the "Command Name" is read from the user input and is compared with the list of command names in the "CMD_N" table in memory. If a match is found, the subroutine performs basic calculations to find the corresponding address for the command subroutine from the "CMD_A" (Command Addresses) table in memory. Next, this subroutine uses a JMP (Jump) instruction to pass on control of the program flow to the appropriate command subroutine. If no match was found in the command names table, an error message is displayed and the program control returns to the terminal.\par
+\par
+\par
+
+\pard\par
+
+\pard\fi720\b\i Algorithm:\b0\i0\par
+\par
+\i Step 1: Save registers to Stack\par
+Step 2: Initialize A0 -> start address of "Command Names" table \par
+Step 3: Initialize A1 -> end address of "Command Names" table \par
+Step 4: Initialize A2 -> start address of input string\par
+Step 5: IF character at (A2) = '  '  // Check for leading space character\par
+\tab THEN go to Step 7\par
+\tab ELSE go to Step 23 // Command Invalid\par
+Step 6: Initialize A2 -> start address of input string\par
+Step 7: IF A2 > A1  // If command name not found in entire address range\par
+\tab THEN go to Step 8\par
+\tab ELSE go to Step 23 // Command Invalid\par
+Step 8: IF character at (A2) = '  '  OR character at (A2) = null // If input command name has ended\par
+\tab THEN go to Step 23 // Command Invalid\par
+\tab ELSE go to Step 9\par
+Step 9: IF character at (A2) = character at (A0) // If character matched\par
+\tab THEN go to Step 12\par
+\tab ELSE go to Step 10\par
+Step 10: A0 = A0 + 1 // Check next character from table\par
+Step 11: Go to Step 8\par
+Step 12: A0 = A0 + 1 // Check next character from table\par
+Step 13: A2 = A2 + 1 // Check next character from input\par
+Step 14: IF A2 > A1 // If command name not found in entire address range\par
+\tab THEN go to Step 15\par
+\tab ELSE go to Step 23 // Command Invalid\par
+Step 15: IF character at (A0) = '  ' // If command name in table has ended\par
+\tab THEN go to Step 17 // Character found\par
+\tab ELSE go to Step 16\par
+Step 16: IF character at (A2) = character at (A0) \par
+\tab THEN go to Step 12\par
+\tab ELSE go to Step 10\par
+Step 17: Offset = [A0-Start Address of "Command Names" table]/ 6 * 2\par
+Step 18: A1 = Start Address of "Command Addresses" table + Offset\par
+Step 19: Get (A1) in A0 // Load address to jump\par
+Step 20: Jump to address in A0\par
+Step 21: Restore registers from Stack\par
+Step 22: Return from subroutine\par
+Step 23: Display error Message\par
+Step 24: Restore registers from Stack\par
+Step 25: Return from subroutine\par
+\i0\par
+
+\pard\i\fs20 Figure 2.2. Command Interpreter Algorithm  \par
+\i0\fs24\par
+\par
+\par
+\b\i Flowchart:\par
+\b0\i0\par
+\i\fs20 Figure 2.3.  Command Interpreter Flowchart  \i0\fs24\par
+\par
+\par
+\par
+\par
+
+\pard\fi720\b\i 2.1.5-) GET_DATA Subroutine\b0\i0\par
+
+\pard\par
+
+\pard\fi720 Along with the "Command Name", the user input string may contain one or more data. Therefore, there needs to be a way to parse these data from the input string and provide it to the subroutines that may require it.The GET_DATA subroutine accomplishes this task. It extracts the data from the input string and interprets its hexadecimal or decimal value (based on the presence/absence of the '$' symbol). It then stores this data in the memory location whose address is specified by the A0 register. For this Monitor program, three long word size memory locations have been reserved to store this data. The data must always start with a space character and end with either a space character, semicolon or a carriage return. If the data is invalid, an error message is displayed.\par
+\par
+\par
+
+\pard\par
+
+\pard\fi720\b\i Algorithm:\b0\i0\par
+\par
+\i Step 1: Save registers to Stack\par
+Step 2: Clear result register D1  // Initial result = 0\par
+Step 3: Initialize A1 -> current position of instruction pointer\par
+Step 4: IF character at (A1) = '  '    // Check for leading space\par
+\tab THEN go to Step 5\par
+\tab ELSE go to Step 21  // Data Invalid\par
+Step 5: IF character at (A1) = ' $'   // Check if data is hex\par
+\tab THEN clear flag D2\par
+\tab ELSE set flag D2\par
+Step 6: IF character at (A2) = '  '  OR character at (A2) = null OR character at (A2) = ';'  // Check if data has ended\par
+\tab THEN go to Step 7    // More data to acquire\par
+\tab ELSE go to Step 16  // Data acquired\par
+Step 7: IF $30 <= character ASCII value <= $39 // Check if data is 0-9\par
+\tab THEN go to Step 8\par
+\tab ELSE go to Step 10  \par
+Step 8: Subtract $30 from character ASCII value in D0 ; Get decimal value\par
+Step 9: Go to Step 12\par
+Step 10: IF $40 < character ASCII value < $47  // Check if data is $A-$F\par
+\tab THEN go to Step 11\par
+\tab ELSE go to Step 21  // Data Invalid\par
+Step 11: Subtract $55 from character ASCII value in D0 // Get decimal value\par
+Step 12: Muliplily result register by 16\par
+Step 13: Add D0 to result register D1\par
+Step 14: A1 = A1 + 1 // Get next character\par
+Step 15: Go to Step 6 \par
+Step 16: IF flag D2 is set  // Check if further conversion is needed\par
+\tab THEN go to Step 17 // Yes\par
+\tab ELSE go to Step 18  // No\par
+Step 17: Convert to decimal number (call subroutine)\par
+Step 18: Store result in (A0), i.e. in memory\par
+Step 19: Restore registers from Stack\par
+Step 20: Return from subroutine\par
+Step 21: Display error Message\par
+Step 22: Restore registers from Stack\par
+Step 23: Return from subroutine\par
+\i0\par
+
+\pard\i\fs20 Figure 2.2. Command Interpreter Algorithm  \par
+\i0\fs24\par
+\par
+\par
+\b\i Flowchart:\par
+\b0\i0\par
+\i\fs20 Figure 2.3.  Command Interpreter Flowchart  \i0\fs24\par
+\par
+\par
+\par
+\par
+\par
+
+\pard\fi720\b\i 2.1.6-) GET_MODE Subroutine\b0\i0\par
+
+\pard\par
+
+\pard\fi720 Some debugger commands allow the user to decide the mode of operation. This is represented by a semicolon symbol (";") followed by a single character, which decides the mode of operation. In this Monitor program, two debugger commands support mode -- "MM" (Memory Modify) supports 'B' (byte operation), 'W' (word operation) and 'L' (long word operation), and "SORTW' (Sort Word) supports 'A' (ascending order) and 'D' (descending order). Therefore, there needs to be a way to parse this "Mode" from the input string. The "GET_MODE" subroutine performs this task. The mode must be entered right after the last data, without leaving a space. This subroutine stores the acquired "Mode" in the memory location specified by A0. For this Monitor program, three long word size memory locations have been reserved to store this data. Lastly, if the data is invalid, an error message is displayed.\par
+\par
+\par
+
+\pard\par
+
+\pard\fi720\b\i Algorithm:\b0\i0\par
+\par
+\i Step 1: Save registers to Stack\par
+Step 2: Initialize A2 -> start address of input string\par
+Step 3: IF character at (A2) = ';'    // Check for leading semicolon\par
+\tab THEN go to Step 4\par
+\tab ELSE go to Step 9  // Data Invalid\par
+Step 4: A2 = A2 + 1  // Go to next character\par
+Step 5: Get character from (A2) in D0\par
+Step 6: Store D0 in (A0), i.e. in memory\par
+Step 7: Restore registers from Stack\par
+Step 8: Return from subroutine\par
+Step 9: Display error Message\par
+Step 10: Restore registers from Stack\par
+Step 11: Return from subroutine\par
+\i0\par
+
+\pard\i\fs20 Figure 2.2. Command Interpreter Algorithm  \par
+\i0\fs24\par
+\par
+\par
+\b\i Flowchart:\par
+\b0\i0\par
+\i\fs20 Figure 2.3.  Command Interpreter Flowchart  \i0\fs24\par
+\par
+\par
+\b\i 2.1.7-) Command Interpreter Assembly Code \b0\i0\par
+\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf1\protect\f2\fs20\lang1033 ***************************\cf2\par
+\cf1 *** COMMAND INTERPRETER ***\cf2\par
+\cf1 ***************************\cf2\par
+\cf1 *-----------------------------------------------------------------------------------------------------------\cf2\par
+\cf1 *-------------------------------------------- DATA SPACE ---------------------------------------------------\cf2\par
+\par
+\cf1 *Input Pointer to Read Input String Saved in Memory\cf2\par
+\cf3 INP_PTR\cf2  \cf4 DC.L\cf2  0 \par
+\par
+\cf1 * Memory Spaces to Store Parsed Data from Input String\cf2\par
+\cf3 DATA1\cf2  \cf4 DC.L\cf2  0\par
+\cf3 DATA2\cf2  \cf4 DC.L\cf2  0\par
+\cf3 DATA3\cf2  \cf4 DC.L\cf2  0 \par
+\par
+\cf1 * Error Message for Invalid Input\cf2\par
+\cf3 ERRC\cf2  \cf4 DC.B\cf2  \cf5 'INVALID COMMAND!'\cf2\par
+\cf3 CE\cf2    \cf4 DC.B\cf2  0\par
+\par
+\cf1 * Table of Command Names\cf2\par
+\cf3 CMD_N\cf2  \cf4 DC.B\cf2  \cf5 'HELP  '\cf2\par
+      \cf4 DC.B\cf2  \cf5 'MDSP  '\cf2\par
+      \cf4 DC.B\cf2  \cf5 'SORTW '\cf2\par
+      \cf4 DC.B\cf2  \cf5 'MM    '\cf2\par
+      \cf4 DC.B\cf2  \cf5 'MS    '\cf0\par
+      DC.B 'BF    '\par
+      DC.B 'BMOV  '\par
+      DC.B 'BTST  '\par
+      DC.B 'BSCH  '\par
+      DC.B 'GO    '\par
+      DC.B 'DF    '\par
+\cf2       \cf4 DC.B\cf2  \cf5 'EXIT  '\cf2\par
+      \cf4 DC.B\cf2  \cf5 'UPPER '\cf2\par
+      \cf4 DC.B\cf2  \cf5 'BREV  '\cf2\par
+      \par
+\cf1 * Table of Command Addresses\cf2\par
+\cf3 CMD_A\cf2  \cf4 DC.W\cf2  HELP\par
+      \cf4 DC.W\cf2  MDSP\par
+      \cf4 DC.W\cf2  SORTW\par
+      \cf4 DC.W\cf2  MM\par
+      \cf4 DC.W\cf2  MS\par
+      \cf4 DC.W\cf2  BF\par
+      \cf4 DC.W\cf2  BMOV\par
+      \cf4 DC.W\cf2  BTST\par
+      \cf4 DC.W\cf2  BSCH\par
+      \cf4 DC.W\cf2  GO\par
+      \cf4 DC.W\cf2  DF\par
+      \cf4 DC.W\cf2  EXIT\par
+      \cf4 DC.W\cf2  UPPER\par
+      \cf4 DC.W\cf2  BREV\par
+      \par
+\cf1 *-----------------------------------------------------------------------------------------------------------\cf2\par
+\cf1 *-------------------------------------------- PROGRAM SPACE ------------------------------------------------\cf2\par
+\cf3 CHK_CMD\cf2    \par
+\cf1 * Looks for Entered Command in CMD_N and Calls the Command Subroutine if found\cf2\par
+\cf1 * If Command is not found, Error Message is Displayed  \cf2\par
+  \par
+    MOVEM.L D0-D1/A1-A3,-(A7) \cf1 ; Save Registers to Stack\cf2\par
+    MOVE.L A0,$102A  \cf1 ; Save A0 in memory\cf2\par
+    \par
+    LEA CMD_N,A0 \cf1 ; Start Address of Command Names\cf2\par
+    LEA CMD_A,A1 \cf1 ; Start Address of Command Subroutines\cf2\par
+    LEA INPUT,A2 \cf1 ; Start Address of Input\cf2\par
+    LEA INP_PTR,A3 \cf1 ; Address of Input Pointer\cf2\par
+    \par
+\cf1 * Check for starting space character  \cf2\par
+    MOVE.B (A2)+,D1\par
+    CMP.B #$20,D1\par
+    BNE CHK_INV \cf1 ; If no, then Command is Invalid\cf2\par
+    \par
+    MOVE.L A2,(A3) \cf1 ; Save Start Address of Input Command in INP_PTR\cf2\par
+    \par
+\cf1 * Find Match for First Character\cf2\par
+\cf3 MATCH1\cf2  MOVE.L (A3),A2 \cf1 ; Get Start Address of Input Command in A2\cf2\par
+    MOVE.L A0,D0 \cf1 ; Save Start Address of Matched First Character in D0\cf2\par
+    \par
+    CMP.L A0,A1 \cf1 ; A1 - A0\cf2\par
+    BEQ CHK_INV \cf1 ; If reached end of CMD_T, Command Not Found\cf2\par
+    \par
+    MOVE.B (A0)+,D1 \cf1 ; Get a character from CMD_T to D1 \cf2\par
+    CMP.B (A2)+,D1 \cf1 ; D1 - (A2)\cf2\par
+    BNE MATCH1 \cf1 ; If character doesn't match Input Command character, keep searching\cf2\par
+    \par
+\cf1 * Current State: First character of Command Input Matched\cf2\par
+    \par
+\cf3 MATCH2\cf2  MOVE.B (A0)+,D1 \cf1 ; Get a character from CMD_T to D1\cf2\par
+\par
+    CMP.B #$20,D1 \cf1 ; Check if character = ' '\cf2\par
+    BEQ AT_END \cf1 ; If true, then reached end of Command Name\cf2\par
+    \par
+    CMP.B (A2)+,D1 \cf1 ; D1 - (A2)\cf2\par
+    BNE MATCH1 \cf1 ; If character doesn't match Input Command character, search for first character again\cf2\par
+    \par
+    CMP.L A0,A1 \cf1 ; A1 - A0\cf2\par
+    BGT MATCH2 \cf1 ; If not reached end of CMD_T, Command Name matches so far\cf2\par
+    BRA CHK_INV \cf1 ; If reached end of CMD_T, Command Not Found\cf2\par
+    \par
+\cf3 AT_END\cf2\par
+    CMP.B #0,(A2) \cf1 ; Check if next character in Input Command is null\cf2\par
+    BEQ FOUND \cf1 ; If yes, Command Found\cf2\par
+    CMP.B #$20,(A2) \cf1 ; Check if next character in Input Command = ' '\cf2\par
+    BNE MATCH1 \cf1 ; If no, search for first character again\cf2\par
+    \par
+\cf3 FOUND\cf2\par
+    MOVE.L A2,(A3) \cf1 ; Save Current Location of Pointer in INP_PTR\cf2\par
+    \par
+\cf1 * Get Address of Command Subroutine    \cf2\par
+    LEA CMD_N,A0 \cf1 ; Start Address of Command Names\cf2\par
+    SUB.L A0,D0 \cf1 ; Find Offset From Start of Command Names Table\cf2\par
+\cf1 * Offset of Command Address from Start of Command Address Table = (Offset from Start of Command Names Table) / 6 * 2\cf2\par
+    DIVU #6,D0 \cf1 ; Offset/6\cf2\par
+    MULU #2,D0 \cf1 ; Offset*2\cf2\par
+    ADD.L A1,D0 \cf1 ; Get Address in Command Address Table  \cf2\par
+    MOVE.L D0,A1 \cf1 ; Set Pointer to that Address\cf2\par
+    MOVE.W (A1),A0 \cf1 ; Get Command Subroutine Start Address in A0\cf2\par
+    \par
+    MOVEM.L (A7)+,D0-D1/A1-A3 \cf1 ; Restore Registers from Stack\cf2\par
+    ADD.L #4,A7 \cf1 ; Throw a Long Word off of Stack\cf2\par
+    \par
+    JSR (A0) \cf1 ; Jump to Command Subroutine\cf2\par
+    BRA RUN_MONITOR \cf1 ; Return from Subroutine\cf2\par
+    \par
+\cf3 CHK_INV\cf2  JSR INVALID \cf1 ; Display Error Message    \cf2\par
+    \par
+    MOVEM.L (A7)+,D0-D1/A1-A3 \cf1 ; Restore Registers from Stack\cf2\par
+    MOVE.L $102A,A0 \cf1 ; Restore A0 from Memory\cf2\par
+    \par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\cf1 *-----------------------------------------------------------------------------------------------------------\cf2\par
+\cf3 GET_DATA\cf2  \par
+\cf1 * Parses Data from Input String and Stores it in memory\cf2\par
+\cf1 * Input: Start Address to store result in A0\cf2\par
+\cf1 * D6 = 1 for invalid input\cf2\par
+\par
+    MOVEM.L D0-D2/A0-A2,-(A7) \cf1 ; Save Registers to Stack\cf2\par
+    \par
+    CLR.L D1 \cf1 ; Clear Register to Calculate Hex Data\cf2\par
+    CLR.L D2 \cf1 ; Clear Flag (for Hex Operation)\cf2\par
+    \par
+    LEA INP_PTR,A1 \cf1 ; Get Address of Stored Pointer Location\cf2\par
+    MOVE.L (A1),A2 \cf1 ; Get Current Input Pointer Address in A2\cf2\par
+    \par
+\cf1 * Check for starting space character  \cf2\par
+    MOVE.B (A2)+,D0\par
+    CMP.B #$20,D0\par
+    BNE GD_INV \cf1 ; If no, then Data is Invalid\cf2\par
+    \par
+    CMP.B #$24,(A2) \cf1 ; Check if first character = '$' \cf2\par
+    BNE NOTHEX \cf1 ; If not, proceed assuming the data is decimal\cf2\par
+    \par
+    MOVE.L #1,D2 \cf1 ; If yes, Set Flag (for Hex Operation)\cf2\par
+    ADD.L #1,A2 \cf1 ; Move pointer to the character after '$'\cf2\par
+   \par
+\cf1 * Check if first character is ';'\cf2\par
+\cf3 NOTHEX\cf2  CMP.B #$3B,(A2) \cf1 ; Check if next character is ';' \cf2\par
+    BEQ GD_INV \cf1 ; If yes, then Command is Invalid\cf2\par
+    \par
+\cf1 * Check if character is a number    \cf2\par
+\cf3 ISNUM\cf2  CMP.B #$3B,(A2) \cf1 ; Check if next character is ';' \cf2\par
+    BEQ EOD \cf1 ; If yes, then reached end of data\cf2\par
+    CLR.L D0 \cf1 ; Clear D0\cf2\par
+    MOVE.B (A2)+,D0 \cf1 ; Get a character in D0\cf2\par
+    DIVU #$10,D0 \cf1 ; D0/10\cf2\par
+    CMP.W #3,D0 \cf1 ; Check if 30 <= ASCII character value <= 39\cf2\par
+    BEQ HEX \cf1 ; If character is a number, proceed to conversion\cf2\par
+\par
+    CMP.L #1,D2 \cf1 ; Check if number is supposed to be Hex\cf2\par
+    BNE GD_INV \cf1 ; If not, then Number is Invalid\cf2\par
+    \par
+\cf1 * Check if character is a Hex digit\cf2\par
+    CMP.W #4,D0 \cf1 ; Check if character could be between A-F\cf2\par
+    BNE GD_INV \cf1 ; If no, then number is Invalid\cf2\par
+    SWAP D0 \cf1 ; Get remainder in lower word\cf2\par
+    CMP.W #0,D0 \cf1 ; Check if character could be '@'\cf2\par
+    BEQ GD_INV \cf1 ; If yes, then number is Invalid\cf2\par
+    CMP.W #6,D0 \cf1 ; Check if D0 - 6 > 0\cf2\par
+    BGT GD_INV \cf1 ; If yes, then number is Invalid\cf2\par
+    \par
+\cf1 * Number is a valid Hex digit: Remainder is between 1 to 6\cf2\par
+    ADD.W #9,D0 \cf1 ; Remainder becomes 10 to 15 (i.e A to F)\cf2\par
+    SWAP D0 \cf1 ; Put remainder in the upper word   \cf2\par
+\par
+\cf1 * Convert the ASCII Data to Hex (Assuming Input Data is Hex)    \cf2\par
+\cf3 HEX\cf2  LSL.L #4,D1 \cf1 ; D1*16\cf2\par
+    SWAP D0 \cf1 ; Get remainder in lower word\cf2\par
+    ADD.W D0,D1 \cf1 ; Add remainder to D1\cf2\par
+    \par
+    CMP.B #0,(A2) \cf1 ; Check if next character is ' ' \cf2\par
+    BEQ EOD \cf1 ; If yes, then reached end of data\cf2\par
+    CMP.B #$20,(A2) \cf1 ; Check if next character is null\cf2\par
+    BEQ EOD \cf1 ; If yes, then reached end of data\cf2\par
+    BRA ISNUM \cf1 ; If no, continue conversion\cf2\par
+    \par
+\cf3 EOD\cf2     \par
+    CMP.B #1,D2 \cf1 ; Check if Flag is Set\cf2\par
+    BEQ COMPLETE \cf1 ; If yes, then operation complete\cf2\par
+    JSR HEX_DEC \cf1 ; If yes, then get the Decimal Equivalent for the Hex number\cf2\par
+    \par
+\cf3 COMPLETE\cf2  MOVE.L D1,(A0) \cf1 ; Store Data in (A0)\cf2\par
+    MOVE.L A2,(A1) \cf1 ; Store Current Input Pointer Location\cf2\par
+    \par
+    MOVEM.L (A7)+,D0-D2/A0-A2 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+    \par
+\cf3 GD_INV\cf2  MOVE.B #1,D6 \cf1 ; Denote Error Message\cf2\par
+    MOVEM.L (A7)+,D0-D2/A0-A2 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\par
+\cf1 *-----------------------------------------------------------------------------------------------------------\cf2\par
+\cf3 GET_MODE\cf2\par
+\cf1 * Parses Mode from Input String and Stores it in Memory\cf2\par
+\cf1 * Input: Start Address to store result in A0\cf2\par
+\par
+    MOVEM.L D0/A0-A2,-(A7) \cf1 ; Save Registers to Stack\cf2\par
+    \par
+    LEA INP_PTR,A1 \cf1 ; Get Address of Stored Pointer Location\cf2\par
+    MOVE.L (A1),A2 \cf1 ; Get Current Input Pointer Address in A2\cf2\par
+    \par
+\cf1 * Check for ';' Character\cf2\par
+    CMP.B #$3B,(A2)+ \cf1 ; Check if Character is ';'\cf2\par
+    BNE INVALID \cf1 ; If no, then Command is Invalid\cf2\par
+    \par
+    CLR.L D0 \cf1 ; Clear Temporary Register D0\cf2\par
+    MOVE.B (A2)+,D0 \cf1 ; Get Mode ASCII Character in D0\cf2\par
+    MOVE.L D0,(A0) \cf1 ; Store Mode in (A0)\cf2\par
+    MOVE.L A2,(A1) \cf1 ; Store Current Input Pointer Address in INP_PTR\cf2\par
+    \par
+    MOVEM.L (A7)+,D0/A0-A2 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\cf1 *-----------------------------------------------------------------------------------------------------------\cf2\par
+\cf3 CHK_END\cf2\par
+\cf1 * Checks for <CR> at the End of Command\cf2\par
+\cf1 * Output: D6 = 1 for Invalid Command / D6 = 0 for Valid Command\cf2\par
+\par
+    MOVEM.L D0/A3-A4,-(A7) \cf1 ; Store Registers on Stack\cf2\par
+    \par
+    LEA INP_PTR,A4 \cf1 ; Get Address of Input Pointer Location in A4\cf2\par
+    MOVE.L (A4),A3 \cf1 ; Get Current Location of Input Pointer in A3\cf2\par
+    MOVE.B (A3),D0 \cf1 ; Get Character at Current Pointer Location in D0\cf2\par
+    BEQ CE_V \cf1 ; If null, then Command is valid\cf2\par
+    \par
+    MOVE.L #1,D6 \cf1 ; D6 = 1 for Invalid Command\cf2\par
+    BRA CK_END \cf1 ; Operation Complete\cf2\par
+    \par
+\cf3 CE_V\cf2  CLR.L D6 \cf1 ; D6 = 0 for Invalid Command\cf2\par
+\par
+\cf3 CK_END\cf2  MOVEM.L (A7)+,D0/A3-A4 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\cf1 *-----------------------------------------------------------------------------------------------------------\cf2\par
+\cf3 INVALID\cf2  \par
+\cf1 * Displays Invalid Message\cf2\par
+\cf1 *\cf2\par
+    MOVEM.L D0/A1,-(A7) \cf1 ; Save Registers to Stack\cf2\par
+    \par
+\cf1 * Print "INVALID COMMAND!"\cf2\par
+    LEA ERRC,A1\par
+    MOVE.B #13,D0\par
+    TRAP #15\par
+    \par
+    MOVEM.L (A7)+,D0/A1 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\cf1 *-----------------------------------------------------------------------------------------------------------  \cf2\par
+\cf3 HEX_DEC\cf2\par
+\cf1 * Convert Hex Number in D1 to Decimal \cf2\par
+\cf1 * Used in GET_DATA Subroutine\cf2\par
+    MOVEM.L D2-D6,-(A7) \cf1 ; Save Registers to Stack\cf2\par
+    \par
+    CLR.L D5 \cf1 ; Clear Register to Store Result\cf2\par
+    MOVE.L #1,D2 \cf1 ; Set Starting Multiplier to 1\cf2\par
+    \par
+\cf3 CONV\cf2  CLR.L D4 \cf1 ; Clear Temporary Register\cf2\par
+    MOVE.L D1,D6 \cf1 ; Make a Copy of D1 in D6\cf2\par
+    ANDI.L #$F,D6 \cf1 ; D6 = D1%16 (Remainder)\cf2\par
+    ADD.L D2,D4 \cf1 ; Add Multiplier to Temporary Register\cf2\par
+    MULU D6,D4 \cf1 ; Multiply Temporary Register by Remainder\cf2\par
+    ADD.L D4,D5 \cf1 ; Add Product to Result Register\cf2\par
+    MULU #10,D2 \cf1 ; Multiplier = (Multiplier)*16\cf2\par
+    LSR.L #4,D1 \cf1 ; D1 = D1/16 (Quotient)\cf2\par
+    BNE CONV \cf1 ; If Input != 0, continue conversion\cf2\par
+    MOVE.L D5,D1 \cf1 ; If Input = 0, Store Result in D1\cf2\par
+     \par
+    MOVEM.L (A7)+,D2-D6 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\cf1 *-----------------------------------------------------------------------------------------------------------\cf2\par
+\cf1 *-----------------------------------------------------------------------------------------------------------\cf2\par
+
+\protect0\pard\protect\cf0\i\protect0\f0\fs24\lang9\par
+\par
+\fs20 Figure 2.4. 68000 Assembly Code   \par
+
+\pard\fi720\i0\fs24\par
+
+\pard\par
+
+\pard\fi720\b\i\par
+\fs28 2.2-) Debugger Commands\par
+
+\pard\b0\i0\fs24\par
+
+\pard\fi720 The current version of the Monitor program contains 12 basic debugger commands that the user can enter at the terminal. These commands can be used to carry out a wide range of operations including searching, displaying, modifying, moving and testing memory locations. Each command has its own subroutine that performs its operation and, based on the "Command Name" inputted, the "Command Interpreter" calls the appropriate subroutine. Also, depending on its operation, different functions require different sets of input data. In the following sections, each debugger command is discussed in detail, looking into their functionality, required inputs, constraints and so on. This is aided by flowcharts and algorithms, followed by the assembly code designed to implement the particular command. Following is a list of all existing commands:\par
+\par
+HELP\par
+EXIT\par
+DF\par
+GO\par
+MS\par
+BF\par
+BMOV\par
+BTST\par
+BSCH\par
+MDSP\par
+MM\par
+SORTW\par
+\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.1-) HELP\b0\i0\par
+\par
+Function: A user new to the Monitor Program may not know the existing commands supported. Even if they do, they might have issues remember their syntax. Rather than having the user read a large instruction manual, it is easier to have a command that summarizes the basic operatin and syntax of all commands in a few words. The " HELP" command acomplishes this. Users can just enter "HELP" at the terminal and a description of all 12 existing commands and their usage will be displayed on screen.\par
+
+\pard\par
+Syntax: "TUTOR 0.1> HELP<CR>"\par
+\par
+\par
+How It Works: A string containing the HELP lookup table is stored in memory. Each line that needs to be displayed is separated using a null character. The entire string is then terminated by three consecutive null characters. The "HELP" subroutine displays the string character by character. When a null character is located, the subroutine outputs a carriage return (<CR>). This goes on till three consecutive null characters are located, after which the program returns to terminal. If the command is not entered correctly, an error message is displayed, and the program returns to the terminal. \par
+
+\pard\fi720\par
+\par
+\par
+\b\i 2.2.1.1-) HELP Algorithm\par
+\par
+\b0 Step 1: Save registers to Stack\par
+Step 2: Initialize A2 -> start address of input string\par
+Step 3: IF character at (A2) = null   // Check for carriage return\par
+\tab THEN go to Step 4\par
+\tab ELSE go to Step 16  // Data Invalid\par
+Step 4: Initialize A1 -> start addres of HELP lookup table\par
+Step 5: Counter = 0 // To count consecutive null characters\par
+Step 6: IF character at (A1) = null   // Check for a null character\par
+\tab THEN go to Step 7\par
+\tab ELSE go to Step 13\par
+Step 7: Display a new line // To display next characters on new line\par
+Step 8: Counter = Counter + 1  // Increment counter\par
+Step 9: IF counter = 3 // Three consecutive null characters\par
+\tab THEN go to Step 14  // Done displaying string\par
+\tab ELSE go to Step 12\par
+Step 10: Display character\par
+Step 11: Counter = 0 // Null characters must be consecutive\par
+Step 12: A1 = A1 + 1  // Go to next character\par
+Step 13: Go to Step 6 // Display all characters in the string\par
+Step 14: Restore registers\par
+Step 15: Return from subroutine\par
+Step 16: Display error message\par
+Step 17: Go to Step 14\b\par
+\par
+2.2.1.2-) HELP Flowchart\b0\i0\par
+
+\pard\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\i\fs20 Figure 2.6.  Debugger Command # 1 Flowchart  \par
+\i0\fs24\par
+
+\pard\fi720\b\i 2.2.1.3-) HELP Assembly Code \par
+
+\pard\b0\i0\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf1\protect\f2\fs20\lang1033 *-------------------------------------------------------------------------------------------- \cf2\par
+\cf3 HELP\cf2\par
+\cf1 * Displays HELP Lookup Table\cf2\par
+\cf1 *\cf2\par
+    MOVE.L $102A,A0 \cf1 ; Restore A0 from Memory\cf2\par
+    MOVEM.L D0-D2/D6/A1,-(A7) \cf1 ; Store Registers on Stack\cf2\par
+    \par
+    JSR CHK_END \cf1 ; Check if reached end of input. If not, then Command Invalid\cf2\par
+    CMP.B #1,D6 \cf1 ; Check if D6 = 0\cf2\par
+    BEQ H_INV \cf1 ; If yes, then Command is Invalid\cf2\par
+    \par
+    MOVE.B #6,D0 \cf1 ; Set TRAP Function to Output Character\cf2\par
+    CLR.B D2 \cf1 ; Counter for Number of Null Characters\cf2\par
+    \par
+    LEA INFO,A1 \cf1 ; Load Start Address of HELP Lookup Table in A1\cf2\par
+    \par
+\cf3 H_LOOP\cf2  MOVE.B (A1)+,D1 \cf1 ; Get Character in D1\cf2\par
+    \par
+    CMP.B #3,D2 \cf1 ; Look for 3 consecutive null characters\cf2\par
+    BEQ H_DONE \cf1 ; If yes, then Done\cf2\par
+    \par
+\cf3 H_N1\cf2  CMP.B #0,D1 \cf1 ; Check if character is null\cf2\par
+    BNE H_N2 \cf1 ; If no, then don't increment counter\cf2\par
+    \par
+    JSR NEWLINE \cf1 ; Move to Next Line\cf2\par
+    \par
+    ADD.B #1,D2 \cf1 ; Increment Null Counter\cf2\par
+    BRA H_N3 \cf1 ; Jump\cf2\par
+    \par
+\cf3 H_N2\cf2  CLR.B D2 \cf1 ; Reset Null Counter\cf2\par
+\par
+\cf3 H_N3\cf2  TRAP #15 \cf1 ; Display Character to Terminal\cf2\par
+    BRA H_LOOP \cf1 ; Loop till 3 consecutive null characters are found\cf2\par
+\par
+\cf3 H_DONE\cf2  MOVEM.L (A7)+,D0-D2/D6/A1 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+    \par
+\cf3 H_INV\cf2  JSR INVALID \cf1 ; Display Error Message\cf2\par
+    MOVEM.L (A7)+,D0-D2/D6/A1 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+
+\protect0\pard\protect\fi720\cf1 *-----------------------------------------------------------------------------------------------------------\cf0\protect0\f0\fs24\lang9\par
+\par
+\b\i 2.2.2-) EXIT\par
+
+\pard\b0\i0\par
+
+\pard\fi720 Function: The "EXIT" command is used to exit from the terminal so that no further operation can be performed. If the command is entered incorrectly, an error message is displaye and the program returns to the terminal.\par
+
+\pard\par
+Syntax: "TUTOR 0.1> EXIT<CR>"\par
+\par
+\par
+How It Works: To exit from the Monitor program the TRAP #15 Task 9 is used. This TRAP function halts the simulator, thus causing the program to stop executing.\par
+\par
+\par
+
+\pard\fi720\b\i 2.2.2.1-) EXIT Algorithm\par
+\par
+\b0 Step 1: Save registers to Stack\par
+Step 2: Initialize A2 -> start address of input string\par
+Step 3: IF character at (A2) = null   // Check for carriage return\par
+\tab THEN go to Step 4\par
+\tab ELSE go to Step 5  // Data Invalid\par
+Step 4: Execute Sim Halt TRAP // Exit the program\par
+Step 5: Display error message\par
+Step 6: Restore registers from Stack\par
+Step 7: Return from subroutine\b\par
+\b0\i0\par
+\par
+\par
+\b\i 2.2.2.2-) EXIT Flowchart\b0\i0\par
+\par
+\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.2.3-) EXIT Assembly Code \par
+\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf1\b0\i0\protect\f2\fs20\lang1033 *--------------------------------------------------------------------------------------------------------------------------    \cf2\par
+\cf3 EXIT\cf2\par
+\cf1\f3 * Exits the Monitor Program\cf2\f2\par
+\cf1\f3 *\cf2\f2\par
+    MOVE.L $1030,A0 \cf1 ; Restore A0 from Memory\cf2\par
+    MOVE.L D6,-(A7) \cf1 ; Save Register to Stack\cf2\par
+    \par
+    JSR CHK_END \cf1 ; Check if reached end of input. If not, then Command Invalid\cf2\par
+    \f3 CMP.L #1,D6 \cf1 ; Check if D6 = 0\cf2\f2\par
+    \f3 BEQ NO_EXIT \cf1 ; If yes, then Command Invalid\cf2\f2\par
+\par
+\cf1 * Exit Monitor Program\cf2\par
+    MOVE.B #9,D0 \cf1 ; Set TRAP Function to HALT Simulator\cf2\par
+    TRAP #15\par
+    \par
+\cf3 NO_EXIT\cf2\f3  JSR INVALID \cf1 ; Display Error Message\cf2\f2\par
+    MOVE.L (A7)\f3 +,D6\f2  \cf1 ; \f3 Restore\f2  Register \f3 from\f2  Stack\cf2\par
+    \f3 RTS \cf1 ; Return from Subroutine\cf2\f2\par
+\par
+
+\protect0\pard\protect\cf1 *--------------------------------------------------------------------------------------------------------------------------\cf0\protect0\f0\fs24\lang9\par
+
+\pard\fi720\par
+\par
+\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.3-) DF\par
+\par
+\b0\i0 Function: The "DF" command is used to display the contents of all registers -- PC, SR,US,SS, Data Registers and Address Registers -- at the time this command is executed. It should be noted that the values displayed by this command are the ones that the registers possessed before this function was called, and any changes made to the registers during the execution of this command do not reflect back on the register data on screen. If the command is entered incorrectly, an error message is displayed, and the program returns to the terminal.\par
+
+\pard\par
+Syntax: "TUTOR 0.1> DF<CR>"\par
+\par
+
+\pard\fi720 How It Works: When this command is executed the value of PC is obtained from the top of the Stack (PC is stored on Stack by JSR instruction) and is stored in memory. Similarly, the value of Supervisor Status Register (SS) is also saved in memory (Here SR = A7 since the code is running in Supervisor Mode). When displaying these registers, their values are read from their respective memory locations and they are then outputted to the screen.\par
+Values of Supervisor Status Word (SR) and User Stack Pointer (US) are obtained using the "MOVE from SR" and the "Move from USP" instrucutions respectively.\par
+ All Data Registers and Address Registers are then stored on the Stack twice -- once to display and once again to restore values of registers. \b\i\par
+
+\pard\b0\i0\par
+
+\pard\fi720\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.3.1-) DF Algorithm\par
+\par
+\b0 Step 1: IF character at (A2) = null   // Check for carriage return\par
+\tab THEN go to Step 2\par
+\tab ELSE go to Step 16  // Data Invalid \par
+Step 2: Get PC from the top of Stack and store in memory // PC stored on Stack by JSR instruction \par
+Step 3: Save SS in memory // SS = A7 in Supervisor Mode\par
+Step 4: Save registers to Stack // To restore values at the end of subroutine\par
+Step 6: Save registers to Stack // To display values one by one\par
+Step 7: Read PC from memory and display on screen // Read from where it was stored\par
+Step 8: Read US and display on screen // Use MOVE from USP\par
+Step 9: Read SR and display on screen // Use MOVE from SR\par
+Step 10: Read SS from memory and display on screen // Read from where it was stored\par
+Step 11: Read register value from Stack and display on screen // D0-D7 & A0-A6\par
+Step 12: IF D0-D7 & A0-A6 all displayed\par
+\tab   THEN go to Step 13\par
+              ELSE go to Step 11\par
+Step 13: Read A7 and display on screen // A7 was not stored on Stack using MOVEM.L intstruction\par
+Step 14: Restore registers from Stack\par
+Step 15: Return from Subroutine\par
+Step 16: Display error message\par
+Step 17: Return from subroutine\b\par
+\par
+2.2.3.2-) DF Flowchart\b0\i0\par
+\par
+\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.3.3-) DF Assembly Code \par
+\par
+\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf1\b0\i0\protect\f2\fs20\lang1033 *--------------------------------------------------------------------------------------------------------------------------\cf2\par
+\cf3 DF\cf2  \f3\par
+\cf1 * Displays Current Values PC, SR, US, SS, Data Registers and Address Registers\cf2\f2\par
+\cf1\f3 *\cf2\f2\par
+    MOVE.L $1030,A0 \cf1 ; Restore A0 from Memory\cf2\par
+    \par
+    \f3 MOVE.L D6,-(A7) \cf1 ; Save D6 on Stack\cf2\f2\par
+    \par
+    JSR CHK_END \cf1 ; Check if reached end of input. If not, then Command Invalid\cf2\par
+    \f3 CMP.L #1,D6 \cf1 ; Check if D6 = 0\cf2\f2\par
+    \f3 BEQ NO_DF \cf1 ; If yes, then command is invalid\cf2\f2\par
+    \par
+    \f3 MOVE.L (A7)+,D6 \cf1 ; Restore D6 from Stack\cf2\f2\par
+    MOVE.L A0,-(A7) \cf1 ; Save A0 on the Stack\cf2\par
+    \par
+\cf1\f3 * Save Value of PC in memory (REG_X)\cf2\f2\par
+    LEA REG_X,A0 \cf1 ; Get Address of REG_X in A0\cf2\par
+    ADD.L #4,A7\f3  \cf1 ; Get to PC Location\cf2\f2\par
+    MOVE.L (A7),(A0)\f3  \cf1 ; Save Value\cf2\f2\par
+    SUB.L #4,A7\f3  \cf1 ; Return to Otiginal Location\cf2\f2\par
+    \par
+\cf1 * Save Value of SS (equal to A7) in memory\cf2\par
+    \f3 LEA REG_Y,A0 \cf1\f2 ; Get Address of REG_\f3 Y\f2  in A0\cf2\par
+    MOVE.L A7,(A\f3 0\f2 ) \cf1 ; Save SS/A7 in REG_\f3 Y\f2  (Memory)\cf2\par
+    ADD.L #\f3 8\f2 ,(A0) \cf1 ; Get Actual Value of SS/A7 in REG_\f3 X\cf2\f2\par
+    \par
+    MOVE.L (A7)+,A0 \cf1 ; Restore A0 from the Stack\cf2\par
+    \par
+    MOVEM.L D0-D7/A0-A6,-(A7) \cf1 ; Store All Registers on Stack\cf2\par
+    MOVEM.L D0-D7/A0-A6,-(A7) \cf1 ; Store Another Copy of All Registers on Stack\cf2\par
+    \par
+\cf1 * Display PC\cf2\par
+    MOVE.B #$50,D1 \cf1 ; Output Character 'P' \cf2\par
+    MOVE.B #6,D0\par
+    TRAP #15\par
+    \par
+    MOVE.B #$43,D1 \cf1 ; Output Character 'C' \cf2\par
+    TRAP #15\par
+    \par
+    MOVE.B #$3D,D1 \cf1 ; Output Character '=' \cf2\par
+    TRAP #15\par
+    \par
+    LEA REG_X,A0 \cf1 ; Get Address of REG_X in A0\cf2\par
+    MOVE.L (A\f3 0\f2 ),D2 \cf1 ; Get PC in D2\cf2\par
+    MOVE.L #4,D3 \cf1 ; Set Number of Bytes to Display = 4\cf2\par
+    JSR DISPREG\par
+    \par
+    JSR SPACE \cf1 ; Leave a Blank Space\cf2\par
+    \par
+\cf1 * Display SR\cf2\par
+    MOVE.B #$53,D1 \cf1 ; Output Character 'S' \cf2\par
+    MOVE.B #6,D0\par
+    TRAP #15\par
+    \par
+    MOVE.B #$52,D1 \cf1 ; Output Character 'R' \cf2\par
+    TRAP #15\par
+    \par
+    MOVE.B #$3D,D1 \cf1 ; Output Character '=' \cf2\par
+    TRAP #15\par
+\par
+    MOVE SR,D2 \cf1 ; Get SR in D2\cf2\par
+    MOVE.L #2,D3 \cf1 ; Set Number of Bytes to Display = 2\cf2\par
+    JSR DISPREG\par
+    \par
+    JSR SPACE \cf1 ; Leave a Blank Space\cf2\par
+     \par
+\cf1 * Display US\cf2\par
+    MOVE.B #$55,D1 \cf1 ; Output Character 'U' \cf2\par
+    MOVE.B #6,D0\par
+    TRAP #15\par
+    \par
+    MOVE.B #$53,D1 \cf1 ; Output Character 'S' \cf2\par
+    TRAP #15\par
+    \par
+    MOVE.B #$3D,D1 \cf1 ; Output Character '=' \cf2\par
+    TRAP #15\par
+\par
+    MOVE USP,A1 \cf1 ; Get US in A1\cf2\par
+    MOVE.L A1,D2 \cf1 ; Get US in D2\cf2\par
+    MOVE.L #4,D3 \cf1 ; Set Number of Bytes to Display = 4\cf2\par
+    JSR DISPREG\par
+    \par
+    JSR SPACE \cf1 ; Leave a Blank Space\cf2\par
+    \par
+\cf1 * Display SS\cf2\par
+    MOVE.B #$53,D1 \cf1 ; Output Character 'S' \cf2\par
+    MOVE.B #6,D0\par
+    TRAP #15\par
+    \par
+    MOVE.B #$53,D1 \cf1 ; Output Character 'S' \cf2\par
+    TRAP #15\par
+    \par
+    MOVE.B #$3D,D1 \cf1 ; Output Character '=' \cf2\par
+    TRAP #15\par
+\par
+    LEA REG_Y,A0 \cf1 ; Get Address of REG_Y in A0\cf2\par
+    MOVE.L (A0),D2 \cf1 ; Get SS from Memory\cf2\par
+    JSR DISPREG\par
+\par
+\cf3 DISP_DA\cf2\par
+    MOVE.B #0,D5 \cf1 ; Counter: 0 = D, 1 = A, >1 = Operation Complete\cf2\par
+\par
+\cf3 DA_START\cf2  JSR NEWLINE \cf1 ; Go to Next Line\cf2\par
+    MOVE.B #$30,D4 \cf1 ; Counter for Register Number    \cf2\par
+    \par
+\cf3 RLOOP\cf2  CMP.B #1,D5 \cf1 ; Check if Couter is 1\cf2\par
+    BEQ A_REG \cf1 ; If yes, then Register to be Displayed is an Adress Register\cf2\par
+    \par
+    MOVE.B #$44,D1 \cf1 ; Output Character 'D' \cf2\par
+    BRA D_REG \cf1 ; Register to be Displayed is a Data Register\cf2\par
+    \par
+\cf3 A_REG\cf2  MOVE.B #$41,D1 \cf1 ; Output Character 'A'\cf2\par
+\par
+\cf3 D_REG\cf2  TRAP #15\par
+\par
+    MOVE.B D4,D1 \cf1 ; Output Register Number \cf2\par
+    TRAP #15\par
+    \par
+    MOVE.B #$3D,D1 \cf1 ; Output Character '=' \cf2\par
+    TRAP #15\par
+    \par
+    TST.B D5 \cf1 ; Check if Data Registers are Being Displayed\cf2\par
+    BEQ CONTINUE \cf1 ; If yes, then Continue\cf2\par
+    \par
+    CMP.B #$37,D4 \cf1 ; Check if A7 is to be Displayed\cf2\par
+    BEQ DF_DONE \cf1 ; If yes, then Exit Display Registers Loop\cf2\par
+    \par
+\cf3 CONTINUE\cf2  MOVE.L (A7)+,D2 \cf1 ; Get Register Value from Stack\cf2\par
+    JSR DISPREG\par
+    \par
+    JSR SPACE \cf1 ; Leave a Blank Space\cf2\par
+    \par
+    ADD.B #1,D4 \cf1 ; Increment Register Number\cf2\par
+    \par
+    CMP.B #$34,D4 \cf1 ; Check if Register Number < 4\cf2\par
+    BLT RLOOP \cf1 ; Loop for Registers D0-D3 & A0-A3\cf2\par
+    \par
+    CMP.B #$34,D4 \cf1 ; Check if Register Number != 4\cf2\par
+    BNE SAME_LINE \cf1 ; If no, then Display Next Register on the Same Line\cf2\par
+    JSR NEWLINE \cf1 ; If yes, then Display Next Register on the Next Line\cf2\par
+    \par
+\cf3 SAME_LINE\cf2  CMP.B #$38,D4 \cf1 ; Check if Register Number < 8\cf2\par
+    BLT RLOOP \cf1 ; Loop for Registers D4-D7\cf2\par
+ \par
+    ADD.B #1,D5 \cf1 ; Increment Counter\cf2\par
+    BRA DA_START \cf1 ; Continue Displaying Registers till A7\cf2\par
+    \par
+\cf3 DF_DONE\cf2  MOVE.L (A0),D2 \cf1 ; Get A7 from Memory\cf2\par
+    JSR DISPREG \cf1 ; Display A7\cf2\par
+    \par
+    JSR NEWLINE \cf1 ; Leave a Blank Line\cf2\par
+    \par
+    MOVEM.L (A7)+,D0-D7/A0-A6 \cf1 ; Restore All Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+    \par
+\cf3\f3 NO_DF\cf2  JSR INVALID \cf1 ; Display Error Message\cf2\f2\par
+    \f3 MOVE.L (A7)+,D6 \cf1 ; Restore D6 from Stack\cf2\f2\par
+    \f3 RTS \cf1 ; Return from Subroutine\cf2\f2\par
+\par
+
+\protect0\pard\protect\fi720\cf1 *---------------------------------------------------------------------------------------------------------------\cf0\b\i\protect0\f0\fs24\lang9\par
+
+\pard\b0\i0\par
+\par
+\par
+
+\pard\fi720\b\i 2.2.4-) GO\b0\i0\par
+\par
+Function: The "GO" command is used execute a piece of code stored in memory. This command takes one input -- the address to start executing code at. This address can be given as a hexadecimal number (represented by the '$' symbol) or a decimal number (no '$' symbol). If the command is entered incorrectly, an error message is displayed and the program returns to the terminal.\par
+
+\pard\par
+Syntax: "TUTOR 0.1> GO $2000<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> GO 8192<CR>"\par
+In both of the above examples, the program will start executing code starting at the same address since $2000 (hexadecimal value) = 8192 (decimal value). Thus, both types of input are accepted by the subroutine.\par
+\par
+\par
+How It Works: To execute the "GO" command, the subroutine needs to know the address at which to start executing code. Since this is provided in the user input, the "GET_DATA" subroutine (discussed in the previous section) is used. This address is then put into an address register, and the program jumps to the aforementioned memory location. \par
+
+\pard\fi720\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.4.1-) GO Algorithm\par
+\par
+\b0 Step 1: Save registers to Stack\par
+Step 2: Get address to jump to in A6 // Calls subroutine "GET_DATA"\par
+Step 3: IF character at (A2) = null   // Check for carriage return\par
+\tab THEN go to Step 4\par
+\tab ELSE go to Step 6  // Data Invalid\par
+Step 4: Restore registers from Stack\par
+Step 5: Jump to (A6)\par
+Step 6: Display error message\par
+Step 7: Restore registers from Stack\par
+Step 8: Return from subroutine\b\par
+\par
+2.2.4.2-) GO Flowchart\b0\i0\par
+\par
+\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.4.3-) GO Assembly Code \par
+
+\pard\b0\i0\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf1\protect\f2\fs20\lang1033 *-------------------------------------------------------------------------------------------------------------------------\cf2\par
+\cf3 GO\cf2\par
+\cf1\f3 * Executes Code in Memory Starting at the Inputted Address\cf2\f2\par
+\cf1\f3 *\cf2\f2\par
+    MOVE.L $1030,A0 \cf1 ; Restore A0 from Memory\cf2\par
+    \f3 MOVEM.L D6/A0/A6,-(A7) \cf1 ; Save Registers to Stack\cf2\f2\par
+    \par
+\cf1 * Get Address in A\f3 6\cf2\f2\par
+    LEA DATA1,A0\par
+    JSR GET_DATA\par
+    MOVE.L (A0),A\f3 6\f2\par
+    \par
+    JSR CHK_END \cf1 ; Check if reached end of input. If not, then Command Invalid\cf2\par
+    \f3 CMP.L #1,D6 \cf1 ; Check if D6 = 1\cf2\f2\par
+    \f3 BEQ NO_GO \cf1 ; If yes, then Command is Invalid\cf2\f2\par
+   \par
+    MOVE\f3 M\f2 .L (A7)+,\f3 D6/\f2 A0 \cf1 ; Restore Register\f3 s\f2  from Stack\cf2\par
+    \f3 ADD.L #8,A7 \cf1 ; Throw Two Long Words from Stack\cf2\f2\par
+\par
+\cf1 * Jump to Adress\cf2\par
+    JMP (A\f3 6\f2 )\f3  \f2\par
+    \par
+\cf3\f3 NO_GO\cf2  JSR INVALID \cf1 ; Display Error Message\cf2\f2\par
+    MOVEM.L (A7)+,D6/A0\f3 /A6\f2  \cf1 ; Restore Registers from Stack \cf2\par
+    \f3 RTS \cf1 ; Return from Subroutine\cf2\f2\par
+\cf1 *--------------------------------------------------------------------------------------------------------------------------\cf2\par
+
+\protect0\pard\protect\fi720\cf0\protect0\f0\fs24\lang9\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.5-) MS (Memory Set)\par
+\par
+\b0\i0 Function: The "MS" (Memory Set) command is used to store data starting at a given address. Thus, this command requires two data inputs apart from the "Command Name". The address can be given as a hexadecimal number or a decimal number. On the other hand, the data can be a hexadecimal number, a decimal number or an ASCII string. If the data is an ASCII string, it must be enclosed within single quotes. If the command is entered incorrectly, an error message is displayed and the program returns to the terminal.\par
+
+\pard\par
+Syntax: "TUTOR 0.1> MS $2000 'Hello World!'<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> MS 8192 'Hello World!'<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> MS $2000 $2000<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> MS 8192 $2000<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> MS $2000 8192<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> MS 8192 8192<CR>"\par
+\par
+\par
+\par
+In all of the above examples, the data will be stored starting at the same address since $2000 (hexadecimal value) = 8192 (decimal value). In the first two examples, the ASCII encoded string "Hello World!" will be stored in memory, while in the last four cases , the number 8192 (decimal value) or $2000 (hexadecimal value) will be stored. Thus, there are six total ways this command can be structured.\par
+\par
+\par
+How It Works: To execute the "MS" (Memory Set) command, the program needs to know the address at which to store the data. Since this is provided in the user input, the "GET_DATA" subroutine (discussed in the previous section) is used. This address is then put into an Address Register. Next, the input data is checked to see if it starts with a single quote character. If it does, the data is assumed to be a string and its ASCII encoded value is stored in consecutive memory locations starting at address in the Address Register. This is then null terminated to mark the end of the ASCII string. If the input data does not start with a single quote character, the data is assumed to be a number (hexadecimal/decimal) and is parsed from the input string using the "GET_DATA" subroutine. This is then stored in consecutive memory locations starting at address in the Address Register.\par
+\par
+
+\pard\fi720\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.5.1-) MS Algorithm\par
+\par
+\b0 Step 1: Save registers to Stack\par
+Step 2: Get address to store data at in A1 // Calls subroutine "GET_DATA"\par
+Step 3: Initialize A2-> current position of instruction pointer\par
+Step 4: IF character at (A2) = '  '    // Check for leading space\par
+\tab THEN go to Step 5\par
+\tab ELSE go to Step 23  // Data Invalid\par
+Step 5: IF character at (A2) = single quote character   // Check if data is an ASCII string\par
+\tab THEN go to Step 6\par
+\tab ELSE go to Step 16 // Data is a number\par
+Step 6: IF character at (A2) = single quote // Check if data has ended\par
+\tab THEN go to Step 7    // More data to store\par
+\tab ELSE go to Step 11  // Data stored\par
+Step 7: Store Data in (A1)\par
+Step 8: A1 = A1 + 1  // Increment memory location\par
+Step 9: A2 = A2 + 1 // Get next character to store\par
+Step 10: Go to Step 6 // Loop till all data is stored\par
+Step 11: Store null at the end of the data in memory\par
+Step 12: Display starting address on screen\par
+Step 13: Display null terminated saved ASCII string // To show that data has been stored successfully\par
+Step 14: Restore registers from Stack\par
+Step 15: Return from subroutine\par
+Step 16: Get data to store in D2 // Calls subroutine "GET_DATA"\par
+Step 17: Store data in memory at (A1) // At start address\par
+Step 18: Display starting address on screen\par
+Step 19: Display saved data // To show that data has been stored successfully\par
+Step 20: Restore registers from Stack \par
+Step 21: Return from subroutine \par
+Step 23: Display error message\par
+Step 23: Restore registers from Stack\par
+Step 24: Return from subroutine\par
+\b\par
+\par
+2.2.5.2-) MS Flowchart\b0\i0\par
+\par
+\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.5.3-) MS Assembly Code \par
+\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf1\b0\i0\protect\f2\fs20\lang1033 *--------------------------------------------------------------------------------------------------    \cf2\par
+\cf3 MS\protect0\par
+\cf1\protect\f3 * Stores Hexadecimal/Decimal/ASCII String Input Starting at Inputted Memory Address\cf2\f2\par
+\cf1\f3 *\cf2\f2\par
+    MOVE.L $1030,A0 \cf1 ; Restore A0 from Memory\cf2\par
+    MOVEM.L \f3 D0-D3/D6/\f2 A0-A4,-(A7) \cf1 ; Save Registers to Stack\cf2\par
+    \par
+\cf1 * Get START Address in A1\cf2\par
+    LEA DATA1,A0 \cf1 ; Set Pointer to First Data Save Location\cf2\par
+    JSR GET_DATA \cf1 ; Get Data from Input\cf2\par
+    MOVE.L (A0),A1 \cf1 ; Get First Address in A1\cf2\par
+\par
+\cf1 * Look for Space Character followed by a Single Quote\cf2\par
+    LEA INP_PTR,A4 \cf1 ; Get Address of Input Pointer Location in A4\cf2\par
+    MOVE.L (A4),A3 \cf1 ; Get Current Location of Input Pointer in A3\cf2\par
+    \par
+    CMP.B #$20,(A3)+ \cf1 ; Check if Next Character is a Space\cf2\par
+    BNE \f3 MS_INV\f2  \cf1 ; If no, then Command is Invalid\cf2\par
+    \par
+    CMP.B #$27,(A3)+ \cf1 ; Check if Next Character is a Single Quote\cf2\par
+    BNE \f3 MS_NUMBER\f2  \cf1 ; If no, then \f3 Data is not an ASCII String\cf2\f2\par
+    \par
+    MOVE.L A3,A2 \cf1 ; Store Starting Address of String Input in A2\cf2\par
+    \par
+\cf1 * Check if String Ends with Single Quote\cf2\par
+\cf3 STR_LOOP\cf2  CMP.B #$27,(A3)+ \cf1 ; Check if Next Character is a Single Quote\cf2\par
+    BEQ STR_END \cf1 ; If yes, then Reached End of String\cf2\par
+    \par
+    CMP.B #0,-(A3) \cf1 ; Check if Character is null\cf2\par
+    BEQ \f3 MS_INV\f2  \cf1 ; If yes, then Command is Invalid\cf2\par
+    ADD.L #1,A3 \cf1 ; Go to Next Character\cf2\par
+    BRA STR_LOOP \cf1 ; If no, then Keep Looping \cf2\par
+    \par
+\cf3 STR_END\cf2  MOVE.L A3,(A4) \cf1 ; Store Current Location of Input Pointer in INP_PTR\cf2\par
+\par
+    JSR CHK_END \cf1 ; Check if reached end of input. If not, then Command Invalid\cf2\par
+    \f3 CMP.B #1,D6 \cf1 ; Check if D6 = 1\cf2\f2\par
+    \f3 BEQ MS_INV \cf1 ; If yes, then Command is Invalid\cf2\f2\par
+    \par
+    \f3 MOVE.L A1,A4 \cf1 ; Save Start Address in A4\cf2\f2\par
+    \par
+\cf1\f3 * Memory Set Operation with ASCII String Data\cf2\f2\par
+\cf3 MS_LOOP\cf2  CMP.B #$27,(A2) \cf1 ; Check if Next Character is a Single Quote\cf2\par
+    BEQ MS_END \cf1 ; If yes, then Memory Set Complete\cf2\par
+    \par
+    MOVE.B (A2)+,(A1)+ \cf1 ; Set Memory\cf2\par
+    BRA MS_LOOP \cf1 ; Loop till End of String \cf2\par
+    \par
+\cf3 MS_END\cf2  MOVE.B #\f3 0,(A1)+ \cf1 ; Terminate String With Null Character\cf2\f2\par
+\par
+\cf1 * Confirm that Memory Set was Successful\cf2\par
+\par
+\cf1 * Display Address\cf2\par
+    MOVE.L A\f3 4\f2 ,D2 \cf1 ; Get START Address in D2\cf2\par
+    MOVE.B #2,D3 \cf1 ; Set Number of Bytes to Display = 2\cf2\par
+    JSR DISPREG \cf1 ; Display Address\cf2\par
+    \par
+    JSR SPACE \cf1 ; Leave a Blank Space\cf2\par
+   \par
+\cf1 * Display String\cf2\par
+    JSR QUOTE \cf1 ; Display Single Quote\cf2\par
+    \par
+    \f3 MOVE.L A4,A1 \cf1 ; Get Start Address of Stored String in A1\cf2\f2\par
+    MOVE.B \f3 #14\f2 ,D\f3 0\f2  \cf1\f3 ; \f2 Set TRAP Function to Output \f3 Null Terminated String Starting at A1\cf2\f2\par
+    TRAP #15\par
+    \par
+\f3     \f2 JSR QUOTE \cf1 ; Display Single Quote\cf2\par
+    \par
+    JSR NEWLINE \cf1 ; Leave Blank Line\cf2\par
+    \par
+    MOVEM.L (A7)+,\f3 D0-D3/D6/\f2 A0-A4 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\par
+\cf1 * Memory Set Operation with ASCII String Data\cf2\par
+\cf3\f3 MS_NUMBER\cf2  \f2\par
+\cf1\f3 * Get Hexadecimal/Decimal Data\cf2\f2\par
+    LEA DATA1,A0 \cf1 ; Set Pointer to Second Data Save Location\cf2\par
+    \f3 JSR GET_DATA \cf1 ; Get Data\cf2\f2\par
+    MOVE.L (A0),\f3 D2 \cf1 ; Get Data in D2\cf2\f2\par
+    \par
+    JSR CHK_END \cf1 ; Check if reached end of input. If not, then Command Invalid\cf2\par
+    CMP.B #1,D6 \cf1 ; Check if D6 = 1\cf2\par
+    BEQ MS_INV \cf1 ; If yes, then Command is Invalid\cf2\par
+\par
+    \f3 CMP.L #$FF,D2 \cf1 ; Check if D2 > $FF\cf2\f2\par
+    \f3 BGT MS_1 \cf1 ; If no, then Data is Larger than a Byte\cf2\f2\par
+\par
+\cf1\f3 * Write Byte Size Data to Address\cf2\f2\par
+    \f3 MOVE.B D2,(A1)\f2\par
+    \f3 BRA MS_3 \cf1 ; Already know Size of Data\cf2\f2\par
+    \par
+\cf3\f3 MS_1\cf2  \f2 CMP.L #$\f3 FF\f2 FF,D\f3 2\f2  \cf1 ; Check if D\f3 2\f2  > $FF\f3 FF\cf2\f2\par
+    BGT MS_\f3 2\f2  \cf1 ; If no, then Data is Larger than a \f3 Word\cf2\f2\par
+    \par
+\cf1 * Write \f3 Word\f2  Size Data to Address\cf2\par
+    MOVE.\f3 W\f2  D2,(A1)\par
+    BRA MS_3 \cf1 ; Already know Size of Data\cf2\par
+    \par
+\cf3\f3 MS_2\cf2  \f2\par
+\cf1 * Write \f3 Log Word\f2  Size Data to Address\cf2\par
+    MOVE.\f3 L\f2  D2,(A1)\par
+    \par
+\cf3\f3 MS_3\cf2  \f2\par
+\cf1 * Display Address\cf2\par
+    MOVE.L D2,D0 \cf1 ; Save D2 in D0\cf2\par
+    MOVE.L A1,D2 \cf1 ; Get START Address in D2\cf2\par
+    MOVE.B #2,D3 \cf1 ; Set Number of Bytes to Display = 2\cf2\par
+    JSR DISPREG \cf1 ; Display Address\cf2\par
+    MOVE.L D0,D2 \cf1 ; Restore D2\cf2\par
+    \par
+    JSR SPACE \cf1 ; Leave a Blank Space\cf2\par
+ \f3\par
+    CMP.L #$FF,D2 \cf1 ; Check if D2 > $FF\cf2\par
+    BGT MS_4 \cf1 ; If no, then Data is Larger than a Byte\cf2\par
+    \par
+\cf1 * Confirm that Byte Size Data was Written to Address\cf2\par
+    MOVE.B (A1),D2\par
+    MOVE.B #1,D3 \cf1 ; Number of Bytes to Display = 1\cf2\par
+    BRA MS_6 \cf1 ; Already know Size of Data\cf2\par
+    \par
+\cf3 MS_4\cf2  CMP.L #$FFFF,D2 \cf1 ; Check if D2 > $FFFF\cf2\par
+    BGT MS_5 \cf1 ; If no, then Data is Larger than a Word\cf2\par
+    \par
+\cf1 * Confirm that Word Size Data was Written to Address\cf2\par
+    MOVE.W (A1),D2\par
+    MOVE.B #2,D3 \cf1 ; Number of Bytes to Display = 2\cf2\par
+    BRA MS_6 \cf1 ; Already know Size of Data\cf2\par
+    \par
+\cf3 MS_5\cf2\par
+\cf1 * Confirm that Long Word Size Data was Written to Address\cf2\par
+    MOVE.L (A1),D2\par
+    MOVE.B #4,D3 \cf1 ; Number of Bytes to Display = 4\cf2\par
+    \par
+\cf3 MS_6\cf2  JSR DISPREG \cf1 ; Display Value of Data Written to Memory\cf2\f2\par
+    \par
+    JSR \f3 NEWLINE\f2  \cf1 ; L\f3 eave a Blank Line\f2  \cf2\par
+    \par
+    MOVEM.L (A7)+,D0-D3\f3 /D6\f2 /A0-A4 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+       \par
+\cf3\f3 MS_INV\cf2  JSR INVALID \cf1 ; Display Error Message\cf2\f2\par
+   \f3  \f2 MOVEM.L (A7)+,D0-D3\f3 /D6\f2 /A0-A4 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\par
+
+\protect0\pard\protect\fi720\cf1 *-------------------------------------------------------------------------------------------------\cf0\b\i\protect0\f0\fs24\lang9\par
+
+\pard\b0\i0\par
+
+\pard\fi720\par
+\par
+\par
+\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.6-) BSCH\par
+\par
+\b0\i0 Function: The "BSCH" (Block Search) command is used to search for a literal string in memory. The bounds of the memory locations to search in are to be inputted by the user. These can be given as hexadecimal or decimal numbers. Also, the literal string to be searched must be entered within single quotes. Thus, altogether, this command requires three input data. Once the command is executed, the subroutine searches for the string in the memory locations and displays the start addresses of all matches along with the message "STRING LOCATED!". If no matches are found, the subroutine displays the message "STRING NOT FOUND!". Lastly, if the command is entered incorrectly, or if the input data is an empty string literal, an error message is displayed and the program returns to the terminal.\par
+
+\pard\par
+Syntax: "TUTOR 0.1> BSCH $2000 $3000 'Hey'<CR>"\par
+\tab\tab OR\par
+            "TUTOR 0.1> BSCH 8192 $3000 'Hey'<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> BSCH $2000 12288 'Hey'<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> BSCH 8192 12288 'Hey'<CR>"\par
+\par
+\par
+In all of the above examples, the literal string will be searched for in the same range of memory locations since $2000 (hexadecimal value) = 8192 (decimal value) and $3000 (hexadecimal value) = 12288 (decimal value) . Thus, there are four total ways this command can be structured.\par
+\par
+\par
+How It Works: To execute the "BSCH" (Block Search) command, the program needs to know the address range in which to search for the string literal. Since these are provided in the user input, the "GET_DATA" subroutine (discussed in the previous section) is used. These addresses are then put into two Address Registers. Next, the input data is checked to see if it starts with a valid ASCII string (data surrounded by single quotes). If it is, the subroutine compares the ASCII encoded characters of the string to the data in the memory locations bound by the limits in the two Address Registers. If any match is found, the subroutine displays a success message followed by starting addresses and data for all matches. If no matches are found, a failure message is displayed. Lastly, if the input data is (a) not a valid string literal, (b) an empty string literal, or (c) not terminated by the carriage return, then an error message is displayed and the subroutine does not search for string matches.\par
+
+\pard\fi720\b\i\par
+
+\pard\b0\i0\par
+
+\pard\fi720\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.6.1-) BSCH Algorithm\par
+\par
+\b0 Step 1: Save registers to Stack\par
+Step 2: Get start address to search string in A1 // Calls subroutine "GET_DATA"\par
+Step 3: Get end address to search string in A2 // Calls subroutine "GET_DATA"\par
+Step 4: Initialize A3-> current position of instruction pointer\par
+Step 5: IF character at (A3) = '  '    // Check for leading space\par
+\tab THEN go to Step 6\par
+\tab ELSE go to Step 19  // Data invalid\par
+Step 6: IF character at (A2) = single quote character   // Check if data is an ASCII string\par
+\tab THEN go to Step 7\par
+\tab ELSE go to Step 19 // Data invalid\par
+Step 7: IF character at (A2) = single quote // Check if data has ended\par
+\tab THEN go to Step 8    // Keep searching\par
+\tab ELSE go to Step 10 // String match found\par
+Step 8: A1 = A1 + 1  // Increment memory location\par
+Step 9: IF A2 > A1    // Address range exhausted\par
+\tab THEN go to Step 15    // Done searching\par
+\tab ELSE go to Step 7  // Keep searching\par
+Step 10: Set flag D0 // Flag set = match found\par
+Step 11: Display address on screen // Address at which match is found/\par
+Step 12: Display matched string \par
+Step 13: Display success message\par
+Step 14: Go to Step 7   // Keep searching\par
+Step 15: IF flag D0 is Set    // D0  = 1 means match found\par
+\tab THEN go to Step 17   // End of subroutine\par
+\tab ELSE go to Step 16  // No match found\par
+Step 16: Display failure message \par
+Step 17: Restore registers from Stack \par
+Step 18: Return from subroutine \par
+Step 19: Display error message\par
+Step 20: Restore registers from Stack \par
+Step 21: Return from subroutine \i0\par
+\par
+\b\i 2.2.6.2-) BSCH Flowchart\b0\i0\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.6.3-) BSCH Assembly Code \par
+\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf1\b0\i0\protect\f2\fs20\lang1033 *---------------------------------------------------------------------------------------------------------    \cf2\par
+\cf3 BSCH\cf2\par
+\cf1\f3 * Searches for a String in Memory\cf2\f2\par
+\cf1\f3 * Returns all matches\cf2\f2\par
+\par
+    MOVE.L $1030,A0 \cf1 ; Restore A0 from Memory\cf2\par
+    MOVEM.L D0-D4/A0-A5,-(A7) \cf1 ; Save Registers to Stack\cf2\par
+    \par
+\cf1 * Get START Address in A1\cf2\par
+    LEA DATA1,A0 \cf1 ; Set Pointer to First Data Save Location\cf2\par
+    JSR GET_DATA \cf1 ; Get Data from Input\cf2\par
+    MOVE.L (A0)+,A1 \cf1 ; Get First Address in A1, and then Set Pointer to Second Data Save Location\cf2\par
+    \par
+\cf1 * Get END Address in A2\cf2\par
+    JSR GET_DATA \cf1 ; Get Data from Input\cf2\par
+    MOVE.L (A0)+,A2 \cf1 ; Get First Address in A2, and then Set Pointer to Third Data Save Location\cf2\par
+\par
+\cf1 * Look for Space Character followed by a Single Quote\cf2\par
+    LEA INP_PTR,A5 \cf1 ; Get Address of Input Pointer Location in A5\cf2\par
+    MOVE.L (A5),A4 \cf1 ; Get Current Location of Input Pointer in A4\cf2\par
+    \par
+    CMP.B #$20,(A4)+ \cf1 ; Check if Next Character is a Space\cf2\par
+    BNE \f3 BSCH_INV\f2  \cf1 ; If no, then Command is Invalid\cf2\par
+    \par
+    CMP.B #$27,(A4)+ \cf1 ; Check if Next Character is a Single Quote\cf2\par
+    BNE \f3 BSCH_INV\f2  \cf1 ; If no, then Command is Invalid\cf2\par
+    \par
+    MOVE.L A4,A3 \cf1 ; Store Starting Address of String Input in A3\cf2\par
+    \par
+\cf1 * Check if String Ends with Single Quote and has at least one character\cf2\par
+    CMP.B #$27,(A4)+ \cf1 ; Check if Next Character is a Single Quote\cf2\par
+    BEQ \f3 BSCH_INV\f2  \cf1 ; If yes, Command is Invalid Since String Cannot Be Empty\cf2\par
+    SUB.L #1,A4 \cf1 ; If no, Go Back to Previous Character\cf2\par
+\par
+\cf3 BSTR_LOOP\cf2  CMP.B #$27,(A4)+ \cf1 ; Check if Next Character is a Single Quote\cf2\par
+    BEQ BSTR_END \cf1 ; If yes, then Reached End of String\cf2\par
+    \par
+    CMP.B #0,-(A4) \cf1 ; Check if Character is null\cf2\par
+    BEQ \f3 BSCH_INV\f2  \cf1 ; If yes, then Command is Invalid\cf2\par
+    ADD.L #1,A4 \cf1 ; Go to Next Character\cf2\par
+    BRA BSTR_LOOP \cf1 ; If no, then Keep Looping \cf2\par
+    \par
+\cf3 BSTR_END\cf2  MOVE.L A4,(A5) \cf1 ; Store Current Location of Input Pointer in INP_PTR\cf2\par
+\par
+    JSR CHK_END \cf1 ; Check if reached end of input. If not, then Command Invalid\cf2\par
+    \f3 CMP.B #1,D6 \cf1 ; Check if D6 = 1\cf2\f2\par
+    \f3 BEQ BSCH_INV \cf1 ; If yes, then Command is Invalid\cf2\f2\par
+    \par
+    CLR.L D4 \cf1 ; Clear Flag to Check if String is Found\cf2\par
+    \par
+\cf3 BSCH_NO\cf2  CMPA.L A1,A2 \cf1 ; Check if A2 <= A1\cf2\par
+     BLE BSCH_DONE \cf1 ; If yes, Search Exhausted\cf2\par
+     MOVE.L A3,A4  \cf1 ; Make a copy of Start Address of Input String\cf2\par
+     MOVE.L A1,A5  \cf1 ; Save Start Address of Located String in A5\cf2\par
+\cf3 BSCH_YES\cf2   CMPA.L A1,A2 \cf1 ; Check if A2 <= A1\cf2\par
+     BLE BSCH_DONE \cf1 ; If yes, Search Exhausted\cf2\par
+     MOVE.B (A4)+,D1 \cf1 ; Get character from Input String in D1\cf2\par
+     CMP.B #$27,D1 \cf1 ; Check if Character is a Single Quote\cf2\par
+     BEQ BSCH_MATCH \cf1 ; If yes, then Match Found\cf2\par
+     MOVE.B (A1)+,D2 \cf1 ; Get character to Compare with in D2\cf2\par
+     CMP.B D1,D2 \cf1 ; Check if Characters Match\cf2\par
+     BNE BSCH_NO \cf1 ; If no, Restart Search from Following Address\cf2\par
+     BRA BSCH_YES \cf1 ; Continue Searching\cf2\par
+       \par
+\cf3 BSCH_MATCH\cf2  MOVE.L #1,D4 \cf1 ; Set Flag to Denote String Was Found\cf2\par
+    MOVE.B #16,D2 \cf1 ; Set Base for Output Operation to 16\cf2\par
+\par
+\cf1 * Display Address\cf2\par
+    \par
+    MOVE.L A5,D\f3 2\f2  \cf1 ; Get START Address in D\f3 2\cf2\f2\par
+    MOVE.B #\f3 2,D3\f2  \cf1 ; Set \f3 Number of Bytes to Display = 2\cf2\f2\par
+    \f3 JSR DISPREG \cf1 ; Display Address\cf2\f2\par
+    \par
+    JSR SPACE \cf1 ; Leave a Blank Space\cf2\par
+   \par
+\cf1 * Display String\cf2\par
+    JSR QUOTE \cf1 ; Display Single Quote\cf2\par
+    \par
+    MOVE.B #6,D0 \cf1 ; Set TRAP Function to Output Character in D1.B\cf2\par
+\par
+\cf3 BSD_LOOP\cf2  CMP.L A5,A1 \cf1 ; Check if A1 <= A5\cf2\par
+    BLE BSD_END \cf1 ; If yes, then Memory Set Display Complete\cf2\par
+    \par
+    MOVE.B (A5)+,D1 \cf1 ; Get Character in D1\cf2\par
+    TRAP #15\par
+    BRA BSD_LOOP \cf1 ; Loop till End of String\cf2\par
+    \par
+\cf3 BSD_END\cf2  JSR QUOTE \cf1 ; Display Single Quote\cf2\par
+\par
+    JSR SPACE \cf1 ; Leave Blank Space\cf2\par
+    \par
+    MOVE.L A1,A5 \cf1 ; Save Value of A1 in A5\cf2\par
+    \par
+\cf1 * Display Success Message\cf2\par
+    LEA SFOUND,A1\par
+    MOVE.B #13,D0\par
+    TRAP #15\par
+    MOVE.L A5,A1 \cf1 ; Restore Value of A1\cf2\par
+    \par
+    BRA BSCH_NO \cf1 ; Look for More Matches\cf2\par
+\par
+\cf3 BSCH_DONE\cf2  CMP.L #1,D4 \cf1 ; Check Flag to See if String Was Found\cf2\par
+    BEQ BSCH_END \cf1 ; If yes, then Block Search Complete\cf2\par
+    \par
+\cf1 * Display Failure Message Since String Was Not Found\cf2\par
+    LEA SLOST,A1\par
+    MOVE.B #13,D0\par
+    TRAP #15\par
+    \par
+\cf3 BSCH_END\cf2  MOVEM.L (A7)+,D0-D4/A0-A5 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+    \par
+\cf3\f3 BSCH_INV\cf2  JSR INVALID \cf1 ; Display Error Message\cf2\f2\par
+    MOVEM.L (A7)+,D0-D4/A0-A5 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\cf1 *-------------------------------------------------------------------------------------------------------------------------\cf2\par
+
+\protect0\pard\protect\fi720\cf0\b\i\protect0\f0\fs24\lang9\par
+
+\pard\b0\i0\par
+
+\pard\fi720\par
+\par
+\par
+\par
+\b\i 2.2.7-) BF (Block Fill)\par
+\par
+\b0\i0 Function: The "BF" (Block Fill) command is used to store a word sized data in memory locations within an address range. The bounds of the memory locations to fill are to be inputted by the user. These can be given as hexadecimal or decimal numbers. Also, these addresses need to be even numbers since this is a word size operation and therefore cannot be executed at odd locations. Finally, if the command is entered incorrectly, an error message is displayed and the program returns to the terminal.\par
+
+\pard\par
+Syntax: "TUTOR 0.1> BF $2000 $3000 $2500<CR>"\par
+\tab\tab OR\par
+            "TUTOR 0.1> BF 8192 $3000 $2500<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> BF $2000 12288 $2500<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> BF 8192 12288 $2500<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> BF $2000 $3000 9472<CR>"\par
+\tab\tab OR\par
+            "TUTOR 0.1> BF 8192 $3000 9472<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> BF $2000 12288 9472<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> BF 8192 12288 9472<CR>"\par
+\par
+\par
+\par
+\par
+In all of the above examples, the same word size data ($2500 = 9472) will be filled in all memory locations in the same address range since $2000 (hexadecimal value) = 8192 (decimal value) and $3000 (hexadecimal value) = 12288 (decimal value) . Thus, there are eight total ways this command can be structured.\par
+\par
+\par
+How It Works: To execute the "BF" (Block Fill) command, the program needs three adresses as mentioned. These can be parsed from the user input using the "GET_DATA" subroutine. These addresses are then put into three Address Registers. Following this, data is copied from the source memory block starting at the source start address and is saved in consecutive memory locations begining at the destination start address. This goes on till all the data from the source memory block have been copied over. In the event that one of the inputted data is not a valid address, an error message is displayed and the Block Fill operation is not executed.\par
+
+\pard\fi720\b\i\par
+
+\pard\b0\i0\par
+
+\pard\fi720\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.7.1-) BF Algorithm\par
+\par
+\b0 Step 1: Save registers to Stack\par
+Step 2: Get start address of block in A1 // Calls subroutine "GET_DATA"\par
+Step 3: IF address is even // Required for word operations\par
+\tab THEN go to Step 4   \par
+\tab ELSE go to Step 14 // Invalid Address\par
+Step 4: Get end address of block in A2 // Calls subroutine "GET_DATA"\par
+Step 5: IF address is even // Required for word operations\par
+\tab THEN go to Step 6   \par
+\tab ELSE go to Step 14// Invalid Address\par
+Step 6: Get input data in D0 // Calls subroutine "GET_DATA"\par
+Step 7: IF D0  < $FFFF   // Word sized data\par
+\tab THEN go to Step 8\par
+\tab ELSE go to Step 14 // Invalid Data\par
+Step 8: IF A2 > A1 // Still inside block\par
+\tab THEN go to Step 9\par
+\tab ELSE go to Step 12  // Operation complete\par
+Step 9: Store data in (A1)   // Block fill\par
+Step 10: A1 = A1 + 1  // Increment memory location\par
+Step 11: Go to Step 5  // Loop while inside block\par
+Step 12: Restore registers from Stack \par
+Step 13: Return from subroutine \par
+Step 14: Display error message\par
+Step 15: Restore registers from Stack \par
+Step 16: Return from subroutine \i0\par
+\par
+\b\i 2.2.7.2-) BF Flowchart\b0\i0\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.7.3-) BF Assembly Code \par
+\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf1\b0\i0\protect\f2\fs20\lang1033 *---------------------------------------------------------------------------------------------------\cf2\par
+\cf3 BF\protect0\par
+\cf1\protect\f3 * Fills Block of Memory With Inputted Word Size Data\cf2\f2\par
+\cf1\f3 *\cf2\f2\par
+    MOVE.L $1030,A0 \cf1 ; Restore A0 from Memory\cf2\par
+    MOVEM.L D0\f3 /D6\f2 /A0-A2,-(A7) \cf1 ; Save Registers to Stack\cf2\par
+    \par
+\cf1 * Get START Address in A1\cf2\par
+    LEA DATA1,A0 \cf1 ; Set Pointer to First Data Save Location\cf2\par
+    JSR GET_DATA \cf1 ; Get Data from Input\cf2\par
+    MOVE.L (A0)+,A1 \cf1 ; Get First Address in A1, and then Set Pointer to Second Data Save Location\cf2\par
+    \par
+\cf1 * Check if \f3 START Address\f2  is \f3 Even\cf2\f2\par
+    \f3 MOVE.L A1,D0 \cf1 ; Get Address in D0\cf2\f2\par
+    \f3 BTST\f2  #\f3 0\f2 ,D0 \cf1 ; Check \f3 if D0 is even\cf2\f2\par
+    B\f3 NE\f2  BF_INV \cf1 ; If \f3 no\f2 , then \f3 Address is Invalid\cf2\f2\par
+\par
+\cf1 * Get END Address in A2\cf2\par
+    JSR GET_DATA \cf1 ; Get Data from Input\cf2\par
+    MOVE.L (A0)+,A2 \cf1 ; Get Second Address in A2, and then Set Pointer to Third Data Save Location\cf2\par
+    \par
+\cf1 * Check if \f3 END\f2  Address is \f3 Even\cf2\f2\par
+    MOVE.L A2,D0 \cf1 ; Get Address in D0\cf2\par
+    BTST #0,D0 \cf1 ; Check if D0 is even\cf2\par
+    BNE BF_INV \cf1 ; If no, then Address is Invalid\cf2\par
+    \par
+\cf1 * Get Data in D0\cf2\par
+    JSR GET_DATA \cf1 ; Get Data from Input\cf2\par
+    MOVE.L (A0),D0 \cf1 ; Get Data in D0\cf2\par
+    \par
+\cf1 * Check if Data is Word Size\cf2\par
+    CMP.L #$FFFF,D0 \cf1 ; Check id D0 > Largest Word\cf2\par
+    BGT \f3 BF_INV\f2  \cf1 ; If yes, then Data is not Word Size\cf2\par
+    \par
+    JSR CHK_END \cf1 ; Check if reached end of input. If not, then Command Invalid\cf2\par
+    \f3 CMP.B #1,D6 \cf1 ; Check if D6 = 1\cf2\f2\par
+    \f3 BEQ BF_INV \cf1 ; If yes, then Command is Invalid\cf2\f2\par
+\par
+\cf3 BF_LOOP\cf2  CMP.L A1,A2 \cf1 ; Check if A2 <= A1\cf2\par
+    BLE BF_END \cf1 ; If yes, then Block Fill Complete\cf2\par
+    \par
+    MOVE.W D0,(A1)+ \cf1 ; Fill Word in the Block\cf2\par
+    BRA BF_LOOP \cf1 ; Loop While in Address Range\cf2\par
+\par
+\cf3 BF_END\cf2  MOVEM.L (A7)+,D0\f3 /D6\f2 /A0-A2 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine \cf2\par
+    \par
+\cf3 BF_\f3 INV\cf2\f2  \f3 JSR INVALID \cf1 ; Display Error Message\cf2\f2\par
+    MOVEM.L (A7)+,D0/D6/A0-A2 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine \cf2\par
+
+\protect0\pard\protect\fi720\cf1 *-------------------------------------------------------------------------------------------------- \cf0\b\i\protect0\f0\fs24\lang9\par
+
+\pard\b0\i0\par
+
+\pard\fi720\par
+\b\i\par
+2.2.8-) BMOV (Block Move)\par
+
+\pard\b0\i0\par
+
+\pard\fi720 Function: The "BMOV" (Block Move) command is used to move data from one block of memory locations to another. Accordingly, this subroutine requires three input addresses: (1) starting address of the source, (2) ending address of the source, and (3) starting address of the destination. Each of these addresses can be given as hexadecimal or decimal numbers. Note that the end address of the destination is not inputted because it can easily be calculated from the size of the source memory block if needed. Also. it is preferrable not to have the destination address lying within the source block of memory locations, to prevent ambiguity of data at these locations. If the command is entered appropriately, this subroutine will copy over data from an entire range of memory locations to another area in memory. Otherwise, an error message is displayed and the program returns to the terminal.\par
+
+\pard\par
+Syntax: "TUTOR 0.1> BMOV $2000 $2500 $3000<CR>"\par
+\tab\tab OR\par
+            "TUTOR 0.1> BMOV 8192 $2500 $3000<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> BMOV $2000 $2500 12288<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> BMOV 8192 $2500 12288<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> BMOV $2000 9472 $3000<CR>"\par
+\tab\tab OR\par
+            "TUTOR 0.1> BMOV 8192 9472 $3000<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> BMOV $2000 9472 12288<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> BMOV 8192 9472 12288<CR>"\par
+\par
+\par
+\par
+In all of the above examples, data residing with memory locations $2000 (8192) and $2500 (9472) is copied over to memory locations between $3000 (12288) and $3500 (13568). Thus, there are eight total ways this command can be structured.\par
+\par
+\par
+How It Works: To execute the "BMOV" (Block Move), the program needs to know the address range  to fill the inputted word size data in. Since these are also provided in the user input, the "GET_DATA" subroutine (discussed in the previous section) is used. These addresses are then put into two Address Registers. Also, one must note that since this is a word size operation, both the addresses must be even. Next, the input is checked to see if it a word size datum. If it is, all memory locations within the range are fill with this datum, one word at a time. If not, then an error message is displayed and the Block Fill operation is not executed.\par
+
+\pard\fi720\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.8.1-) BMOVAlgorithm\par
+\par
+\b0 Step 1: Save registers to Stack\par
+Step 2: Get start address of source block in A1 // Calls subroutine "GET_DATA"\par
+Step 3: Get end address of source block in A2 // Calls subroutine "GET_DATA"\par
+Step 4: Get start address of destination block in A3 // Calls subroutine "GET_DATA"\par
+Step 5: Initialize A4-> current position of instruction pointer\par
+Step 6: IF character at (A4) = null    // Check for carriage return\par
+\tab THEN go to Step 7\par
+\tab ELSE go to Step 14  // Data invalid\par
+Step 7: IF A2 > A1 // Still inside block\par
+\tab THEN go to Step 8\par
+\tab ELSE go to Step 12  // Operation complete\par
+Step 8: Copy data from (A1) to (A3)   // Block Move\par
+Step 9: A1 = A1 + 1  // Increment source memory location\par
+Step 10: A3 = A3 + 1  // Increment memory location\par
+Step 11: Go to Step 7  // Loop while inside block\par
+Step 12: Restore registers from Stack \par
+Step 13: Return from subroutine \par
+Step 14: Display error message\par
+Step 15: Restore registers from Stack \par
+Step 16: Return from subroutine \i0\par
+\b\i\par
+\par
+\b0\i0\par
+\par
+\b\i 2.2.8.2-) BMOV Flowchart\b0\i0\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.8.3-) BMOVAssembly Code \par
+
+\pard\b0\i0\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf1\protect\f2\fs20\lang1033 *--------------------------------------------------------------------------------------------------    \cf2\par
+\cf3 BMOV\cf2\par
+\cf1\f3 * Copy a Block of Memory from One Place to Another\cf2\f2\par
+\cf1\f3 * Inputs: Start & End Address of Source, Start Address of Destination\cf2\f2\par
+\par
+    MOVE.L $1030,A0 \cf1 ; Restore A0 from Memory\cf2\par
+    MOVEM.L \f3 D6/\f2 A0-A3,-(A7) \cf1 ; Save Registers to Stack \cf2\par
+    \par
+\cf1 * Get START Address in A1\cf2\par
+    LEA DATA1,A0 \cf1 ; Set Pointer to First Data Save Location\cf2\par
+    JSR GET_DATA \cf1 ; Get Data from Input\cf2\par
+    MOVE.L (A0)+,A1 \cf1 ; Get First Address in A1, and then Set Pointer to Second Data Save Location\cf2\par
+\par
+\cf1 * Get END Address in A2\cf2\par
+    JSR GET_DATA \cf1 ; Get Data from Input\cf2\par
+    MOVE.L (A0)+,A2 \cf1 ; Get Second Address in A2, and then Set Pointer to Third Data Save Location\cf2\par
+    \par
+\cf1 * Get START Address #2 in A3\cf2\par
+    JSR GET_DATA \cf1 ; Get Data from Input\cf2\par
+    MOVE.L (A0),A3 \cf1 ; Get Second Address in A2\cf2\par
+    \par
+    JSR CHK_END \cf1 ; Check if reached end of input. If not, then Command Invalid\cf2\par
+    CMP.B #1,D6 \cf1 ; Check if D6 = 1\cf2\par
+    BEQ B\f3 MOV\f2 _INV \cf1 ; If yes, then Command is Invalid\cf2\par
+\par
+\cf3 BMOV_LOOP\cf2  CMP.L A1,A2 \cf1 ; Check if A2 <= A1\cf2\par
+    BLE BMOV_END \cf1 ; If yes, then Block Move Complete\cf2\par
+    \par
+    MOVE.B (A1)+,(A3)+ \cf1 ; Move Byte from Block\cf2\par
+    BRA BMOV_LOOP \cf1 ; Loop While in Address Range\cf2\par
+\par
+\cf3 BMOV_END\cf2  MOVEM.L (A7)+,\f3 D6/\f2 A0-A3 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+    \par
+\cf3 BMOV_\f3 INV\cf2  JSR INVALID \cf1 ; Display Error Message\cf2\f2\par
+\f3    \f2  MOVEM.L (A7)+,D6/A0-A3 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+
+\protect0\pard\protect\fi720\cf1 *-------------------------------------------------------------------------------------------   \cf0\protect0\f0\fs24\lang9\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.9-) BTST (Block Test)\par
+\par
+\b0\i0 Function: "BTST" (Block Test) is a destructive test of a block of memory. The memory is tested by consecutively writing and reading different types of data to see whether the written value is actually maintained by the memory locations or not. If the memory block passes this test, a success message is displayed on the screen. If not, a failure message is displayed, followed by additional information regarding the reasons behind the failure. This includes the address of memory location where the Block Test failed, the value written to the memory, and the actual (different) value read from the location. For the Monitor program, the hexadecimal numbers '$AA' and '$55' are used to test memory blocks as they are alternate zeroes and ones (10101010 and 01010101), thus making it possible to test every value for every bit of data in the block of memory. Lastly, the addresses inputted by the user can be either hexadecimal or decimal numbers. Note however, that if the addresses inputted are invalid, the Block Test operation is not be performed. Instead, an error message is displayed and the program returns to the terminal.\par
+\par
+\par
+\b\i\par
+
+\pard\b0\i0 Syntax: "TUTOR 0.1> BTST $2000 $3000<CR>"\par
+\tab\tab OR\par
+            "TUTOR 0.1> BTST 8192 $3000<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> BTST $2000 12288<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> BTST 8192 12288<CR>"\par
+\par
+\par
+\par
+In all of the above examples, the block of memory ranging from addresses $2000 (8192) to$3000 (12288) is being tested. Thus, there are eight total ways this command can be structured.\par
+\par
+How It Works: Before performing the Block Test operation, the subroutine needs to acquire the start and end address of the block of memory to be tested. It does so by using the GET_DATA" subroutine to parse the addresses from the input string. Next, the subroutine checks if the command is appropriately terminated using a carriage return. If not, an error message is displayed, and the program returns to the terminal. If it is entered correctly, the Block Test operation begins. First, the byte "$AA" is written to all memory locations within the block of memory. This is followed by a read operation for the entire block. When each byte is read, it is compare with "$AA". If it matches, the subroutine moves on to the next address. If it doesn't match, the corresponding address, value written (here $AA), and value read are displayed on the screen with a failure message. If the entire block checks out, the same operation is carried out once again, but this time using the byte "$55" instead of "$AA". If this also checks out, a success message is displayed on the screen, after which the program returns to the terminal.\par
+\par
+
+\pard\fi720\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.9.1-) BTST Algorithm\b0\i0\par
+\par
+\i Step 1: Save registers to Stack\par
+Step 2: Get start address of block in A1 // Calls subroutine "GET_DATA"\par
+Step 3: Get end address of block in A2 // Calls subroutine "GET_DATA"\par
+Step 4: Initialize A4-> current position of instruction pointer\par
+Step 5: IF character at (A4) = null    // Check for carriage return\par
+\tab THEN go to Step 6\par
+\tab ELSE go to Step 23  // Data invalid\par
+Step 6: IF A2 > A1 // Still inside block\par
+\tab THEN go to Step 7 \par
+\tab ELSE go to Step 10 // Write successful\par
+Step 7: Write $AA into (A1) // Write operation loop\par
+Step 8: A1 = A1 + 1  // Increment memory location\par
+Step 9: Go to Step 6  // Loop while inside block\par
+Step 10: Get start address of block in A1 \par
+Step 11: IF A2 > A1 // Still inside block\par
+\tab THEN go to Step 12\par
+\tab ELSE go to Step 16  // Read successful\par
+Step 12: Read from (A1) // Read operation loop\par
+Step 13: IF (A1) = $AA // Check Written Value\par
+\tab THEN go to Step 14\par
+\tab ELSE go to Step 20 // Write unsuccessful\par
+Step 14: A1 = A1 + 1  // Increment memory location\par
+Step 15: Go to Step 6  // Loop while inside block\par
+Step 16: Get start address of block in A1 \par
+Step 17: Repeat Steps 6 to 15 using $55 instead of $AA\par
+Step 18: Display success message\par
+Step 19: Go to Step 21\par
+Step 20: Display failure message, address, written value & read value\par
+Step 21: Restore registers from Stack \par
+Step 22: Return from subroutine \par
+Step 23: Display error message\par
+Step 24: Restore registers from Stack \par
+Step 25: Return from subroutine \i0\par
+\par
+\b\i 2.2.9.2-) BTST Flowchart\b0\i0\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.9.3-) BTST Assembly Code \par
+\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf1\b0\i0\protect\f2\fs20\lang1033 *-------------------------------------------------------------------------------------------    \cf2\par
+\cf3 BTST\cf2\par
+\cf1\f3 * Desctructive Test for a Memory Block\cf2\f2\par
+\cf1\f3 * Data is Alternatively Read & Written to Ensure that the Memory Location can Maintain Data\cf2\f2\par
+\par
+    MOVE.L $1030,A0 \cf1 ; Restore A0 from Memory\cf2\par
+    MOVEM.L D0-D\f3 5\f2 /A0-A\f3 3\f2 ,-(A7) \cf1 ; Save Registers to Stack\cf2\par
+    \par
+\cf1 * Get START Address in A1\cf2\par
+    LEA DATA1,A0 \cf1 ; Set Pointer to First Data Save Location\cf2\par
+    JSR GET_DATA \cf1 ; Get Data from Input\cf2\par
+    MOVE.L (A0)+,A1 \cf1 ; Get First Address in A1, and then Set Pointer to Second Data Save Location\cf2\par
+\par
+\cf1 * Get END Address in A2\cf2\par
+    JSR GET_DATA \cf1 ; Get Data from Input\cf2\par
+    MOVE.L (A0)+,A2 \cf1 ; Get Second Address in A2, and then Set Pointer to Third Data Save Location\cf2\par
+    \par
+    JSR CHK_END \cf1 ; Check if reached end of input. If not, then Command Invalid\cf2\par
+    \f3 CMP.B #1,D6 \cf1 ; Check if D6 = 1\cf2\f2\par
+    \f3 BEQ BTST_INV \cf1 ; If yes, then Command is Invalid\cf2\f2\par
+\par
+    MOVE.L A1,A0 \cf1 ; Make Copy of START Address in A0\cf2\par
+    \f3 MOVE.L A0,A3 \cf1 ; Make Copy of START Address in A3\cf2\f2\par
+\par
+    \f3 MOVE.B #$AA,D4 \cf1 ; Data to be written\cf2\f2\par
+    \par
+\cf1 * Write Data to Block\cf2\par
+\cf3 BTST_LOOP1\cf2  CMP.L A1,A2 \cf1 ; Check if A2 <= A1\cf2\par
+    BLE BTST_NEXT\f3 1\f2  \cf1 ; If yes, then Block Write Complete\cf2\par
+    \par
+    MOVE.B \f3 D4\f2 ,(A1)+ \cf1 ; Write Byte to Block\cf2\par
+    BRA BTST_LOOP1 \cf1 ; Loop While in Address Range\cf2\par
+    \par
+\cf3 BTST_NEXT\f3 1\cf2\f2   \cf1 ;MOVE.B #$3C,(A0) ; Create a Block Test Error at Starting Address\cf2\par
+\par
+\cf1 * Read Data from Block\cf2\par
+\cf3 BTST_LOOP2\cf2  CMP.L A0,A2 \cf1 ; Check if A2 <= A0\cf2\par
+    BLE BTST_PASS \cf1 ; If yes, then Block Read Complete\cf2\par
+    \par
+    MOVE.B (A0)+,D\f3 5\f2  \cf1 ; Read Byte from Block into Temporary Register\cf2\par
+    CMP.B \f3 D4\f2 ,D\f3 5\f2  \cf1 ; Check if Read Value = Written Value\cf2\par
+    BNE BTST_FAIL \cf1 ; If no, then Block Test Failed\cf2\par
+    BRA BTST_LOOP2 \cf1 ; Loop While in Address Range\cf2\par
+    \par
+\cf3 BTST_PASS\cf2  \f3 MOVE.L A3,A0 \cf1 ; Restore START Address in A0\cf2\f2\par
+    MOVE.L A3,A\f3 1\f2  \cf1 ; Restore START Address in A\f3 1\cf2\f2\par
+    \par
+    \f3 CMP.B #$55,D4 \cf1 ; Check if D4 = $55\cf2\f2\par
+    \f3 BEQ BTST_SUCCESS \cf1 ; Passed both Block Tests\cf2\f2\par
+    \par
+    \f3 MOVE.B #$55,D4 \cf1 ; New Data to be Written\cf2\f2\par
+    \f3 BRA BTST_LOOP1 \cf1 ; Perform Operation Twice\cf2\f2\par
+    \par
+\cf1 * Display Block Test Passed Message\cf2\par
+\cf3 BTST_SUCCESS\cf2  LEA BPASS,A1\par
+    MOVE.B #13,D0 \cf1 ; Set TRAP Funtion to Output String Starting at A1 with CR\cf2\par
+    TRAP #15\par
+    BRA BTST_END \cf1 ; End of Block Test\cf2\par
+    \par
+\cf1 * Display Block Test Failed Message\cf2\par
+\cf3 BTST_FAIL\cf2  LEA BFAIL,A1\par
+    MOVE.B #13,D0 \cf1 ; Set TRAP Funtion to Output String Starting at A1 with CR\cf2\par
+    TRAP #15\par
+    \par
+\cf1 * Display Failure Address\cf2\par
+    MOVE.L A0,D\f3 2\f2  \cf1 ; Get Address of Latter Byte\cf2\par
+    SUB.L #1,D\f3 2\f2  \cf1 ; Get Address of Failed Byte\cf2\par
+    MOVE.B #\f3 2\f2 ,D\f3 3\f2  \cf1 ; Set \f3 Number of Bytes to Display = 2\cf2\f2\par
+    \f3 JSR DISPREG \cf1 ; Display Failure Address\cf2\f2\par
+    \par
+    JSR SPACE \cf1 ; Leave a Blank Space\cf2\par
+    \par
+\cf1 * Display Written Byte\cf2\par
+\f3     \f2 MOVE.B #\f3 1\f2 ,D\f3 3\f2  \cf1 ; Set \f3 Number of Bytes to Display = 1\cf2\f2\par
+    MOVE.L \f3 D4\f2 ,D\f3 2\f2  \cf1 ; Data to be Written\cf2\par
+    JSR DISPREG \cf1 ; Display \f3 Written Byte\cf2\f2\par
+    \par
+    JSR SPACE \cf1 ; Leave a Blank Space\cf2\par
+    \par
+\cf1 * Display Read Byte\cf2\par
+    MOVE.L D\f3 5\f2 ,D\f3 2\f2  \cf1 ; Data to be Written\cf2\par
+    JSR DISPREG \cf1 ; Display \f3 Read\f2  Byte\cf2\par
+    \par
+    JSR NEWLINE \cf1 ; Print a Blank Line\cf2\par
+    \par
+\cf3 BTST_END\cf2  MOVEM.L (A7)+,D0-D\f3 5\f2 /A0-A\f3 3\f2  \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+    \par
+\cf3 BTST_\f3 INV\cf2  JSR INVALID \cf1 ; Display Error Message\cf2\f2\par
+    MOVEM.L (A7)+,D0-D\f3 5\f2 /A0-A\f3 3\f2  \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\par
+\cf1 *--------------------------------------------------------------------------------------------------------------------------\cf2\par
+
+\protect0\pard\protect\fi720\cf0\b\i\protect0\f0\fs24\lang9\par
+
+\pard\b0\i0\par
+
+\pard\fi720\par
+\par
+\par
+\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.10-) MDSP (Memory Display)\par
+
+\pard\b0\i0\par
+
+\pard\fi720 Function: The command "MDSP" (Memory Display) is used to display data in consecutive memory locations. One or two addresses are inputs to this command. These addresses can be given as hexadecimal or decimal numbers. If two addresses are inputted, this command displays the memory locations and their contents for all addresses within the given range (last address excluded). On the other hand, if only one address is inputted, by default, the command will display 16 consecutive memory locations and their contents, starting at the inputted address. If any of the inputs are invalid, an error message is displayed and the memory display operation is not executed.\par
+\par
+\par
+\par
+\b\i\par
+
+\pard\b0\i0 Syntax: "TUTOR 0.1> MDSP $2000<CR>"\par
+\tab\tab OR\par
+            "TUTOR 0.1> MDSP $2000 $3000<CR>"\par
+\par
+\par
+\par
+In the first example, the subroutine will display the addresses and contents of 16 consecutive memory locations starting at $2000 (i.e. $2000 to $200F). On the other hand, the second example command will display addresses and contents for all memory locations between $2000 and $3000.\par
+\par
+How It Works: In order to display addresses and contents of memory locations to the terminal, the subroutine must be provided with one or two addresses. This is achieved through the use of the "GET_DATA" subroutine. If there are two addresses, they are stored in two separate Address Registers. If only one is given, this address is placed in both the Address Registers, and then 16 is added to the second one. The subroutine now has everything it needs and thus begins displays addresses and contents of memory locations between the two addresses. If for some reason the inputs are erroneous, an error message is displayed and the program returns to the terminal.\par
+
+\pard\fi720\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.10.1-) MDSP Algorithm\par
+\par
+\b0 Step 1: Save registers to Stack\par
+Step 2: Get start address of block in A1 // Calls subroutine "GET_DATA"\par
+Step 3: Initialize A4-> current position of instruction pointer\par
+Step 4: IF character at (A4) = null    // Check for carriage return\par
+\tab THEN go to Step  7   // No second address\par
+\tab ELSE go to Step 5\par
+Step 5: Get end address of block in A2 // Calls subroutine "GET_DATA"\par
+Step 6: IF character at (A4) = null    // Check for carriage return\par
+\tab THEN go to Step  8\par
+\tab ELSE go to Step 15 // Invalid command\par
+Step 7: A2 = A1 + 16 // Default operation\par
+Step 8: IF A2 > A1 // Still inside block\par
+\tab THEN go to Step 9\par
+\tab ELSE go to Step 13  // Operation complete\par
+Step 9: Display address to terminal\par
+Step 10: Display byte sized data from address\par
+Step 11: A1 = A1 + 1  // Increment memory location\par
+Step 12: Go to Step 8  // Loop while inside block\par
+Step 13: Restore registers from Stack \par
+Step 14: Return from subroutine \par
+Step 15: Display error message\par
+Step 16: Restore registers from Stack \par
+Step 17: Return from subroutine \i0\par
+\b\i\par
+\par
+
+\pard\b0\i0\tab\b\i 2.2.10.2-) MDSP Flowchart\par
+\b0\i0\par
+
+\pard\fi720\b\i 2.2.10.3-) MDSPAssembly Code \b0\i0\par
+
+\pard\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf1\protect\f2\fs20\lang1033 *-----------------------------------------------------------------------------------------------------------------------------------\cf2\par
+\cf3 MDSP\cf2\par
+\cf1\f3 * If 2 Addresses Inputted : Displays Addresses and Contents of All Memory Locations Between Addresses\cf2\par
+\cf1\f2 * If \f3 1\f2  Addresse\f3  \f2 Inputted : Displays Addresses and Contents of \f3 16 Consecutive\f2  Memory Location\f3 s Starting at Address\cf2\f2\par
+\par
+    MOVE.L $1030,A0 \cf1 ; Restore A0 from Memory\cf2\par
+    MOVEM.L D0-D\f3 3/D6\f2 /A0-A4,-(A7) \cf1 ; Store Registers on Stack\cf2\par
+    \par
+\cf1 * Get START Address in A1\cf2\par
+    LEA DATA1,A0 \cf1 ; Set Pointer to First Data Save Location\cf2\par
+    JSR GET_DATA \cf1 ; Get Data from Input\cf2\par
+    MOVE.L (A0)+,A1 \cf1 ; Get First Address in A1, and then Set Pointer to Second Data Save Location\cf2\par
+\par
+\cf1 * Check if Second Address Inputted\cf2\par
+    LEA INP_PTR,A4 \cf1 ; Get Address of Input Pointer Location in A4\cf2\par
+    MOVE.L (A4),A3 \cf1 ; Get Current Location of Input Pointer in A3\cf2\par
+    MOVE.B (A3),D0 \cf1 ; Get Character at Current Pointer Location in D0\cf2\par
+    BNE GET2ADR \cf1 ; If character is not null, then Get Second Address\cf2\par
+    MOVE.L A1,A2 \cf1 ; Copy A1 to A2\cf2\par
+    ADD.L #16,A2 \cf1 ; A2 = A1 + 16\cf2\par
+    BRA START_MDSP\par
+    \par
+\cf3 GET2ADR\cf2  \par
+    JSR GET_DATA \cf1 ; Get Data from Input\cf2\par
+    MOVE.L (A0),A2 \cf1 ; Get Second Address in A2\cf2\par
+    \par
+\cf3 START_MDSP\cf2   \par
+    JSR CHK_END \cf1 ; Check if reached end of input. If not, then Command Invalid\cf2\par
+    \f3 CMP.B #1,D6 \cf1 ; Check if D6 = 1\cf2\f2\par
+    \f3 BEQ MD_INV \cf1 ; Command is Invalid\cf2\f2\par
+    \par
+    \par
+\cf3 MD_LOOP\cf2  CMP.L A1,A2 \cf1 ; Check if A2 <= A1\cf2\par
+    BLE MD_DONE \cf1 ; If yes, then MD_DONE\cf2\par
+    \par
+    MOVE.L A1,D\f3 2\f2  \cf1 ; \f3 Get Address in D2\cf2\f2\par
+    \f3 MOVE.B #2,D3 \cf1 ; \f2 Set \f3 Number of Bytes to Display = 2\cf2\f2\par
+    \f3 JSR DISPREG \cf1 ; \f2 Output Address\cf2\par
+\par
+    JSR SPACE \cf1 ; Output Space Character\cf2\par
+    \par
+    MOVE.B (A1)+,D\f3 2 \cf1 ; Get Byte Size Data in D2\cf2\f2\par
+    MOVE.B #\f3 1\f2 ,D3 \cf1 ; Set Number of Bytes to Display = \f3 1\cf2\f2\par
+    \f3 JSR DISPREG\f2  \cf1 ; Output a Byte in Hex\cf2\par
+  \par
+    JSR NEWLINE \cf1 ; Output Newline Character\cf2\par
+    \par
+    BRA MD_LOOP \cf1 ; Loop While Still in Address Range\cf2\par
+    \par
+\cf3 MD_DONE\cf2  MOVEM.L (A7)+,D0-D\f3 3/D6\f2 /A0-A4 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+    \par
+\cf3 MD\f3 _INV\cf2\f2  \f3 JSR INVALID \cf1 ; Display Error Message\cf2\f2\par
+    MOVEM.L (A7)+,D0-D2/A0-A4 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine    \cf2\par
+
+\protect0\pard\protect\cf1 *--------------------------------------------------------------------------------------------- \cf0\protect0\f0\fs24\lang9\par
+\par
+\par
+
+\pard\fi720\b\i 2.2.11-) MM (Memory Modify)\par
+\par
+\b0\i0 Function: The "MM" (Memory Modify) command performs the dual task of displaying as well as allowing the user to modify memory locations. There are three supported modes of operation: 'B' (byte size), 'W' (word size), and 'L' (wong word size). This command uses one input which serves as the start address for the memory modify operation. This address can be given as a hexadecimal or a decimal number. If the mode of operation is not specified, the default "word size" operation is executed. This command will display a memory location starting at the specified address and wait for user input. If the user inputs a number, it is stored in that memory location. If the number is larger than the size of opeation, an error message is displayed and the memory modify operation ends. If the user enters a carriage return without entered any data, the contents of the memory location will not be modified. Finally, the memory modify operation will continue until one of the following occurs: (1) the user enters a period (".") followed by a carriage return, or (2) the user enters invalid data which causes the program to display an error message and stop the memory modify operation.\par
+\par
+Modes: 'B' -> Byte Operation\par
+\tab  'W' -> Word Operation (Default)\par
+\tab   'L' -> Long Word Operation\par
+\par
+\b\i\par
+
+\pard\b0\i0 Syntax: "TUTOR 0.1> MM $2000<CR>"\par
+\tab\tab OR\par
+            "TUTOR 0.1> MM $2000;B<CR>"\par
+\tab\tab OR\par
+            "TUTOR 0.1> MM $2000;W<CR>"\par
+\tab\tab OR\par
+            "TUTOR 0.1> MM $2000;L<CR>"\par
+\par
+\par
+The first and third example commands perform the exact same operation: word size data is displayed at the terminal along with their addresses starting at $2000, and the user can input word size data to modify the data. In the second example, the same operation is perfomed, except that bytes are used instead of words. Similarly, the last command is an example of a long word size operation.\par
+\par
+How It Works: In order to display addresses and contents of memory locations to the terminal, the subroutine must be provided with a starting address. This is achieved through the use of the "GET_DATA" subroutine. This address is then placed in an Address. Next, the subroutine checks if a mode of operation has been inputted by looking for the semicolon (";") symbol. If so, it sets a Data Register to an appropriate value based on the mode selected. If no mode is selected, the word size operation is performed by default. The subroutine now has everything it needs and thus begins displays addresses and contents of memory locations starting at the inputted address. After displaying each datum, the subroutine waits for user input. If a period (".") followed by a carriage return is entered, the subroutine exits the memory modify loop and returns to the terminal. If a carriage return is entered, the subroutine doesn't modify the contents of the memory location, but moves on to the next address. If a hexadecimal or a decimal number is entered (with a leading space character), the subroutine stores the entered number in the current memory location and then moves on to the next address. Finally, if the user entered number is larger than the size of operation, or if the number is invalid, an error message is displayed and the program returns to the terminal.\par
+
+\pard\fi720\b\i\par
+
+\pard\b0\i0\par
+
+\pard\fi720\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.11.1-) MM Algorithm\par
+\par
+\b0 Step 1: Save registers to Stack\par
+Step 2: Get start address of block in A1 // Calls subroutine "GET_DATA"\par
+Step 3: Initialize A4-> current position of instruction pointer\par
+Step 4: IF character at (A4) = null    // Check for carriage return\par
+\tab THEN go to Step  10   // Default Mode\par
+\tab ELSE go to Step 5\par
+Step 5: IF character at (A4) = ';'    // Check for semicolon\par
+\tab THEN go to Step  6  \par
+\tab ELSE go to Step  27 // Invalid command\par
+Step 6: A4 = A4 + 1 // Go to next character\par
+Step 7: IF character at (A4) =  'B'  \par
+\tab THEN go to Step 12    // Byte operation\par
+\tab ELSE go to Step 8\par
+Step 8: IF character at (A4) =  'L'  \par
+\tab THEN go to Step 14  // Long word operation\par
+\tab ELSE go to Step 9\par
+Step 9: IF character at (A4) =  'W'  \par
+\tab THEN go to Step  10 // Word operation\par
+\tab ELSE go to Step 27 // Invalid command\par
+Step 10: Set D0 = 1 // For word size operation\par
+Step 11: Go to Step 15\par
+Step 12: Set D0 = 0 // For byte size operation\par
+Step 13: Go to Step 15\par
+Step 14: Set D0 = 2 // For long word operation\par
+Step 15: Display address to terminal\par
+Step 16: Display data from address  // Size depends on mode of operation\par
+Step 17: IF character at (A4) = '.'    // Check for period\par
+\tab THEN go to Step  25 // Operation complete\par
+\tab ELSE go to Step 18\par
+Step 18: IF character at (A4) = null    // Check for semicolon\par
+\tab THEN go to Step  23 // Don't modify memory\par
+\tab ELSE go to Step  19\par
+Step 19: IF character at (A4) = ' '     // Check for space\par
+\tab THEN go to Step  20  // Number entered\par
+\tab ELSE go to Step  27 // Invalid command\par
+Step 20: Get number in D1 // Calls subroutine "GET_DATA"\par
+Step 21: IF number < size of operation \par
+\tab THEN go to Step  22  \par
+\tab ELSE go to Step 27  // Invalid number\par
+Step 22: Store number in memory  // Memory modify\par
+Step 23: A1 = A1 + 1  // Increment memory location\par
+Step 24: Go to Step 15  // Loop till period entered\par
+Step 25: Restore registers from Stack \par
+Step 26: Return from subroutine \par
+Step 27: Display error message\par
+Step 28: Restore registers from Stack \par
+Step 29: Return from subroutine \i0\par
+\par
+\par
+\b\i 2.2.11.2-) MM Flowchart\b0\i0\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.11.3-) MM Assembly Code \par
+
+\pard\b0\i0\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf1\protect\f2\fs20\lang1033 *-----------------------------------------------------------------------------------------------  \cf2\par
+\cf3 MM\cf2\par
+\cf1\f3 * Displays Address and Contents of Memory Locations Starting at Inputted Address\cf2\f2\par
+\cf1\f3 * Enter Number at the Terminal to Modify the Memory Contents\cf2\f2\par
+\cf1\f3 * Enter Carriage Return\f2  at the Terminal to \f3 Go to Next Address Without \f2 Modify\f3 ing\f2  the Memory Contents\cf2\par
+\cf1\f3 * Enter Period to Exit MM command loop\cf2\f2\par
+\par
+    MOVE.L $1030,A0 \cf1 ; Restore A0 from Memory\cf2\par
+    MOVEM.L D0-D4\f3 /D6\f2 /A0-A4,-(A7) \cf1 ; Save Registers to Stack\cf2\par
+    \par
+\cf1 * Get START Address in A1\cf2\par
+    LEA DATA1,A0 \cf1 ; Set Pointer to First Data Save Location\cf2\par
+    JSR GET_DATA \cf1 ; Get Data from Input\cf2\par
+    MOVE.L (A0)+,A2 \cf1 ; Get First Address in A2, and then Set Pointer to Second Data Save Location\cf2\par
+    \par
+\cf1 * Check if Command String has Ended\cf2\par
+    LEA INP_PTR,A3 \cf1 ; Get Address of Stored Pointer Location\cf2\par
+    MOVE.L (A3),A4 \cf1 ; Get Current Input Pointer Address in A4\cf2\par
+    \par
+    CMP.B #0,(A4) \cf1 ; Check if Character is null\cf2\par
+    BEQ MODEW \cf1 ; If yes, Perform Default Operation, i.e Word Mode\cf2\par
+    \par
+\cf1 * Check for ';' Character\cf2\par
+    CMP.B #$3B,(A4) \cf1 ; Check if Character is ';'\cf2\par
+    BNE \f3 MM_INV\f2  \cf1 ; If no, then Command is Invalid\cf2\par
+    \par
+    MOVE.L A4,(A3) \cf1 ; Save Current Input Pointer Location in INP_PTR\cf2\par
+    \par
+\cf1 * Check Mode of Operation\cf2\par
+    JSR GET_MODE \cf1 ; Get Mode from Input\cf2\par
+    MOVE.L (A0)+,D0 \cf1 ; Get Mode in D0, and then Set Pointer to Third Data Save Location\cf2\par
+    \par
+    CMP.L #$42,D0 \cf1 ;Check if Mode = 'B'\cf2\par
+    BEQ MODEB \cf1 ; If yes, then Perform Operation in Byte Mode\cf2\par
+    \par
+    CMP.L #$4C,D0 \cf1 ;Check if Mode = 'L'\cf2\par
+    BEQ MODEL \cf1 ; If yes, then Perform Operation in Long Word Mode\cf2\par
+    \par
+    CMP.L #$57,D0 \cf1 ;Check if Mode = 'W'\cf2\par
+    BNE \f3 MM_INV\f2  \cf1 ; If no, then Command is Invalid\cf2\par
+    \par
+\cf3 MODEW\cf2  MOVE.L #1,D4 \cf1 ; D4 = 1 for Word Operation\cf2\par
+    BRA MM_START \cf1 ; Start Memory Modify Operation\cf2\par
+\cf3 MODEB\cf2  CLR.L D4 \cf1 ; D4 = 0 for Byte Operation\cf2\par
+    BRA MM_START \cf1 ; Start Memory Modify Operation\cf2\par
+\cf3 MODEL\cf2  MOVE.L #2,D4 \cf1 ; D4 = 2 for Long Word Operation\cf2\par
+\par
+\cf3 MM_START\cf2\par
+    JSR CHK_END \cf1 ; Check if Command String is at End\cf2\par
+    \f3 CMP.B #1,D6 \cf1 ; Check if D6 = 0\cf2\f2\par
+    \f3 BEQ MM_INV \cf1 ; If yes, then Command is Invalid\cf2\f2\par
+\par
+    CLR.L D3 \cf1 ; Clear Data Input Register\cf2\par
+    MOVE.B #16,D2 \cf1 ; Set Base to 16 for TRAP Function #15\cf2\par
+    \par
+\cf3 MM_LOOP\cf2  MOVE.B #15,D0 \cf1 ; Set TRAP Function to Display D1.L in Base D2.B\cf2\par
+    \par
+    MOVE.L A2,D\f3 2\f2  \cf1 ; \f3 Get Address in D2\cf2\f2\par
+    MOVE.B #\f3 2\f2 ,D3 \cf1 ; Size of Output = \f3 2\f2  Bytes\cf2\par
+    \f3 JSR DISPREG \cf1\f2 ; Output Address\cf2\par
+\par
+    JSR SPACE \cf1 ; Output Space Character\cf2\par
+    \par
+    CLR.L D1 \cf1 ; Clear Output Register \cf2\par
+    \par
+\cf1 * Byte Read Operation \cf2\par
+    CMP.L #0,D4 \cf1 ; Check if D4 = 0 (for Byte Operation)\cf2\par
+    BNE MM_N1 \cf1 ; If no, then Next\cf2\par
+    \par
+    MOVE.B (A2),D\f3 2\f2  \cf1 ; Output a Byte\cf2\par
+    MOVE.B #\f3 1\f2 ,D3 \cf1 ; Size of Output = \f3 1\f2  Byte\cf2\par
+    BRA MM_READ \cf1 ; Perform Read Operation\cf2\par
+\par
+\cf1 * Word Read Operation \cf2\par
+\cf3 MM_N1\cf2  CMP.L #1,D4 \cf1 ; Check if D4 = 1 (for Word Operation)\cf2\par
+    BNE MM_N2 \cf1 ; If no, then Next\cf2\par
+    \par
+    MOVE.W (A2),D\f3 2\f2  \cf1 ; Output a Word\cf2\par
+    MOVE.B #\f3 2\f2 ,D3 \cf1 ; Size of Output = \f3 2\f2  Bytes\cf2\par
+    BRA MM_READ \cf1 ; Perform Read Operation\cf2\par
+    \par
+\cf1 * Long Word Read Operation   \cf2\par
+\cf3 MM_N2\cf2  MOVE.L (A2),D\f3 2\f2  \cf1 ; Output a Long\cf2\par
+    \f3 MOVE.B #4,D3 \cf1 ; Size of Output = 4 Bytes\cf2\f2\par
+\par
+\cf3 MM_READ\cf2  \f3 JSR DISPREG\f2  \cf1 ; Output Data \cf2\par
+\par
+    MOVE.B #$3E,D1 \cf1 ; Set Character '>' for Output\cf2\par
+    MOVE.B #6,D0 \cf1 ; Set TRAP Function to Output Character in D1.B\cf2\par
+    TRAP #15\par
+\par
+\cf1 * Get Input Data\cf2\par
+    LEA MM_INPUT,A1 \cf1 ; Input\cf2\par
+    MOVE.B #2,D0\par
+    TRAP #15  \par
+    \par
+\cf1 * Check for '.'\cf2\par
+    CMP.B #$2E,(A1) \cf1 ; Check if Character = '.'\cf2\par
+    BEQ MM_DONE \cf1 ; If yes, then Memory Modify Complete\cf2\par
+    \par
+\cf1 * Check for null\cf2\par
+    CMP.B #0,(A1) \cf1 ; Check if Character = null\cf2\par
+    BNE MM_WRITE \cf1 ; If yes, then Modify Current Location\cf2\par
+    \par
+\cf1 * Byte Skip Operation \cf2\par
+    CMP.L #0,D4 \cf1 ; Check if D4 = 0 (for Byte Operation)\cf2\par
+    BNE MM_N3 \cf1 ; If no, then Next\cf2\par
+    \par
+    ADD.L #1,A2 \cf1 Move to Next Byte\cf2\par
+    BRA MM_LOOP \cf1 ; Loop Till '.' is Entered\cf2\par
+\par
+\cf1 * Word Skip Operation \cf2\par
+\cf3 MM_N3\cf2  CMP.L #1,D4 \cf1 ; Check if D4 = 1 (for Word Operation)\cf2\par
+    BNE MM_N4 \cf1 ; If no, then Next\cf2\par
+    \par
+    ADD.L #2,A2 \cf1 Move to Next Word\cf2\par
+    BRA MM_LOOP \cf1 ; Loop Till '.' is Entered\cf2\par
+    \par
+\cf1 * Long Word Skip Operation   \cf2\par
+\cf3 MM_N4\cf2  ADD.L #4,A2 \cf1 Move to Next Long Word\cf2\par
+    BRA MM_LOOP \cf1 ; Loop Till '.' is Entered\cf2\par
+    \par
+\cf1 * Get Input Data in D0\cf2\par
+\par
+\cf3 MM_WRITE\cf2  MOVE.L A1,(A3) \cf1 ; Save Current Input Pointer Location in INP_PTR \cf2\par
+\par
+    JSR GET_DATA \cf1 ; Get Data from Input\cf2\par
+    MOVE.L (A0),D0 \cf1 ; Get Data in D0\cf2\par
+    \par
+\cf1 * Byte Write Operation \cf2\par
+    CMP.L #0,D4 \cf1 ; Check if D4 = 0 (for Byte Operation)\cf2\par
+    BNE MM_N5 \cf1 ; If no, then Next\cf2\par
+    \par
+    CMP.L #$FF,D0 \cf1 ; Check if D0 > $FF\cf2\par
+    BGT \f3 MM_INV\f2  \cf1 ; If yes, then Data Invalid\cf2\par
+    \par
+    MOVE.B D0,(A2)+ \cf1 ; Store Entered Byte in Memory\cf2\par
+    BRA MM_WDONE \cf1 ; Write Operation Done\cf2\par
+\par
+\cf1 * Word Write Operation \cf2\par
+\cf3 MM_N5\cf2  CMP.L #1,D4 \cf1 ; Check if D4 = 1 (for Word Operation)\cf2\par
+    BNE MM_N6 \cf1 ; If no, then Next\cf2\par
+    \par
+    CMP.L #$FFFF,D0 \cf1 ; Check if D0 > $FFFF\cf2\par
+    BGT \f3 MM_INV\f2  \cf1 ; If yes, then Data Invalid\cf2\par
+    \par
+    MOVE.W D0,(A2)+ \cf1 ; Store Entered Word in Memory\cf2\par
+    BRA MM_WDONE \cf1 ; Write Operation Done\cf2\par
+    \par
+\cf1 * Long Word Write Operation   \cf2\par
+\cf3 MM_N6\cf2  MOVE.L D0,(A2)+ \cf1 ; Store Entered Long Word in Memory\cf2\par
+\par
+\cf3 MM_WDONE\cf2  BRA MM_LOOP \cf1 ; Loop Till '.' is Entered\cf2\par
+    \par
+\cf3 MM_DONE\cf2  MOVEM.L (A7)+,D0-D4\f3 /D6\f2 /A0-A4 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+    \par
+\cf3 MM_\f3 INV\cf2\f2  \f3 JSR INVALID \cf1 ; Display Error Message\cf2\f2\par
+    MOVEM.L (A7)+,D0-D4\f3 /D6\f2 /A0-A4 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+
+\protect0\pard\protect\fi720\cf1 *-------------------------------------------------------------------------------------------------- \cf0\protect0\f0\fs24\lang9\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.12-) SORTW (Sort Word)\par
+
+\pard\b0\i0\par
+
+\pard\fi720 Function: This command is used to sort word size data located between two inputted addresses. The data can be sorted in ascending or descending order depending on the user's need. This subroutine requires two input addresses (for the range of operation) and an optional mode of operation (ascending order is the default). These addresses can be given as hexadecimal or decimal numbers. Also, since this is a word size operation, the inputted addresses must both be even, or else an error message will be displayed, and the sort operation won't be executed.\par
+\par
+Modes: 'A' -> Ascending Order (Default)\par
+\tab  'D' -> Descending Order\par
+\par
+
+\pard\par
+Syntax: "TUTOR 0.1> SORTW $2000 $3000;A<CR>"\par
+\tab\tab OR\par
+            "TUTOR 0.1> SORTW $2000 $3000;D<CR>"\par
+\tab\tab OR\par
+\tab "TUTOR 0.1> SORTW $2000 $3000<CR>"\par
+\par
+\par
+In the first example, word sized data stored at addresses $2000-$3000 will be sorted in acending order (based on the mode specified). Similarly, the second example will sort the same data in descending order. There is no mode of operation specified in the third example. Therefore, the default mode of ascending order will be used to sort the data.\par
+\par
+\par
+How It Works: The "SORTW" (Sort Word) command requires the start and end addresses of the block of memory to be sorted. These are parsed from the user input using the "GET_DATA" subroutine and are then put into two Address Registers. Since this is a word size operation, both the addresses must be even and are therefore checked accordingly. The subroutine then checks if any mode has been entered by the user, which is denoted using the ";" symbol followed by a single uppercase alphabet. Based on this alphabet, the appropriate flag is set. These flags control how the operation is performed (here, ascending/descending order). Therefore, any errors in the inputs causes the subroutine to display an error message on the terminal, and the sort operation is thus not performed. Lastly, if no mode is set, the flag is reset (for default operation of ascending order).\par
+
+\pard\fi720\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.12.1-) SORTW Algorithm \par
+\par
+\b0 Step 1: Save registers to Stack\par
+Step 2: Get start address of block in A1 // Calls subroutine "GET_DATA"\par
+Step 3: IF address is even // Required for word operations\par
+\tab THEN go to Step 4   \par
+\tab ELSE go to Step 26 // Invalid Address\par
+Step 4: Get end address of block in A2 // Calls subroutine "GET_DATA"\par
+Step 5: IF address is even // Required for word operations\par
+\tab THEN go to Step 6   \par
+\tab ELSE go to Step 26 // Invalid Address\par
+Step 6: Initialize A4-> current position of instruction pointer\par
+Step 7: IF character at (A4) = null    // Check for carriage return\par
+\tab THEN go to Step 11 // Default order\par
+\tab ELSE go to Step 8\par
+Step 8: IF character at (A4) = ';'    // Check for semicoln\par
+\tab THEN go to Step  9\par
+\tab ELSE go to Step 26  // Invalid command\par
+Step 9: Get mode in D0  // Calls subroutine "GET_MODE"\par
+Step 10: IF D0  = 'A'  \par
+\tab THEN go to Step 11 // Ascending order\par
+\tab ELSE go to Step 13\par
+Step 11: Reset flag D2  // Denotes ascending order\par
+Step 12: Go to Step 15\par
+Step 13: IF D0  = 'D'  \par
+\tab THEN go to Step 14 // Descending order\par
+\tab ELSE go to Step 26  // Invalid command\par
+Step 14: Set flag D2  // Denotes descending order\par
+Step 15: IF A2 > A1 // Still inside block\par
+\tab THEN go to Step 16\par
+\tab ELSE go to Step 19   // Largest word found\par
+Step 16: Get largest word  in D3\par
+Step 17: A1 = A1 + 1  // Increment memory location\par
+Step 18: Go to Step 15  // Loop while inside block\par
+Step 19: Store Largest Number at last address\par
+Step 20: A2 = A2 - 1  // Decrement end address\par
+Step 21: IF A2 = A1 // Block empty\par
+\tab THEN go to Step 22\par
+\tab ELSE go to Step 15  // Loop till entire list is in ascending order\par
+Step 22: IF flag set  // Descending order\par
+\tab THEN go to Step 23\par
+\tab ELSE go to Step 24  // Operation complete\par
+Step 23: Reverse order entire address range // Calls subroutine "REVERSE"\par
+Step 24: Restore registers from Stack\par
+Step 25: Return from subroutine \par
+Step 26: Display error message\par
+Step 27: Restore registers from Stack \par
+Step 28: Return from subroutine \i0\par
+\par
+\b\i 2.2.12.2-) SORTW Flowchart\b0\i0\par
+
+\pard\par
+
+\pard\fi720\b\i 2.2.12.3-) SORTWAssembly Code \par
+\par
+\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf1\b0\i0\protect\f2\fs20\lang1033 *---------------------------------------------------------------------------------------------    \cf2\par
+\cf3 SORTW\cf2\par
+\cf1\f3 * Sorts Word Size Data in Block of Memory\cf2\f2\par
+\cf1\f3 * \f2 Ascending/Descending Depending on Mode\cf2\f3\par
+\f2\par
+    MOVE.L $1030,A0 \cf1 ; Restore A0 from Memory\cf2\par
+    MOVEM.L D0-D2\f3 /D6\f2 /A0-A4,-(A7) \cf1 ; Save Registers to Stack\cf2\par
+\par
+\cf1 * Get START Address in A1\cf2\par
+    LEA DATA1,A0 \cf1 ; Set Pointer to First Data Save Location\cf2\par
+    JSR GET_DATA \cf1 ; Get Data from Input\cf2\par
+    MOVE.L (A0)+,A1 \cf1 ; Get First Address in A1, and then Set Pointer to Second Data Save Location\cf2\par
+    \par
+\cf1 * Check if START Address is Even\cf2\par
+    MOVE.L A1,D0 \cf1 ; Get Address in D0\cf2\par
+    BTST #0,D0 \cf1 ; Check if D0 is even\cf2\par
+    BNE \f3 SORT\f2 _INV \cf1 ; If no, then Address is Invalid\cf2\par
+\par
+\cf1 * Get END Address in A2\cf2\par
+    JSR GET_DATA \cf1 ; Get Data from Input\cf2\par
+    MOVE.L (A0)+,A2 \cf1 ; Get Second Address in A2, and then Set Pointer to Third Data Save Location\cf2\par
+    \par
+\cf1\f3 *\f2  Check if START Address is Even\cf2\par
+    MOVE.L A\f3 2\f2 ,D0 \cf1 ; Get Address in D0\cf2\par
+    BTST #0,D0 \cf1 ; Check if D0 is even\cf2\par
+    BNE SORT_INV \cf1 ; If no, then Address is Invalid\cf2\par
+    \par
+\cf1 * Check for Order\cf2\par
+    LEA INP_PTR,A4 \cf1 ; Get Address of Input Pointer Location in A4\cf2\par
+    MOVE.L (A4),A3 \cf1 ; Get Current Location of Input Pointer in A3\cf2\par
+    \par
+    CMP.B #0,(A3) \cf1 ; Check if Input String has Ended\cf2\par
+    BEQ DEFAULT \cf1 ; If yes, then Perform Default Operation of Ascending Order\cf2\par
+    \par
+    MOVE.L A3,(A4) \cf1 ; Save Current Input Pointer Location in INP_PTR\cf2\par
+  \par
+    JSR GET_MODE \cf1 ; Get Mode from Input\cf2\par
+    MOVE.L (A0),D0 \cf1 ; Get Third Data in D0\cf2\par
+    \par
+    CMP.L #$41,D0 \cf1 ; Check if Data = 'A'\cf2\par
+    BEQ DEFAULT \cf1 If yes, then Perform Default Operation of Ascending Order\cf2\par
+    \par
+    CMP.L #$44,D0 \cf1 ; Check if Data = 'D'\cf2\par
+    BNE \f3 SORT_INV\f2  \cf1 ; If no, then Command is Invalid\cf2\par
+    \par
+    MOVE.L #1,D2 \cf1 ; Set Flag for Descending Order\cf2\par
+    BRA SORT_START \cf1 ; Start Sorting Function\cf2\par
+  \par
+\cf3 DEFAULT\cf2\par
+    CLR.L D2 \cf1 ; Reset Flag for Ascending Operation\cf2\par
+\par
+    JSR CHK_END \cf1 ; Check if reached end of input. If not, then Command Invalid\cf2\par
+    \f3 CMP.B #1,D6  \cf1 ; Check if D6 = 1\cf2\f2\par
+    \f3 BEQ SORT_INV \cf1 ; If yes, then Command is Invalid\cf2\f2\par
+\par
+\cf3 SORT_START\cf2     \par
+    MOVE.L A1,A0 \cf1 ; Make a Copy of START Address in A0\cf2\par
+    CLR.L D0 \cf1 ; Clear Temporary Register 1\cf2\par
+    CLR.L D1 \cf1 ; Clear Temporary Register 2\cf2\par
+\par
+\cf3 OLOOP\cf2  MOVE.L A1,A3 \cf1 ; Assuming the First Word is Largest, Set A3 as Pointer\cf2\par
+    MOVE.W (A1)+,D0 \cf1 ; Get Word in D0\cf2\par
+    CMP.L A1,A2 \cf1 ; Check if A2 <= A1\cf2\par
+    BLE SORT_END \cf1 ; If yes, then Sorting Complete\cf2\par
+\par
+\cf3 ILOOP\cf2  MOVE.W (A1)+,D1 \cf1 ; Get Next Word\cf2\par
+    CMP.L D1, D0 \cf1 ; Compare Previous Word with Next Word\cf2\par
+    BGE INEXT \cf1 ; Check if Previous Word >= Next Word\cf2\par
+    MOVE.W -(A1),D0 \cf1 ; Get Larger Word in D0\cf2\par
+    MOVE.L A1,A3 \cf1 ; Set A3 as Pointer to Larger Word\cf2\par
+\par
+\cf3 INEXT\cf2  CMP.L A1,A2 \cf1 ; Check if A2 <= A1\cf2\par
+    BLE ONEXT \cf1 ; If yes, then Proceed to Next Round of Sorting\cf2\par
+    BRA ILOOP \cf1 ; If no, then Continue Sorting\cf2\par
+    \par
+\cf1 * Swap the Last Number of the Address Range with the Largest Number in the Current Round, then Shorten the Range by a Word\cf2\par
+\cf3 ONEXT\cf2  MOVE.W (A3),-(A2)\par
+    MOVE.W D1,(A3)\par
+    \par
+    MOVE.L A0,A1 \cf1 ; Reload START Address in A1\cf2\par
+    \par
+    CMP.L A1,A2 \cf1 ; Check if A2 > A1\cf2\par
+    BGT OLOOP \cf1 ; If yes, then done    \cf2\par
+    \par
+\cf3 SORT_END\cf2  CMP.L #1,D2 \cf1 ; Check if Flag is Set\cf2\par
+    BNE SORT_DONE \cf1 ; If yes, then Sorting Complete\cf2\par
+    JSR REVERSE \cf1 ; If no, then change to Decending Order by Reversing Order\cf2\par
+\par
+\cf3 SORT_DONE\cf2  MOVEM.L (A7)+,D0-D2\f3 /D6\f2 /A0-A4 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\par
+\cf3 SORT_\f3 INV\cf2  JSR INVALID \cf1 ; Display Error Message\cf2\f2\par
+    MOVEM.L (A7)+,D0-D2/D6/A0-A4 \cf1 ; Restore Registers from Stack\cf2\par
+    RTS \cf1 ; Return from Subroutine\cf2\par
+\cf1 *-----------------------------------------------------------------------------------------------\cf2\par
+
+\protect0\pard\protect\fi720\cf0\b\i\protect0\f0\fs24\lang9\par
+
+\pard\b0\i0\par
+
+\pard\fi720\par
+
+\pard\par
+\par
+
+\pard\fi720\b\i\fs28 2.3-) Exception Handlers\par
+
+\pard\b0\i0\fs24\par
+
+\pard\fi720 During the normal operation of executing one of the existing commands, exceptions could be raised due to invalid inputs or due to executing erroneous code from a memory location using the "GO" command. At such times, rather than being rendered inoperable, the Monitor Program should be able to effectively handle the most common exception and recover from them. The basic exception handling process is as follows:\par
+(1) Store Exception Stack Frame onto the Supervisor Stack\par
+(2) Check the type of exception (Bus Error, Address Error, etc.)\par
+(3) Get the address of the exception handling subroutine from the exception vector table\par
+(4) Execute code at that address\par
+\par
+\par
+Exception Fig 1\par
+\par
+\par
+Although the first few steps are the same for all types of exceptions, exception handling routines for each of them are (or can be) different. These subroutines are discussed in the following sections. Lastly, once the exception handling routine has successfully been executed, the data in the registers or memory may have changed. This is due to the fact that there is no method of rolling back changes in the current version of the Monitor Program.\par
+
+\pard\par
+\tab\b\i 2.3.1-) Address Error Exception\par
+
+\pard\fi720\par
+\b0\i0 An Address Error occurs when the user tries to access a word or long size data from an odd address. In the exception handler routine, an error message is displayed, followed by the contents of the Supervisor Status Word, Bus Address and Instruction Register in one line, followed by the contents of all Data and Address Registers in the next. The program then returns to the terminal.\par
+\par
+\b\i 2.3.1.1-) Address Error Exception Flowchart\b0\i0\par
+\par
+\b\i\par
+2.3.1.2-) Address Error Exception Algorithm \b0\i0\par
+
+\pard\par
+
+\pard\fi720\i Step 1: Display Error Message \par
+Step 2: Get Supervisor Status Word, Bus Address & Instruction Register from Stack  // Exception Vector Frame\par
+Step 3: Display Supervisor Status Word, Bus Address & Instruction Register  // In one line\par
+Step 4: Display a carriage return // Display remaining output on next line\par
+Step 5: Display Data and Address Registers // Calls part of DF command\par
+Step 6: Return to terminal\b\par
+\b0\i0\par
+\par
+\b\i\par
+2.3.1.3-) Address Error Exception Assembly Code \par
+\par
+\cf1\b0\i0\protect\f2\fs20\lang1033 *-----------------------------------------------------------------------------------------------------------\cf0\b\i\protect0\f0\fs24\lang9\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf3\b0\i0\protect\f2\fs20\lang1033 SADR\cf2    \cf4 DC.B\cf2  \cf5 'ADDRESS ERROR OCCURRED!'\cf2\par
+
+\protect0\pard\protect\fi720        \cf4 DC.B\cf2  0\cf0\b\i\protect0\f0\fs24\lang9\par
+\cf1\b0\i0\protect\f2\fs20\lang1033 *-----------------------------------------------------------------------------------------------------------  \cf0\b\i\protect0\f0\fs24\lang9\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf3\b0\i0\protect\f2\fs20\lang1033 ADRS_ERR\cf2\par
+    LEA SADR,A1 \cf1 ; Load Error Message\cf2\par
+\cf1\protect0\f3\tab\par
+\tab\cf2\protect\f2 JSR NEWLINE \cf1 ; Go to Next Line\cf2\par
+    \par
+    MOVE.B #13,D0\par
+    TRAP #15 \par
+    \par
+    MOVE.W (A7)+,D0 \cf1 ; Throw First Word from Stack\cf2\par
+    \par
+    MOVE.L (A7)+,D0 \cf1 ; Get Bus Address in D0\cf2\par
+    MOVE.W (A7)+,D1 \cf1 ; Get Instruction Register in D1\cf2\par
+    \par
+    MOVE.W (A7)+,D2 \cf1 ; Get Supervisor Status Word in D2\cf2\par
+    MOVE.B #2,D3 \cf1 ; Set Number of Bytes to Display = 2\cf2\par
+    JSR DISPREG \cf1 ; Display SSW\cf2\par
+    \par
+    JSR SPACE \cf1 ; Leave Blank Space\cf2\par
+    \par
+    MOVE.l D0,D2 \cf1 ; Get Bus Address in D2\cf2\par
+    MOVE.B #4,D3 \cf1 ; Set Number of Bytes to Display = 4\cf2\par
+    JSR DISPREG \cf1 ; Display BA\cf2\par
+    \par
+    JSR SPACE \cf1 ; Leave Blank Space\cf2\par
+    \par
+    MOVE.l D1,D2 \cf1 ; Get Instruction Register in D2\cf2\par
+    MOVE.B #2,D3 \cf1 ; Set Number of Bytes to Display = 2\cf2\par
+    JSR DISPREG \cf1 ; Display IR\cf2\par
+    \par
+    JSR NEWLINE \cf1 ; Go to Next Line\cf2\par
+    \par
+    MOVE.L (A7)+,D5 \cf1 ; Throw Long Word from Stack\cf2\par
+\par
+\cf3 ERR_DF\cf2  \cf1 ; Short Hand Way to Display Data & Address Register Values Using the DF Command\cf2\par
+\par
+    MOVEM.L A0,-(A7) \cf1 ; Save A0 on Stack\cf2\par
+    \par
+    LEA DATA3,A0 \cf1 ; Load Address of DATA3 in A0\cf2\par
+    MOVE.L A7,(A0) \cf1 ; Store Value of A7 in DATA3\cf2\par
+    ADD.L #4,(A0) \cf1 ; Get Value of Stack at the Time of Exception\cf2\par
+    \par
+    ADD.L #8,A7 \cf1 ; Move 2 Long Words Down the Stack\cf2\par
+    PEA *+22 \cf1 ; Effective Address to Return from RTS\cf2\par
+    SUB.L #4,A7 \cf1 ; Move 1 Long Word Up the Stack\cf2\par
+    \par
+    MOVEM.L (A7)+,A0 \cf1 ; Restore A0 from Stack\cf2\par
+    \par
+    MOVEM.L D0-D7/A0-A6,-(A7) \cf1 ; Store All Registers on Stack\cf2\par
+    MOVEM.L D0-D7/A0-A6,-(A7) \cf1 ; Store Another Copy of All Registers on Stack\cf2\par
+    \par
+    BRA DISP_DA \cf1 ; Call Part of the DF Command \cf2\par
+\par
+    ADD.L #2,A7 \cf1 ; Throw Long Word from Stack  \cf2\par
+    \par
+    BRA RUN_MONITOR \cf1 ; Return to Terminal\cf2\par
+
+\protect0\pard\protect\fi720\cf1 *----------------------------------------------------------------------------------------------------------- \cf0\b\i\protect0\f0\fs24\lang9\par
+\par
+
+\pard\tab 2.3.2-) Bus Error Exception\par
+\par
+
+\pard\fi720\b0\i0 A Bus Error occurs when the user tries to access an invalid or illegal address. In the exception handler routine, an error message is displayed, followed by the contents of the Supervisor Status Word, Bus Address and Instruction Register in one line, followed by the contents of all Data and Address Registers. The program then returns to the terminal.\par
+
+\pard\par
+\par
+\tab\b\i 2.3.2.1-) Bus Error Exception Flowchart\par
+\b0\i0\par
+
+\pard\fi720\b\i 2.3.2.2-) Bus Error Exception Algorithm\b0\i0\par
+
+\pard\par
+
+\pard\fi720\i Step 1: Display Error Message \par
+Step 2: Get Supervisor Status Word, Bus Address & Instruction Register from Stack  // Exception Vector Frame\par
+Step 3: Display Supervisor Status Word, Bus Address & Instruction Register  // In one line\par
+Step 4: Display a carriage return // Display remaining output on next line\par
+Step 5: Display Data and Address Registers // Calls part of DF command\par
+Step 6: Return to terminal\i0\par
+
+\pard\par
+\par
+
+\pard\fi720\b\i 2.3.2.3-) Bus Error Exception Assembly Code \par
+
+\pard\b0\i0\par
+\cf1\protect\f2\fs20\lang1033 *-----------------------------------------------------------------------------------------------------------  \cf2\par
+
+\protect0\pard\protect\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf3 SBERR\cf2   \cf4 DC.B\cf2  \cf5 'BUS ERROR OCCURRED!'\cf2\par
+
+\protect0\pard\protect\fi720        \cf4 DC.B\cf2  0\cf0\protect0\f0\fs24\lang9\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf1\protect\f2\fs20\lang1033 *-----------------------------------------------------------------------------------------------------------  \protect0\par
+\cf3\protect BUS_ERR\cf2  \par
+    LEA SBERR,A1 \cf1 ; Load Error Message\cf2\par
+\par
+\protect0\f3\tab\protect\f2 JSR NEWLINE \cf1 ; Go to Next Line\cf2\par
+    \par
+    MOVE.B #13,D0\par
+    TRAP #15 \par
+    \par
+    MOVE.W (A7)+,D0 \cf1 ; Throw First Word from Stack\cf2\par
+    \par
+    MOVE.L (A7)+,D0 \cf1 ; Get Bus Address in D0\cf2\par
+    MOVE.W (A7)+,D1 \cf1 ; Get Instruction Register in D1\cf2\par
+    \par
+    MOVE.W (A7)+,D2 \cf1 ; Get Supervisor Status Word in D2\cf2\par
+    MOVE.B #2,D3 \cf1 ; Set Number of Bytes to Display = 2\cf2\par
+    JSR DISPREG \cf1 ; Display SSW\cf2\par
+    \par
+    JSR SPACE \cf1 ; Leave Blank Space\cf2\par
+    \par
+    MOVE.l D0,D2 \cf1 ; Get Bus Address in D2\cf2\par
+    MOVE.B #4,D3 \cf1 ; Set Number of Bytes to Display = 4\cf2\par
+    JSR DISPREG \cf1 ; Display BA\cf2\par
+    \par
+    JSR SPACE \cf1 ; Leave Blank Space\cf2\par
+    \par
+    MOVE.l D1,D2 \cf1 ; Get Instruction Register in D2\cf2\par
+    MOVE.B #2,D3 \cf1 ; Set Number of Bytes to Display = 2\cf2\par
+    JSR DISPREG \cf1 ; Display IR\cf2\par
+    \par
+    JSR NEWLINE \cf1 ; Go to Next Line\cf2\par
+    \par
+    MOVE.L (A7)+,D5 \cf1 ; Throw Long Word from Stack\cf2\par
+\par
+\cf3 ERR_DF\cf2  \cf1 ; Short Hand Way to Display Data & Address Register Values Using the DF Command\cf2\par
+\par
+    MOVEM.L A0,-(A7) \cf1 ; Save A0 on Stack\cf2\par
+    \par
+    LEA DATA3,A0 \cf1 ; Load Address of DATA3 in A0\cf2\par
+    MOVE.L A7,(A0) \cf1 ; Store Value of A7 in DATA3\cf2\par
+    ADD.L #4,(A0) \cf1 ; Get Value of Stack at the Time of Exception\cf2\par
+    \par
+    ADD.L #8,A7 \cf1 ; Move 2 Long Words Down the Stack\cf2\par
+    PEA *+22 \cf1 ; Effective Address to Return from RTS\cf2\par
+    SUB.L #4,A7 \cf1 ; Move 1 Long Word Up the Stack\cf2\par
+    \par
+    MOVEM.L (A7)+,A0 \cf1 ; Restore A0 from Stack\cf2\par
+    \par
+    MOVEM.L D0-D7/A0-A6,-(A7) \cf1 ; Store All Registers on Stack\cf2\par
+    MOVEM.L D0-D7/A0-A6,-(A7) \cf1 ; Store Another Copy of All Registers on Stack\cf2\par
+    \par
+    BRA DISP_DA \cf1 ; Call Part of the DF Command \cf2\par
+\par
+    ADD.L #2,A7 \cf1 ; Throw Long Word from Stack  \cf2\par
+    \par
+    BRA RUN_MONITOR \cf1 ; Return to Terminal\cf2\par
+
+\protect0\pard\protect\fi720\cf1 *-----------------------------------------------------------------------------------------------------------  \cf0\protect0\f0\fs24\lang9\par
+\par
+\b\i\par
+2.3.3-) Illegal Instruction Exception\par
+\par
+\b0\i0 Illegal instruction is the term used to refer to any of the word bit patterns that do not match the bit pattern of the first word of a legal M68000 instruction. The patterns $4AFA, $4AFB, and $4AFC always cause an Illegal Instruction Exception. In the exception handler routine, an error message is displayed, followed by the contents of all Data and Address Registers. The program then returns to the terminal.\par
+\b\i\par
+2.3.3.1-) Illegal Instruction Exception Flowchart \par
+2.3.3.2-) Illegal Instruction Exception Algorithm \par
+\par
+\b0 Step 1: Display Error Message \par
+Step 2: Display Data and Address Registers // Calls part of DF command\par
+Step 3: Return to terminal\i0\par
+\par
+\par
+\b\i\par
+2.3.3.3-) Illegal Instruction Exception Assembly Code \par
+\par
+
+\pard\cf1\b0\i0\protect\f2\fs20\lang1033 *-----------------------------------------------------------------------------------------------------------  \cf0\protect0\f0\fs24\lang9\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf3\protect\f2\fs20\lang1033 SILL\cf2    \cf4 DC.B\cf2  \cf5 'ILLEGAL INSTRUCTION ERROR OCCURRED!'\cf2\par
+       \cf4 DC.B\cf2  0\par
+\cf1 *-----------------------------------------------------------------------------------------------------------  \protect0\par
+\cf3\protect ILL_INST\cf2\par
+    LEA SILL,A1 \cf1 ; Load Error Message\cf2\par
+  \par
+\cf1\protect0\f3\tab\cf2\protect\f2 JSR NEWLINE \cf1 ; Go to Next Line\cf2\par
+    MOVE.B #13,D0 \cf1 ; Display String at A1\cf2\par
+    TRAP #15 \cf1\protect0\par
+\par
+\cf3\protect ERR_DF\cf2  \cf1 ; Short Hand Way to Display Data & Address Register Values Using the DF Command\cf2\par
+\par
+    MOVEM.L A0,-(A7) \cf1 ; Save A0 on Stack\cf2\par
+    \par
+    LEA DATA3,A0 \cf1 ; Load Address of DATA3 in A0\cf2\par
+    MOVE.L A7,(A0) \cf1 ; Store Value of A7 in DATA3\cf2\par
+    ADD.L #4,(A0) \cf1 ; Get Value of Stack at the Time of Exception\cf2\par
+    \par
+    ADD.L #8,A7 \cf1 ; Move 2 Long Words Down the Stack\cf2\par
+    PEA *+22 \cf1 ; Effective Address to Return from RTS\cf2\par
+    SUB.L #4,A7 \cf1 ; Move 1 Long Word Up the Stack\cf2\par
+    \par
+    MOVEM.L (A7)+,A0 \cf1 ; Restore A0 from Stack\cf2\par
+    \par
+    MOVEM.L D0-D7/A0-A6,-(A7) \cf1 ; Store All Registers on Stack\cf2\par
+    MOVEM.L D0-D7/A0-A6,-(A7) \cf1 ; Store Another Copy of All Registers on Stack\cf2\par
+    \par
+    BRA DISP_DA \cf1 ; Call Part of the DF Command \cf2\par
+\par
+    ADD.L #2,A7 \cf1 ; Throw Long Word from Stack  \cf2\par
+    \par
+    BRA RUN_MONITOR \cf1 ; Return to Terminal\protect0\par
+\protect *-----------------------------------------------------------------------------------------------------------  \protect0\par
+
+\pard\fi720\cf0\b\i\f0\fs24\lang9\par
+\b0\i0\par
+\b\i\par
+2.3.4-) Privilege Violation Exception\par
+\par
+\b0\i0 To provide system security, various instructions are privileged (RESET, RTE, STOP, and instructions involving SR or USP). An attempt to execute one of the privileged instructions while in the user mode causes an exception. In the exception handler routine, an error message is displayed, followed by the contents of all Data and Address Registers. The program then returns to the terminal.\b\i\par
+\b0\i0\par
+\b\i\par
+2.3.4.1-) Privilege Violation Exception Flowchart\b0\i0\par
+\b\i\par
+2.3.4.2-) Privilege Violation Exception Algorithm\par
+\par
+\b0 Step 1: Display Error Message \par
+Step 2: Display Data and Address Registers // Calls part of DF command\par
+Step 3: Return to terminal\i0\par
+\b\i\par
+2.3.4.3-) Privilege Violation Exception Assembly Code \par
+\par
+
+\pard\cf1\b0\i0\protect\f2\fs20\lang1033 *-----------------------------------------------------------------------------------------------------------  \cf2\par
+
+\protect0\pard\protect\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf3 SPRIV\cf2   \cf4 DC.B\cf2  \cf5 'PRIVILEGE VIOLATION ERROR OCCURRED!'\cf2\par
+       \cf4 DC.B\cf2  0\par
+\cf1 *-----------------------------------------------------------------------------------------------------------  \cf2     \par
+\cf3 PRIV_VIOL\cf2\par
+    LEA SPRIV,A1 \cf1 ; Load Error Message\cf2\protect0\par
+\par
+\f3\tab\protect\f2 JSR NEWLINE \cf1 ; Go to Next Line\cf2\par
+    MOVE.B #13,D0 \cf1 ; Display String at A1\cf2\par
+    TRAP #15 \protect0\par
+\par
+\cf3\protect ERR_DF\cf2  \cf1 ; Short Hand Way to Display Data & Address Register Values Using the DF Command\cf2\par
+\par
+    MOVEM.L A0,-(A7) \cf1 ; Save A0 on Stack\cf2\par
+    \par
+    LEA DATA3,A0 \cf1 ; Load Address of DATA3 in A0\cf2\par
+    MOVE.L A7,(A0) \cf1 ; Store Value of A7 in DATA3\cf2\par
+    ADD.L #4,(A0) \cf1 ; Get Value of Stack at the Time of Exception\cf2\par
+    \par
+    ADD.L #8,A7 \cf1 ; Move 2 Long Words Down the Stack\cf2\par
+    PEA *+22 \cf1 ; Effective Address to Return from RTS\cf2\par
+    SUB.L #4,A7 \cf1 ; Move 1 Long Word Up the Stack\cf2\par
+    \par
+    MOVEM.L (A7)+,A0 \cf1 ; Restore A0 from Stack\cf2\par
+    \par
+    MOVEM.L D0-D7/A0-A6,-(A7) \cf1 ; Store All Registers on Stack\cf2\par
+    MOVEM.L D0-D7/A0-A6,-(A7) \cf1 ; Store Another Copy of All Registers on Stack\cf2\par
+    \par
+    BRA DISP_DA \cf1 ; Call Part of the DF Command \cf2\par
+\par
+    ADD.L #2,A7 \cf1 ; Throw Long Word from Stack  \cf2\par
+    \par
+    BRA RUN_MONITOR \cf1 ; Return to Terminal\cf2\par
+\cf1 *-----------------------------------------------------------------------------------------------------------  \protect0\par
+
+\pard\fi720\cf0\b\i\f0\fs24\lang9\par
+\par
+2.3.5-) Divide by Zero Exception\par
+\par
+\b0\i0 When an instructon tries to divide a number by zero, this exception is raised. In the exception handler routine, an error message is displayed, followed by the contents of all Data and Address Registers. The program then returns to the terminal.\par
+\b\i\par
+2.3.5.1-) Divide by Zero Exception Flowchart\b0\i0\par
+\par
+\b\i\par
+2.3.5.2-) Divide by Zero Exception Algorithm\b0\i0\par
+\par
+\i Step 1: Display Error Message \par
+Step 2: Display Data and Address Registers // Calls part of DF command\par
+Step 3: Return to terminal\i0\par
+\b\i\par
+2.3.5.3-) Divide by Zero Exception Assembly Code \par
+\par
+
+\pard\cf1\b0\i0\protect\f2\fs20\lang1033 *-----------------------------------------------------------------------------------------------------------  \cf0\protect0\f0\fs24\lang9\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf3\protect\f2\fs20\lang1033 SZERO\cf2   \cf4 DC.B\cf2  \cf5 'DIV\f3 IDE BY \f2 ZERO ERROR OCCURRED!'\cf2\par
+       \cf4 DC.B\cf2  0\par
+\cf1 *----------------------------------------------------------------------------------------------------------- \protect0\par
+\cf3\protect DIV_ZERO\cf2\par
+    LEA SZERO,A1 \cf1 ; Load Error Message\cf2\par
+\cf1  \protect0\par
+\f3\tab\cf2\protect\f2 JSR NEWLINE \cf1 ; Go to Next Line\cf2\par
+    MOVE.B #13,D0 \cf1 ; Display String at A1\cf2\par
+    TRAP #15 \cf1\protect0\par
+\par
+\cf3\protect ERR_DF\cf2  \cf1 ; Short Hand Way to Display Data & Address Register Values Using the DF Command\cf2\par
+\par
+    MOVEM.L A0,-(A7) \cf1 ; Save A0 on Stack\cf2\par
+    \par
+    LEA DATA3,A0 \cf1 ; Load Address of DATA3 in A0\cf2\par
+    MOVE.L A7,(A0) \cf1 ; Store Value of A7 in DATA3\cf2\par
+    ADD.L #4,(A0) \cf1 ; Get Value of Stack at the Time of Exception\cf2\par
+    \par
+    ADD.L #8,A7 \cf1 ; Move 2 Long Words Down the Stack\cf2\par
+    PEA *+22 \cf1 ; Effective Address to Return from RTS\cf2\par
+    SUB.L #4,A7 \cf1 ; Move 1 Long Word Up the Stack\cf2\par
+    \par
+    MOVEM.L (A7)+,A0 \cf1 ; Restore A0 from Stack\cf2\par
+    \par
+    MOVEM.L D0-D7/A0-A6,-(A7) \cf1 ; Store All Registers on Stack\cf2\par
+    MOVEM.L D0-D7/A0-A6,-(A7) \cf1 ; Store Another Copy of All Registers on Stack\cf2\par
+    \par
+    BRA DISP_DA \cf1 ; Call Part of the DF Command \cf2\par
+\par
+    ADD.L #2,A7 \cf1 ; Throw Long Word from Stack  \cf2\par
+    \par
+    BRA RUN_MONITOR \cf1 ; Return to Terminal\protect0\par
+\protect *-----------------------------------------------------------------------------------------------------------  \protect0\par
+
+\pard\fi720\cf0\b\i\f0\fs24\lang9  \par
+\par
+2.3.6-) CHK Instruction Exception\par
+\par
+\b0\i0 The CHK instruction compares the value in the destination data register to zero and to the upper bound source operand. If the register value is less than zero or greater than the upper bound, a CHK Instruction Exception is raised. In the exception handler routine, an error message is displayed, followed by the contents of all Data and Address Registers. The program then returns to the terminal.\par
+\b\i\par
+2.3.6.1-) CHK Instruction Exception Flowchart\b0\i0\par
+\par
+\b\i\par
+2.3.6.2-) CHK Instruction Exception Algorithm\b0\i0\par
+\par
+\i Step 1: Display Error Message \par
+Step 2: Display Data and Address Registers // Calls part of DF command\par
+Step 3: Return to terminal\i0\par
+\b\i\par
+2.3.6.3-) CHK Instruction Exception Assembly Code \par
+\par
+
+\pard\cf1\b0\i0\protect\f2\fs20\lang1033 *-----------------------------------------------------------------------------------------------------------  \cf2\par
+
+\protect0\pard\protect\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf3 SCHK\cf2    \cf4 DC.B\cf2  \cf5 'CHK INSTRUCTION ERROR OCCURRED!'\cf2\par
+       \cf4 DC.B\cf2  0\par
+       \cf4 DC.B\cf2  0\par
+\cf1 *-----------------------------------------------------------------------------------------------------------  \protect0\par
+\cf3\protect CHK_INST\cf2\par
+    LEA SCHK,A1 \cf1 ; Load Error Message\protect0\par
+\par
+\f3\tab\cf2\protect\f2 JSR NEWLINE \cf1 ; Go to Next Line\cf2\par
+    MOVE.B #13,D0 \cf1 ; Display String at A1\cf2\par
+    TRAP #15 \cf1\protect0\par
+\par
+\cf3\protect ERR_DF\cf2  \cf1 ; Short Hand Way to Display Data & Address Register Values Using the DF Command\cf2\par
+\par
+    MOVEM.L A0,-(A7) \cf1 ; Save A0 on Stack\cf2\par
+    \par
+    LEA DATA3,A0 \cf1 ; Load Address of DATA3 in A0\cf2\par
+    MOVE.L A7,(A0) \cf1 ; Store Value of A7 in DATA3\cf2\par
+    ADD.L #4,(A0) \cf1 ; Get Value of Stack at the Time of Exception\cf2\par
+    \par
+    ADD.L #8,A7 \cf1 ; Move 2 Long Words Down the Stack\cf2\par
+    PEA *+22 \cf1 ; Effective Address to Return from RTS\cf2\par
+    SUB.L #4,A7 \cf1 ; Move 1 Long Word Up the Stack\cf2\par
+    \par
+    MOVEM.L (A7)+,A0 \cf1 ; Restore A0 from Stack\cf2\par
+    \par
+    MOVEM.L D0-D7/A0-A6,-(A7) \cf1 ; Store All Registers on Stack\cf2\par
+    MOVEM.L D0-D7/A0-A6,-(A7) \cf1 ; Store Another Copy of All Registers on Stack\cf2\par
+    \par
+    BRA DISP_DA \cf1 ; Call Part of the DF Command \cf2\par
+\par
+    ADD.L #2,A7 \cf1 ; Throw Long Word from Stack  \cf2\par
+    \par
+    BRA RUN_MONITOR \cf1 ; Return to Terminal\protect0\par
+\protect *-----------------------------------------------------------------------------------------------------------  \protect0\par
+
+\pard\fi720\cf0\b\i\f0\fs24\lang9\par
+\b0\i0\par
+\b\i\par
+2.3.7-) Line A and Line F Emulators\par
+\par
+\b0\i0 Word patterns with bits 15\f4\endash 12 equaling 1010 or 1111 are distinguished as unimplemented\f0\lang1033  \f4\lang9 instructions, and \f0\lang1033 trying to execute these will raise a Line A Emulator Exception or a Line F Emulator Exception respectively.  \lang9 In the exception handler routine, an error message is displayed, followed by the contents of all Data and Address Registers. The program then returns to the terminal.\par
+\b\i\par
+2.3.7.1-) Line A and Line F Emulators Flowchart\b0\i0\par
+\par
+\b\i 2.3.7.2-) Line A and Line F Emulators Algorithm \par
+\par
+\b0 Step 1: Display Error Message \par
+Step 2: Display Data and Address Registers // Calls part of DF command\par
+Step 3: Return to terminal\i0\par
+\b\i\par
+2.3.7.3-) Line A and Line F Emulators Assembly Code \par
+\par
+
+\pard\cf1\b0\i0\protect\f2\fs20\lang1033 *-----------------------------------------------------------------------------------------------------------  \cf0\protect0\f0\fs24\lang9\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf3\protect\f2\fs20\lang1033 SLINEA\cf2  \cf4 DC.B\cf2  \cf5 'LINE A EMULATOR ERROR OCCURRED!'\cf2\par
+       \cf4 DC.B\cf2  0\par
+\par
+\cf3 SLINEF\cf2  \cf4 DC.B\cf2  \cf5 'LINE F EMULATOR ERROR OCCURRED!'\cf2\par
+       \cf4 DC.B\cf2  0\par
+
+\protect0\pard\protect        \cf4 DC.B\cf2  0\par
+
+\protect0\pard\protect\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf1 *-----------------------------------------------------------------------------------------------------------  \protect0\par
+\cf3\protect LINE_A\cf2\par
+    LEA SLINEA,A1 \cf1 ; Load Error Message\cf2\par
+    BRA \protect0\f3 E_NEXT\protect\f2\par
+\par
+\cf3 LINE_F\cf2\par
+    LEA SLINEF,A1 \cf1 ; Load Error Message\protect0\par
+\par
+\cf3\protect E_\protect0\f3 NEXT \cf2\protect\f2 JSR NEWLINE \cf1 ; Go to Next Line\cf2\par
+    MOVE.B #13,D0 \cf1 ; Display String at A1\cf2\par
+    TRAP #15 \cf1\protect0\par
+\par
+\cf3\protect ERR_DF\cf2  \cf1 ; Short Hand Way to Display Data & Address Register Values Using the DF Command\cf2\par
+\par
+    MOVEM.L A0,-(A7) \cf1 ; Save A0 on Stack\cf2\par
+    \par
+    LEA DATA3,A0 \cf1 ; Load Address of DATA3 in A0\cf2\par
+    MOVE.L A7,(A0) \cf1 ; Store Value of A7 in DATA3\cf2\par
+    ADD.L #4,(A0) \cf1 ; Get Value of Stack at the Time of Exception\cf2\par
+    \par
+    ADD.L #8,A7 \cf1 ; Move 2 Long Words Down the Stack\cf2\par
+    PEA *+22 \cf1 ; Effective Address to Return from RTS\cf2\par
+    SUB.L #4,A7 \cf1 ; Move 1 Long Word Up the Stack\cf2\par
+    \par
+    MOVEM.L (A7)+,A0 \cf1 ; Restore A0 from Stack\cf2\par
+    \par
+    MOVEM.L D0-D7/A0-A6,-(A7) \cf1 ; Store All Registers on Stack\cf2\par
+    MOVEM.L D0-D7/A0-A6,-(A7) \cf1 ; Store Another Copy of All Registers on Stack\cf2\par
+    \par
+    BRA DISP_DA \cf1 ; Call Part of the DF Command \cf2\par
+\par
+    ADD.L #2,A7 \cf1 ; Throw Long Word from Stack  \cf2\par
+    \par
+    BRA RUN_MONITOR \cf1 ; Return to Terminal\protect0\par
+\protect *-----------------------------------------------------------------------------------------------------------  \protect0\par
+
+\pard\fi720\cf0\b\i\f0\fs24\lang9\par
+
+\pard\b0\i0\par
+
+\pard\fi720\b\i\fs28 2.4-) User Instructional Manual \par
+
+\pard\b0\i0\fs24\par
+
+\pard\fi720 The following section describes the short instruction manual that is displayed using the "HELP" command. This section covers the format and types of infomation displayed on the screen for each command.\par
+
+\pard\par
+\tab\b\i 2.4.1-) Format\par
+\par
+
+\pard\fi720\b0\i0 Fig\par
+\par
+The first line of the description for any command starts with the name of the command followed by a colon (":"). Next, the function of the command  is described in a few words. If the specific command has multiple modes of operation (such as ascending and descending order for the "Sort Word" command), a list of all the modes, including the default mode is presented on the next few lines. After that, the syntax of the command is presented, which is accompanied by an example usage of the command, which conforms to the syntax. If more than one syntax is valid, each of them is displayed on a new line with an example.\par
+
+\pard\par
+
+\pard\fi720\tab\b\i 2.4.2-) Assembly Code\b0\i0\par
+
+\pard\par
+\cf1\protect\f2\fs20\lang1033 *-----------------------------------------------------------------------------------------------------------  \cf0\protect0\f0\fs24\lang9\par
+
+\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\tx5280\tx5760\tx6240\tx6720\tx7200\tx7680\tx8160\tx8640\tx9120\tx9600\cf1\protect\f2\fs20\lang1033 * Lookup Table for HELP Command\cf2\par
+\cf3 INFO\cf2  \cf4 DC.B\cf2  \cf5 'HELP: Displays This Message'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'MDSP: Displays Addresses And Memory Contents'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'MDSP <address1> <address2> eg: MDSP $200 $300<CR>'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'MDSP <address1> eg: MDSP $200<CR> (Displays 16 bytes)'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'MM: Modifies Data In Memory'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'Default: Displays One Word'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 ';B: Displays One Byte'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 ';W: Displays One Word'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 ';L: Displays One Long Word'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'MM <address1>[;size] eg: MM $8;W<CR>'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'SORTW: Sorts A Block Of Word Size Memory'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'Default: Ascending Order'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 ';A: Ascending Order'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 ';D: Descending Order'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'SORTW <address1> <address2>[;size] eg: SORTW $50 $60;A<CR>'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'MS: Sets Data Into Memory'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'MS <address> <data> eg: MS $66 "YAY!"<CR>'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'MS <address> <data> eg: MS $66 \f3 $455\f2 <CR>'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'UPPER: Capitalizes Null Terminated String At Address'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'UPPER <address> eg: UPPER $30<CR>'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'BF: Fills A Block Of Memory'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'BF <address1> <address2> <word> eg: BF $50 $60 $345<CR>'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'BSCH: Searches A Literal String In Memory'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'BSCH <address1> <address2> "string" eg: BSCH $50 $60 "Hey"<CR>'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'BMOV: Moves A Block Of Memory To Another Area'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'BMOV <address1> <address2> <address3> eg: BMOV $20 $30 $40<CR>'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'BTST: Tests Block Of Memory'\cf2  \par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'BTST <address1> <address2> eg: BTST $20 $30<CR>'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'BREV: Reverses Data In A Block Of Memory'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'BREV <address1> <address2> eg: BREV $45 $55<CR>'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'DF: Displays Formatted Registers'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'DF  eg: DF<CR>'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'GO: Start Execution From Given Address'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'GO <address> eg: GO $50<CR>'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'EXIT: Terminates Monitor Program'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2  \cf5 'EXIT  eg: EXIT<CR>'\cf2\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2   0\par
+     \cf4 DC.B\cf2   0\par
+
+\protect0\pard\protect\cf1 *-----------------------------------------------------------------------------------------------------------  \cf0\protect0\f0\fs24\lang9\par
+\par
+\par
+\par
+
+\pard\fi720\b\i 2.4.3-) Output\par
+\par
+Fig\par
+
+\pard\b0\i0\par
+
+\pard\fi720\par
+
+\pard\b\i\par
+
+\pard\fi720\par
+\b0\i0\par
+
+\pard\b\i\fs28 3-) Discussion\par
+ \par
+
+\pard\fi720\b0\i0\fs24 Considering the superior functionality and ease of use provided by the Monitor Program, it is reasonable to assume that many important design challenges were faced, and these are discussed in this section of the report.\par
+\par
+\b\i 3.1-) Erroneous Inputs & Code Size \par
+\par
+\b0\i0 The Monitor Program needs to be able to provide many features to the user. Since, they may not know exactly how the program works, it may happen that the user enters invalid inputs. Thus, the program must be able to handle and recover from these, rather than causing the program to crash. To do so, all possibilities need to be considered and dealt with, which requires both time and effort. But most importantly, enabling subroutines to deal with all kinds of inputs increases the shear volume of the code, which is not an appealling feature. Therefore, effort needs to be taken to find a balance between functionality and code size, which has been addressed as much as possible in the implementation of the Montor Program.\par
+\par
+\b\i 3.2-) Stack Operations\par
+\par
+\b0\i0 Since the Monitor Program is basically comprised of a whole bunch of subroutines and branches between them, for the most part (as far as implementation is concerned) the Stack is constantly being used to store return PC locations (in the case of JSR - Jump to Subroutine), save register values (to prevent changes made during subroutine operation), and to place the exception stack frame (during exception handling). As there are all these different types of data on the Stack, it is crucial to keep track of what is actually on there, and what needs to be removed from it at any point during the code. This makes it quite challenging for the programmer to implement the many subroutines as a single extra (or less) data on the Stack can cause a whole bunch of exceptions, thus making the Monitor Program inoperable.\par
+\par
+\b\i 3.3-) Looking for Logic Errors\par
+\par
+\b0\i0 The Easy68K simulator is equipped with a compiler which checks for any syntax errors and warns the programmer about it. However, logic errors are not that easy to locate, and considering the large size of the code, and since the program involves a large number of brances and returns, this problem is compounded even further. A simple logic error in a single line of code could generate a large number of exceptions (at times, the simulator might even halt). But in order to find the instruction where the logic is flawed, the programmer must trace through the entire code (including the branches) to pinpoint its location (as the error could be in any of the subroutines the program branches through). Thus, the programmer needs to put in a lot more time and effort to fix errors in the Monitor Program code as compared to when writing simple, shorter programs.\par
+\par
+\b\i 3.4-) Limited Implementation\par
+\par
+\b0\i0 Some of the commands in the existing Monitor Program are limited in nature. For example, the BF (Block Fill) command fills a block of memory with word size data. For proper functionality, the addresses need to be even, or else an address error will occur. Thus, if the user wishes to fill byte size data in a range of odd number of addresses, there is no way for them to do so without affecting the following (or preceding) memory location. A few other commands have this same issue and could therefore be improved upon.\par
+\par
+\par
+\par
+
+\pard\b\i\fs28 4-) Feature Suggestions \b0\i0\fs24\par
+
+\pard\fi720\par
+Although the current version of the Monitor Program is well implemented and robust, there are certain modifications that can make the program even more efficient and thus increase user satisfaction. These are discussed in this section of the report.\par
+\par
+\b\i 4.1-) Segmented "HELP" Command\par
+\par
+\b0\i0 When the user enters commands into the terminal, they might have trouble remembering the exact syntax for a specific command. The user could also be curious to see what capabilities the command allows them (such as the kinds of data that are valid, their different combinations, and so on) so that they may be able to use the Monitor Program to the greatest possible extent. In both these cases, the user only needs a description of the one command and not all. However, when the "HELP" command is inputted, it displays an entire block of information that includes descriptions for all commands. This can be improved by adding an argument to the "HELP" command that would include the name of the command the user wants to know more about. For example, they could enter "HELP MDSP" to get information about the "MDSP" (Memory Display). Adding this feature would surely help the user to be able to use the Monitor Program more efficiently.\par
+\par
+\b\i 4.2-) Enhanced "MDSP" (Memory Display) Command\par
+\par
+\b0\i0 The "MDSP" (Memory Display) command is used to display the addresses and the contents of memory locataions between two inputted addresses. When the user enters a large range (Like $2000 to $3000), the screen gets rapidly filled up will all the output data, most of which may not fit in the screen. Thus, to prevent this, two suggestions are made. Firstly, the "MDSP" command could be modified to output data from consecutive addresses after certain intervals of time. For example, it could output upto 16 consecutive memory locations, and then wait for a short amount of time before outputting the next set of data. Another, more efficient way of dealing with this situation is to perform the exact same operation as the first suggestion, but instead of waiting for a short amount of time, the program could wait for user input (such as a carriage return) before displaying the next set of data. Incorporating this into the command will improve its efficiency and usability when working with large address ranges.\par
+\par
+\b\i 4.3-) A String Display Command\par
+\par
+\b0\i0 The "MS" (Memory Set) command can be used to store an inputted string literal in memory. However, in the current version of the Monitor Program, there is no way to display a string from memory. The only current method of checking if the string was correctly stored in memory is by using the "BSCH" (Block Search) command. However, the user needs to know the exact (or at least partial) string to look for. So it cannot be used to display unknown strings from a particular memory location. Adding this feature would therefore benefit the user when used in conjugation with commands that work on strings (for example converting a string to uppercase/lowercase, reversing a string).\par
+\par
+\b\i 4.4-) A Repeat Command\par
+\par
+\b0\i0 There are instances when the user may want to perform the same operation repeatedly. To do so, they have to enter the command over and over again, which is not practical. Thus, a command could be added to the Monitor Program that repeats whatever last command the user entered. \par
+\par
+\b\i 4.5-) Additional Commands\par
+\par
+\b0\i0 As the scope of this Monitor Program is limited in nature, only a select few commands were implemented. However, a whole bunch of commands could be added to make the software more beneficial to the user. This could include string commands -- converting a string to uppercase/lowercase, reversing a string, replaces a string, etc. -- math operations -- a simple calculator command capable of performing addition, subtraction, multiplication, division and exponents -- or even trigonometry operations -- sine, cosine, tangent, etc. Adding these will enable to user to utilize the Monitor Program in more advanced ways that the current version simply cannot afford.\par
+\par
+\par
+ \par
+\par
+
+\pard\b\i\fs28 5-) Conclusion \par
+\b0\i0\fs24\par
+\tab The Monitor Program is intended to enable a user who does not have the time or effort to write long programs to be able to perform their required operations using short and simple commands. As discussed in the report, the current version of the Monitor Program provides 12 usuable commands. Each of them has been extensively discussed within the course of this report with the help of flowcharts, algorithms and assembly code. In the concluding sections, a discussion on the design challenges faced and feature suggestions have also been included to push for future works building on the current design. The implemented monitor program was tested for its functionality as well as its error-handling capabilities. In short, utmost efforts were made to provide the user with the most efficient and easy-to-use Monitor Program.\par
+\tab\par
+\b\i\fs28 6-) References\par
+\b0\i0\fs24\par
+\fs20 [1]\tab {{\field{\*\fldinst{HYPERLINK https://smallbusiness.chron.com/common-uses-microprocessors-69828.html }}{\fldrslt{https://smallbusiness.chron.com/common-uses-microprocessors-69828.html\ul0\cf0}}}}\f0\fs20\par
+\par
+[2]\tab {{\field{\*\fldinst{HYPERLINK http://www.easy68k.com/ }}{\fldrslt{http://www.easy68k.com/\ul0\cf0}}}}\f5\fs22\par
+}
+ 
